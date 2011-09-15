@@ -28,6 +28,7 @@ void ConcessionClerk::sellFood() {
             continue;
         }
         lBuyFood->Acquire();
+        // if have customer, then set busy and signal the customer, else set free
         if (getWaitingSize() > 0) {
             setIsBusy(true);
             subWaitingSize();
@@ -38,9 +39,14 @@ void ConcessionClerk::sellFood() {
         // on service
         lock->Acquire();
         lBuyFood->Release();
-        // wait customer to signal
+        // wait customer or manager to signal
         condition[1]->Wait(lock);
-        // TODO: get tickets sum
+        // ? break ?
+        //if (getIsBreak()) {
+        //    setIsBusy(false);
+        //    lock->Release();
+        //    continue;
+        //}
 
         // TODO: tell customers amount
         condition[1]->Signal(lock);
