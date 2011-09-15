@@ -81,7 +81,7 @@ void test1() {
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)tc_new, i);
     }
-    printf("Number of TicketClerks = [*d]\n",MAX_TC);
+    printf("Number of TicketClerks = [%d]\n",MAX_TC);
     // create Customer
     int group = rand()%MAX_GROUP + 1;
     int nextCustomerNumber = 0; 
@@ -106,8 +106,8 @@ void test1() {
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)cr_tb_new, int(customerData));
     }
-    printf("Number of Customers = [*d]\n",nextCustomerNumber);
-    printf("Number of Groups = [*d]\n",group);
+    printf("Number of Customers = [%d]\n",nextCustomerNumber);
+    printf("Number of Groups = [%d]\n",group);
     // create ConcessionClerk 
     for (int i = 0;i < MAX_CC; ++i) {
         name = new char[MAX_VAR];
@@ -115,7 +115,7 @@ void test1() {
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)cc_new, i);
     }
-    printf("Number of ConcessionClerks = [*d]\n",MAX_CC);
+    printf("Number of ConcessionClerks = [%d]\n",MAX_CC);
     // create TicketTaker 
     for (int i = 0;i < MAX_TT; ++i) {
         name = new char[MAX_VAR];
@@ -123,7 +123,7 @@ void test1() {
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)tt_new, i);
     }
-     printf("Number of TicketTakers = [*d]\n",MAX_TT);
+     printf("Number of TicketTakers = [%d]\n",MAX_TT);
 
     // create MovieTechnician 
     for (int i = 0;i < MAX_MT; ++i) {

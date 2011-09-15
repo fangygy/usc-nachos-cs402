@@ -2,7 +2,7 @@
 #include "movietheater.h"
 
 TicketTaker::TicketTaker(int ttId) : Employee(ttId, "TicketTaker") {
-    printf("construct ticket clerk %d\n", ttId);
+   // printf("construct ticket clerk %d\n", ttId);
 }
 
 void TicketTaker::checkTickets() {

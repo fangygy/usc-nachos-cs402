@@ -80,7 +80,7 @@ void Customer::buyTickets() {
         lineIndex = getInLine(lBuyTickets, (Employee**)tc, MAX_TC);        
     }
     // get in which line
-    printf("Customer [%d] in Group [%d] is getting in TicketClerk line [clerkNumber]\n",customerId,groupId,lineIndex);
+    printf("Customer [%d] in Group [%d] is getting in TicketClerk line [%d]\n",customerId,groupId,lineIndex);
     TicketClerk *clerk = tc[lineIndex];
     // if busy wait for ticketClerk
     if (clerk->getIsBusy()) {
@@ -104,16 +104,16 @@ void Customer::buyTickets() {
         clerk->setPayment(amount);
         printf("Customer [%d] in Group [%d] in TicketClerk line [%d] is paying [%2f] for tickets\n",customerId,groupId,lineIndex,amount);
         // TODO: print out amount and give money
-        printf("print out amount and give money\n");
+       // printf("print out amount and give money\n");
         clerk->condition[1]->Signal(clerk->lock);
 
         // wait to get tickets back
         clerk->condition[1]->Wait(clerk->lock);
         // finish and leave
         clerk->condition[1]->Signal(clerk->lock);
-        prinf("Customer [%d] in Group [%d] is leaving TicketClerk[clerkNumber]\n",customerId,groupId,)
+        printf("Customer [%d] in Group [%d] is leaving TicketClerk[%d]\n",customerId,groupId,lineIndex);
     } else {
-        printf("Customer [customerNumber] in Group [groupNumber] sees TicketClerk [clerkNumber] is on break.\n",customerId,groupId,lineIndex);
+        printf("Customer [%d] in Group [%d] sees TicketClerk [%d] is on break.\n",customerId,groupId,lineIndex);
         clerk->subWaitingSize();
         // for race condition of waiting size
         lBuyTickets->Release();
