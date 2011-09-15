@@ -8,6 +8,7 @@ Customer::Customer(int cId, int gId, int gSize, bool ticketBuyer) {
     isTicketBuyer = ticketBuyer;
     // how to find groupmate
     //Customer * customers;   //Only head customers need this value
+    printf("Customer [%d] in Group [%d] has entered the movie theater\n",customerId,groupId);
 }
 Customer::~Customer() {}
 
@@ -72,22 +73,23 @@ int Customer::getInLine(Lock *lock, Employee** employee, int count) {
 void Customer::buyTickets() {
 
     int lineIndex = -1;
-    printf("Customer %d try to get in line\n",customerId);
-    printTCStatus();
+    //printf("Customer %d try to get in line\n",customerId);
+    //printTCStatus();
 
     while (lineIndex == -1) {
         lineIndex = getInLine(lBuyTickets, (Employee**)tc, MAX_TC);        
     }
     // get in which line
-    printf("customer %d : found the shortest line %d\n", customerId, lineIndex);
+    printf("Customer [%d] in Group [%d] is getting in TicketClerk line [clerkNumber]\n",customerId,groupId,lineIndex);
     TicketClerk *clerk = tc[lineIndex];
     // if busy wait for ticketClerk
     if (clerk->getIsBusy()) {
         clerk->condition[0]->Wait(lBuyTickets);
     }
-    printf("customer %d : is interacting with clerk %d\n", customerId, lineIndex);
-    printTCStatus();
-    printf("============================\n");
+   printf("Customer [%d] in Group [%d] is walking up to TicketClerk[%d] to buy [%d] tickets\n",customerId,groupId,lineIndex,groupSize);
+    //printf("customer %d : is interacting with clerk %d\n", customerId, lineIndex);
+   //printTCStatus();
+    //printf("============================\n");
     // interact with TicketClerk
     clerk->lock->Acquire();
     if (!clerk->getIsBreak()) {
@@ -100,6 +102,7 @@ void Customer::buyTickets() {
         clerk->condition[1]->Wait(clerk->lock);
         double amount = clerk->getAmount();
         clerk->setPayment(amount);
+        printf("Customer [%d] in Group [%d] in TicketClerk line [%d] is paying [%2f] for tickets\n",customerId,groupId,lineIndex,amount);
         // TODO: print out amount and give money
         printf("print out amount and give money\n");
         clerk->condition[1]->Signal(clerk->lock);
@@ -108,7 +111,9 @@ void Customer::buyTickets() {
         clerk->condition[1]->Wait(clerk->lock);
         // finish and leave
         clerk->condition[1]->Signal(clerk->lock);
+        prinf("Customer [%d] in Group [%d] is leaving TicketClerk[clerkNumber]\n",customerId,groupId,)
     } else {
+        printf("Customer [customerNumber] in Group [groupNumber] sees TicketClerk [clerkNumber] is on break.\n",customerId,groupId,lineIndex);
         clerk->subWaitingSize();
         // for race condition of waiting size
         lBuyTickets->Release();
