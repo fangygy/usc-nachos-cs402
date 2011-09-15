@@ -23,6 +23,20 @@
 extern Lock *lBuyTickets;
 extern Lock *lBuyFood;
 extern Lock *lCheckTickets;
+extern Lock *lStartMovie;
+extern Semaphore *sGroup[MAX_GROUP];
+extern Condition *cGroup[MAX_GROUP];
+extern Condition *cGroupFood[MAX_GROUP];
+extern Lock *lGroup[MAX_GROUP];
+extern int groupFoodSum[MAX_GROUP][2];
+extern int groupTicketSum[MAX_GROUP];
+extern Semaphore *sGroupFood[MAX_GROUP];
+extern bool groupTicket[MAX_GROUP];
+extern bool groupAskForFood[MAX_GROUP];
+extern bool groupFood[MAX_GROUP];
+extern bool groupSeat[MAX_GROUP];
+
+extern bool seatState[25];
 
 class Employee {
   private:
@@ -57,6 +71,7 @@ class Customer {
 // how to find groupmate
     Customer * customers;   //Only head customers need this value
     void printTCStatus();
+    int seatNumber;
   public:
     // customerId, groupId, isTicketBuyer
     Customer(int cId, int gId, int gSize, bool ticketBuyer);
@@ -69,14 +84,20 @@ class Customer {
     // for ticketBuyer to buy food from ConcessionClerk
     void buyFood();
     // for ticketBuyer to count Food
-    int countFood(char * food);
-    // for ticketBuyer to ask if buy a food
-    bool askForFood(char * food);
+    bool countFood();
     // for customer to decide if buy a food
-    bool answerForFood(char * food);
+    int answerForFood(int food);
 
     // for ticketBuyer to check ticket
     void checkTickets();
+    // arrange seats
+    void arrangeSeats();
+    // for regular custormer
+    void waitTickets();
+    void waitFood();
+    void waitSeats();
+    void waitGroup();
+    void setSeatNumber(int seatNum);
 
     // for customer to go bathroom
     void goBathroom();
@@ -89,8 +110,11 @@ extern Customer *cr[MIN_CR];
 
 class TicketClerk : public Employee{
   private:
+    // customer sum in one group
     int ticketSum;
+    // amount in one group
     double amount;
+    // customer pay
     double payment;
     void printStatus();
   public:
@@ -98,23 +122,31 @@ class TicketClerk : public Employee{
     void sellTickets();
     void setTicketSum(int sum);
     int getTicketSum();
+    // put amount in the variable
     void setAmount(double amount);
+    // get amount
     double getAmount();
+    // receive money from customer
     void setPayment(double amount);
 };
 extern TicketClerk *tc[MAX_TC];
 
 class ConcessionClerk : public Employee{
   private:
+    // sum for each food in one group
     int food[2];
+    // amount for food
     double amount;
+    // customer pay
     double payment;
     void printStatus();
   public:
     ConcessionClerk(int ccId);
     void sellFood();
+    // customer tell cc sum for each food
     void setFood(int pos, int sum);
     int getFood(int pos);
+    // amount for the food
     void setAmount(double amount);
     double getAmount();
     void setPayment(double amount);
@@ -149,4 +181,5 @@ class Manager : public Employee{
 };
 extern Manager * mr[MAX_MR];
 
+void init();
 #endif

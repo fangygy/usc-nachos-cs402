@@ -83,11 +83,10 @@ void test1() {
     }
 
     // create Customer
-    srand ( time(NULL) );
     int group = rand()%MAX_GROUP + 1;
     int nextCustomerNumber = 0; 
     for (int i = 0;i < group; ++i) {
-        int groupSize = 1;//srand(SEED)%5+1;
+        int groupSize = rand()%MAX_GROUPSIZE+1;
         for (int j = 0;j < groupSize - 1; ++j) {
             name = new char[MAX_VAR];
             sprintf(name, "Thread_Customer_%d", nextCustomerNumber);
@@ -134,6 +133,7 @@ void test1() {
      
 }
 void Problem2() {
+    init();
     char name[MAX_VAR];
     Thread * t; 
     // create Manager 

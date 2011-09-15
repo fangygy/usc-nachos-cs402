@@ -18,7 +18,9 @@ void ConcessionClerk::setPayment(double p) {
 double ConcessionClerk::getPayment() {
     return payment;
 }
-
+void ConcessionClerk::setFood(int pos, int sum) {
+    food[pos] = sum;
+}
 
 void ConcessionClerk::sellFood() {
     while(true) {

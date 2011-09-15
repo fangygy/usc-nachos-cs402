@@ -27,6 +27,7 @@ void TicketClerk::setPayment(double p) {
 void TicketClerk::sellTickets() {
     while(true) {
         if (getIsBreak()) {
+            // ? continue or wait for signal ?
             continue;
         }
 
