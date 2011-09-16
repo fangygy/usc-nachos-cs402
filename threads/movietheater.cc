@@ -17,7 +17,7 @@ Condition *cGroup[MAX_GROUP];
 Condition *cGroupFood[MAX_GROUP];
 Lock *lGroup[MAX_GROUP];
 int groupFoodSum[MAX_GROUP][2];
-int groupTicketSum[MAX_GROUP];
+int ticketReceipt[MAX_GROUP];
 Semaphore *sGroupFood[MAX_GROUP];
 bool groupTicket[MAX_GROUP];
 bool groupAskForFood[MAX_GROUP];
@@ -26,7 +26,7 @@ bool groupSeat[MAX_GROUP];
 
 void init() {
     memset(groupFoodSum, 0, sizeof(groupFoodSum));
-    memset(groupTicketSum, 0, sizeof(groupTicketSum));
+    memset(ticketReceipt, 0, sizeof(ticketReceipt));
     memset(groupTicket, 0, sizeof(groupTicket));
     memset(groupAskForFood, 0, sizeof(groupAskForFood));
     memset(groupFood, 0, sizeof(groupFood));

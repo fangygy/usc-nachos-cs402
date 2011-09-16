@@ -57,14 +57,15 @@ void TicketClerk::sellTickets() {
             setIsBusy(true);
         }
         // get tickets sum 
-        int ticketamount=getTicketSum(); 
+        int ticketSum = getTicketSum(); 
         // tell customers amount
-        setAmount(ticketamount); 
-        printf("TicketClerk [%d] has an order for [%d] and the cost is [%.2f].\n",getId(),ticketamount,getAmount()); 
+        setAmount(ticketSum); 
+        printf("TicketClerk [%d] has an order for [%d] and the cost is [%.2f].\n",getId(),ticketSum,getAmount()); 
       
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
         // get money, handout the tickets 
+        ticketReceipt[getGroupId()] = ticketSum;
         condition[1]->Signal(lock);
         // customer leave, get next customer 
         condition[1]->Wait(lock);

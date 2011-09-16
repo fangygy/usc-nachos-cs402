@@ -37,7 +37,7 @@ void TicketTaker::checkTickets() {
         }
 
         //get tickets sum
-        printf("TicketTaker [%d] has received [%d] tickets.\n",getId(),getTicketSum());
+        printf("TicketTaker [%d] has received [%d] tickets.\n",getId(), getTicketSum());
 
         // TODO: ? should just let in or tell customers seats number 
         // better not to enforce seats number, which needs more variables to state
