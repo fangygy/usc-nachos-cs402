@@ -27,8 +27,18 @@ void TicketTaker::checkTickets() {
         lCheckTickets->Release();
         // wait customer to signal
         condition[1]->Wait(lock);
+        // if break 
+        if (getIsBreak()) {
+            setIsBusy(false);
+            lock->Release();
+            continue;
+        } else {
+            setIsBusy(true);
+        }
+
         //get tickets sum
         printf("TicketTaker [%d] has received [%d] tickets.\n",getId(),getTicketSum());
+
         // TODO: ? should just let in or tell customers seats number 
         // better not to enforce seats number, which needs more variables to state
         condition[1]->Signal(lock);

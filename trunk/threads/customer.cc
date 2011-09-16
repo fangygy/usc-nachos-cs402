@@ -88,9 +88,9 @@ void Customer::buyTickets() {
     if (clerk->getIsBusy()) {
         clerk->condition[0]->Wait(lBuyTickets);
     }
-   printf("Customer [%d] in Group [%d] is walking up to TicketClerk[%d] to buy [%d] tickets\n",customerId,groupId,lineIndex,groupSize);
+    printf("Customer [%d] in Group [%d] is walking up to TicketClerk[%d] to buy [%d] tickets\n",customerId,groupId,lineIndex,groupSize);
     //printf("customer %d : is interacting with clerk %d\n", customerId, lineIndex);
-   //printTCStatus();
+    //printTCStatus();
     //printf("============================\n");
     // interact with TicketClerk
     clerk->lock->Acquire();

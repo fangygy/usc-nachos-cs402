@@ -54,12 +54,15 @@ void ConcessionClerk::sellFood() {
         lBuyFood->Release();
         // wait customer or manager to signal
         condition[1]->Wait(lock);
-        // ? break ?
-        //if (getIsBreak()) {
-        //    setIsBusy(false);
-        //    lock->Release();
-        //    continue;
-        //}
+        // if break 
+        if (getIsBreak()) {
+            setIsBusy(false);
+            lock->Release();
+            continue;
+        } else {
+            setIsBusy(true);
+        }
+
        
 
 
@@ -84,32 +87,32 @@ void ConcessionClerk::sellFood() {
 }
 void ConcessionClerk::printStatus(){
 
-	//Print Clerk Status
+    //Print Clerk Status
 
-	printf("Concession Clerk Status:");
-	 for (int i = 0;i < MAX_CC; ++i) {
-		 ConcessionClerk *clerk = cc[i];
-		 if(clerk!=NULL){ // if clerk have not been create, don't print	
-			 printf("%d,",clerk->getIsBusy());
-		}else{
-                    printf("NA,"); 
-                 }	
-	}
-	printf("\n");
+    printf("Concession Clerk Status:");
+    for (int i = 0;i < MAX_CC; ++i) {
+        ConcessionClerk *clerk = cc[i];
+        if(clerk!=NULL){ // if clerk have not been create, don't print    
+            printf("%d,",clerk->getIsBusy());
+        }else{
+            printf("NA,"); 
+        }    
+    }
+    printf("\n");
 
 
-	//Print the number of waiting customer in each clerk's line
+    //Print the number of waiting customer in each clerk's line
 
-	 printf("Concession counter Waiting Status (#):");
+    printf("Concession counter Waiting Status (#):");
 
-	 for (int i = 0;i < MAX_CC; ++i) {
-		 ConcessionClerk *clerk = cc[i];
-		 if(clerk!=NULL){ // if clerk have not been create, don't print
-			 printf("%d,",clerk->getWaitingSize());
-                 }else{
-                    printf("NA,"); 
-                 }
-	 }
-	 printf("\n");
+    for (int i = 0;i < MAX_CC; ++i) {
+        ConcessionClerk *clerk = cc[i];
+        if(clerk!=NULL){ // if clerk have not been create, don't print
+            printf("%d,",clerk->getWaitingSize());
+        }else{
+            printf("NA,"); 
+        }
+    }
+    printf("\n");
 
 }
