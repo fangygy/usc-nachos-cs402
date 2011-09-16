@@ -28,15 +28,18 @@ void TicketClerk::sellTickets() {
     while(true) {
         if (getIsBreak()) {
             // ? continue or wait for signal ?
+            printf("TicketClerk [%d] is going on break.\n",getId());
             continue;
         }
 
         lBuyTickets->Acquire();
         if (getWaitingSize() > 0) {
             setIsBusy(true);
+            printf("TicketClerk [%d] has a line length [%d] and is signaling a customer\n",getId(),getWaitingSize());
             subWaitingSize();
             condition[0]->Signal(lBuyTickets);
         } else {
+            printf("TicketClerk [%d] has no one in line. I am available for a customer.\n",getId());
             setIsBusy(false);
         }
       
@@ -48,7 +51,9 @@ void TicketClerk::sellTickets() {
         // get tickets sum 
         int ticketamount=getTicketSum(); 
         // tell customers amount
-        setAmount(ticketamount);       
+        setAmount(ticketamount); 
+        printf("TicketClerk [%d] has an order for [%d] and the cost is [%.2f].\n",getId(),ticketamount,getAmount()); 
+      
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
         // get money, handout the tickets 
