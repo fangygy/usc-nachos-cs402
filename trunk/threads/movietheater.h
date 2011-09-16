@@ -20,6 +20,10 @@
 #define RATE_SODA 0.75  // chance to buy Soda
 #define RATE_BATHROOM 0.25  // chance to go bathroom
 
+#define PRICE_TICKET 12.00
+#define PRICE_SODA 4.00
+#define PRICE_POPCORN 5.00
+
 extern Lock *lBuyTickets;  //Lock to get in line of buyTickets
 extern Lock *lBuyFood;  //Lock to get in line of buyFood
 extern Lock *lCheckTickets;  //Lock to get in line of checkTickets
@@ -134,7 +138,7 @@ class TicketClerk : public Employee{
     void setTicketSum(int sum);
     int getTicketSum();
     // put amount in the variable
-    void setAmount(double amount);
+    void setAmount(int amount);
     // get amount
     double getAmount();
     // receive money from customer
@@ -151,6 +155,7 @@ class ConcessionClerk : public Employee{
     // customer pay
     double payment;
     void printStatus();
+    void calAmount();
   public:
     ConcessionClerk(int ccId);
     void sellFood();
