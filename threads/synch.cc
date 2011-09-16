@@ -174,7 +174,7 @@ void Condition::Wait(Lock* conditionLock) {
 
     // check if the conditionLock is NULL and is held by currentThread
     if (conditionLock == NULL || !conditionLock->isHeldByCurrentThread()) {
-        printf("You do not have a lock\n");
+        //printf("You do not have a lock\n");
         (void) interrupt->SetLevel(oldLevel);
         return;
     }
@@ -184,7 +184,7 @@ void Condition::Wait(Lock* conditionLock) {
     }
     // if waitingLock is not conditionLock, should return for wrong lock
     if (waitingLock != conditionLock) {
-        printf("Wrong lock for waiting.\n");
+        //printf("Wrong lock for waiting.\n");
         (void) interrupt->SetLevel(oldLevel);
         return;
     }
@@ -206,19 +206,19 @@ void Condition::Signal(Lock* conditionLock) {
     
     // check if the conditionLock is NULL and is held by currentThread
     if (conditionLock == NULL || !conditionLock->isHeldByCurrentThread()) {
-        printf("You do not have a lock to signal other\n");
+        //printf("You do not have a lock to signal other\n");
         (void) interrupt->SetLevel(oldLevel);
         return;
     }
 
     // check conditionLock is waiting for 
     if (waitingLock == NULL) {
-        printf("No lock wait.\n");
+        //printf("No lock wait.\n");
         (void) interrupt->SetLevel(oldLevel);
         return;
     }
     if (waitingLock != conditionLock) {
-        printf("Pass the wrong lock.\n");
+       // printf("Pass the wrong lock.\n");
         (void) interrupt->SetLevel(oldLevel);
         return;
     }

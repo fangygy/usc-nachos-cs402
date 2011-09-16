@@ -5,6 +5,9 @@ Lock foodLineLock("foodLineLock");
 
 ConcessionClerk::ConcessionClerk(int ccId) : Employee(ccId, "ConcessionClerk") {
 }
+void ConcessionClerk::calAmount() {
+    amount = food[0]*PRICE_POPCORN +food[1]*PRICE_POPCORN;
+}
 double ConcessionClerk::getAmount() {
     return amount;
 }
@@ -47,11 +50,14 @@ void ConcessionClerk::sellFood() {
         //    lock->Release();
         //    continue;
         //}
-
-        // TODO: tell customers amount
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
-        // get money, handout the tickets
+        // tell customers food price 
+        calAmount();
+        condition[1]->Signal(lock);
+        // wait for customer go pay
+        condition[1]->Wait(lock);
+        // get money, handout the food
         condition[1]->Signal(lock);
         // customer leave, get next customer
         condition[1]->Wait(lock);

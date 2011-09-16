@@ -4,8 +4,8 @@
 TicketClerk::TicketClerk(int tcId) : Employee(tcId, "TicketClerk") {
     //printf("construct ticket clerk %d\n", tcId);
 }
-void TicketClerk::setAmount(double sum) {
-    amount = sum;
+void TicketClerk::setAmount(int sum) {
+    amount = sum*(PRICE_TICKET);
 }
 
 double TicketClerk::getAmount() {
@@ -45,9 +45,10 @@ void TicketClerk::sellTickets() {
         lBuyTickets->Release();
         // wait customer to signal
         condition[1]->Wait(lock);
-        // TODO: get tickets sum 
-        printf("get tickets amount\n");
-        // TODO: tell customers amount
+        // get tickets sum 
+        int ticketamount=getTicketSum(); 
+        // tell customers amount
+        setAmount(ticketamount);       
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
         // get money, handout the tickets 

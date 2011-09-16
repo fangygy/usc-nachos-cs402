@@ -100,11 +100,12 @@ void Customer::buyTickets() {
 
         // wait for money amount
         clerk->condition[1]->Wait(clerk->lock);
+        // ask ticket clerk for total price
         double amount = clerk->getAmount();
+        // pay money 
         clerk->setPayment(amount);
-        printf("Customer [%d] in Group [%d] in TicketClerk line [%d] is paying [%2f] for tickets\n",customerId,groupId,lineIndex,amount);
-        // TODO: print out amount and give money
-       // printf("print out amount and give money\n");
+        printf("Customer [%d] in Group [%d] in TicketClerk line [%d] is paying [%f] for tickets\n",customerId,groupId,lineIndex,amount);
+        
         clerk->condition[1]->Signal(clerk->lock);
 
         // wait to get tickets back
@@ -135,27 +136,40 @@ void Customer::buyFood() {
     while (lineIndex == -1) {
         lineIndex = getInLine(lBuyFood, (Employee**)cc, MAX_CC);
     }
+    printf("Customer [%d] in Group [%d] is getting in ConcessionClerk line [%d]\n",customerId,groupId,lineIndex);
 
     ConcessionClerk *clerk = cc[lineIndex];
     if (clerk->getIsBusy()) {
         clerk->condition[0]->Wait(lBuyFood);
     }
+    printf("Customer [%d] in Group [%d] is walking up to ConcessionClerk[%d] to buy [%d] popcorn and [%d] soda.\n",customerId,groupId,lineIndex,groupFoodSum[groupId][0],groupFoodSum[groupId][1]);
     // interact with ConcessionClerk 
     clerk->lock->Acquire();
     if (!clerk->getIsBreak()) {
         lBuyFood->Release();
         // TODO: tell clerk popcorn sum and soda sum
+
         for (int i = 0;i < 2; ++i) {
             clerk->setFood(i, groupFoodSum[groupId][i]);
             clerk->condition[1]->Signal(clerk->lock);
             // wait for acknowledgement and amount
             clerk->condition[1]->Wait(clerk->lock);
         }
+
+ 
         // TODO: give money
         double amount = clerk->getAmount();
         clerk->setPayment(amount);
+        printf("Customer [%d] in Group [%d] in ConcessionClerk line [%d] is paying [%d] for food\n",customerId,groupId,lineIndex,amount);
         clerk->condition[1]->Signal(clerk->lock);
+        //wait for clerk to acknowledge money 
+        clerk->condition[1]->Wait(clerk->lock);
+        // customer leave, get next customer
+        clerk->condition[1]->Signal(clerk->lock);
+        printf("Customer [%d] in Group [%d] is leaving ConcessionClerk[%d]\n",customerId,groupId,lineIndex);
+
     } else {
+        printf("Customer [%d] in Group [%d] sees ConcessionClerk [%d] is on break.\n",customerId,groupId,lineIndex);
         clerk->subWaitingSize();
         // for race condition of waiting size
         lBuyFood->Release();

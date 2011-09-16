@@ -62,12 +62,12 @@ void mt_new(int i) {
 }
 
 void mr_new(int i) {
-    printf("start mr_new\n");
-    printf("%s: new Manager %d\n", currentThread->getName(), i);
+    //printf("start mr_new\n");
+    //printf("%s: new Manager %d\n", currentThread->getName(), i);
     mr[i] = new Manager(i);
     test1();
 
-    printf("%s: Manager %d created\n", currentThread->getName(), i);
+   // printf("%s: Manager %d created\n", currentThread->getName(), i);
 }
 
 void test1() {
