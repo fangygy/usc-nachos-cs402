@@ -31,8 +31,10 @@ void TicketClerk::sellTickets() {
         while (getIsBreak()) {
             // wait for manager signal
             printf("%s [%d] is going on break.\n", getEmployeeType(), getId());
+            lBuyTickets->Release();
             condition[1]->Wait(lock);
             printf("%s [%d] is coming off break.\n", getEmployeeType(), getId()); 
+            lBuyTickets->Acquire();
         }
 
         if (getWaitingSize() > 0) {
