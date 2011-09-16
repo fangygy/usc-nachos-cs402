@@ -54,10 +54,9 @@ class Employee {
     char employeeType[MAX_VAR];
     // customer in waiting line
     int waitingSize;
-  protected:
+  public:
     void setIsBusy(bool busy);
     void setIsBreak(bool isBreak);
-  public:
     // for action between with customer and employee
     Lock *lock;
     // c0 is for customer in waiting line
@@ -196,8 +195,9 @@ class MovieTechnician : public Employee{
 extern MovieTechnician * mt[MAX_MT];
 class Manager : public Employee{
   private:
-    
+    void randToBreak(Lock * lockWaiting, Employee ** clerk, int count);
   public:
+    void work();
     Manager(int mrId);
 };
 extern Manager * mr[MAX_MR];
