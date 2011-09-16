@@ -34,11 +34,17 @@ int ConcessionClerk::getFood(int pos){
 
 void ConcessionClerk::sellFood() {
     while(true) {
-        if (getIsBreak()) {
-            printf("ConcessionClerk [%d] is going on break.\n",getId());
-            continue;
-        }
         lBuyFood->Acquire();
+        lock->Acquire();
+        if (getIsBreak()) {
+            // wait for manager signal
+            printf("%s [%d] is going on break.\n", getEmployeeType(), getId());
+            condition[1]->Wait(lock);
+            printf("%s [%d] is coming off break.\n", getEmployeeType(), getId());
+
+//            printf("ConcessionClerk [%d] is going on break.\n",getId());
+//            continue;
+        }
         // if have customer, then set busy and signal the customer, else set free
         if (getWaitingSize() > 0) {
             setIsBusy(true);
@@ -50,7 +56,6 @@ void ConcessionClerk::sellFood() {
             setIsBusy(false);
         }
         // on service
-        lock->Acquire();
         lBuyFood->Release();
         // wait customer or manager to signal
         condition[1]->Wait(lock);

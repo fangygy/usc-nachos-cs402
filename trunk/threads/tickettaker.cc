@@ -7,12 +7,18 @@ TicketTaker::TicketTaker(int ttId) : Employee(ttId, "TicketTaker") {
 
 void TicketTaker::checkTickets() {
     while(true) {
+        lCheckTickets->Acquire();
+        lock->Acquire();
         if (getIsBreak()) {
-            printf("TicketTaker [%d] is going on break.\n",getId());
-            continue;
+            // wait for manager signal
+            printf("%s [%d] is going on break.\n", getEmployeeType(), getId());
+            condition[1]->Wait(lock);
+            printf("%s [%d] is coming off break.\n", getEmployeeType(), getId());
+
+//            printf("TicketTaker [%d] is going on break.\n",getId());
+//            continue;
         }
 
-        lCheckTickets->Acquire();
         if (getWaitingSize() > 0) {
             printf("TicketTaker [%d] has a line length [%d] and is signaling a customer.\n",getId(),getWaitingSize());
             setIsBusy(true);
@@ -23,7 +29,6 @@ void TicketTaker::checkTickets() {
             setIsBusy(false);
         }
         // on service
-        lock->Acquire();
         lCheckTickets->Release();
         // wait customer to signal
         condition[1]->Wait(lock);

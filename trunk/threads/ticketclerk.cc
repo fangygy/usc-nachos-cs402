@@ -26,13 +26,15 @@ void TicketClerk::setPayment(double p) {
 
 void TicketClerk::sellTickets() {
     while(true) {
-        if (getIsBreak()) {
-            // ? continue or wait for signal ?
-            printf("TicketClerk [%d] is going on break.\n",getId());
-            continue;
+        lBuyTickets->Acquire();
+        lock->Acquire();
+        while (getIsBreak()) {
+            // wait for manager signal
+            printf("%s [%d] is going on break.\n", getEmployeeType(), getId());
+            condition[1]->Wait(lock);
+            printf("%s [%d] is coming off break.\n", getEmployeeType(), getId()); 
         }
 
-        lBuyTickets->Acquire();
         if (getWaitingSize() > 0) {
             setIsBusy(true);
             printf("TicketClerk [%d] has a line length [%d] and is signaling a customer\n",getId(),getWaitingSize());
@@ -44,7 +46,6 @@ void TicketClerk::sellTickets() {
         }
       
         // on service
-        lock->Acquire();
         lBuyTickets->Release();
         // wait customer to signal
         condition[1]->Wait(lock);
