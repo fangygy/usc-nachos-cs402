@@ -137,7 +137,9 @@ void Customer::buyFood() {
     }
 
     ConcessionClerk *clerk = cc[lineIndex];
-    clerk->condition[0]->Wait(lBuyFood);
+    if (clerk->getIsBusy()) {
+        clerk->condition[0]->Wait(lBuyFood);
+    }
     // interact with ConcessionClerk 
     clerk->lock->Acquire();
     if (!clerk->getIsBreak()) {
@@ -201,7 +203,9 @@ void Customer::checkTickets() {
     }
 
     TicketTaker *clerk = tt[lineIndex];
-    clerk->condition[0]->Wait(lCheckTickets);
+    if (clerk->getIsBusy()) {
+        clerk->condition[0]->Wait(lCheckTickets);
+    }
     // interact with TicketTaker 
     clerk->lock->Acquire();
     if (!clerk->getIsBreak()) {
