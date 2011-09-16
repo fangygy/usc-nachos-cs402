@@ -51,6 +51,7 @@ int Customer::getInLine(Lock *lock, Employee** employee, int count) {
 
         // get a no busy line
         if (!employee[i]->getIsBusy() && !employee[i]->getIsBreak() && employee[i]->getWaitingSize() == 0) {
+            employee[i]->setIsBusy(true);
             lineIndex = i;
             break;
         }
