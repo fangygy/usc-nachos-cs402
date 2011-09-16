@@ -38,6 +38,17 @@ void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count) {
                 }
                 clerk[i]->lock->Release();
             }
+        } else if (clerk[i]->getWaitingSize() > 5) {
+            int j = 0;
+            for (j = 0;j < count; ++j) {
+                if (i == j) continue;
+                if (clerk[j]->getIsBreak()) {
+                    clerk[j]->lock->Acquire();
+                    clerk[j]->setIsBreak(false);
+                    clerk[j]->lock->Release();
+                    break;
+                }
+            }
         }
     }
     lockWaiting->Release();
