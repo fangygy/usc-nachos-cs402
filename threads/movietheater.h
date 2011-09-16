@@ -24,6 +24,10 @@
 #define PRICE_SODA 4.00
 #define PRICE_POPCORN 5.00
 
+#define FOOD_POPCORN 0
+#define FOOD_SODA    1 
+
+
 extern Lock *lBuyTickets;  //Lock to get in line of buyTickets
 extern Lock *lBuyFood;  //Lock to get in line of buyFood
 extern Lock *lCheckTickets;  //Lock to get in line of checkTickets

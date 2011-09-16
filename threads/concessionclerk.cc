@@ -6,7 +6,7 @@ Lock foodLineLock("foodLineLock");
 ConcessionClerk::ConcessionClerk(int ccId) : Employee(ccId, "ConcessionClerk") {
 }
 void ConcessionClerk::calAmount() {
-    amount = food[0]*PRICE_POPCORN +food[1]*PRICE_POPCORN;
+    amount = food[FOOD_POPCORN]*PRICE_POPCORN +food[FOOD_SODA]*PRICE_SODA;
 }
 double ConcessionClerk::getAmount() {
     return amount;
@@ -24,19 +24,29 @@ double ConcessionClerk::getPayment() {
 void ConcessionClerk::setFood(int pos, int sum) {
     food[pos] = sum;
 }
+int ConcessionClerk::getFood(int pos){
+
+   return food[pos];
+
+}
+
+
 
 void ConcessionClerk::sellFood() {
     while(true) {
         if (getIsBreak()) {
+            printf("ConcessionClerk [%d] is going on break.\n",getId());
             continue;
         }
         lBuyFood->Acquire();
         // if have customer, then set busy and signal the customer, else set free
         if (getWaitingSize() > 0) {
             setIsBusy(true);
+            printf("ConcessionClerk [%d] has a line length [%d] and is signaling a customer.\n",getId(),getWaitingSize());
             subWaitingSize();
             condition[0]->Signal(lBuyFood);
         } else {
+            printf("ConcessionClerk [%d] has no one in line. I am available for a customer.\n",getId());
             setIsBusy(false);
         }
         // on service
@@ -50,15 +60,22 @@ void ConcessionClerk::sellFood() {
         //    lock->Release();
         //    continue;
         //}
+       
+
+
+
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
         // tell customers food price 
         calAmount();
+         printf("ConcessionClerk [%d] has an order for [%d] popcorn and [%d] soda. The cost is [%.2f].\n",getId(),getFood(FOOD_POPCORN),getFood (FOOD_SODA),getAmount());
+        
         condition[1]->Signal(lock);
         // wait for customer go pay
         condition[1]->Wait(lock);
         // get money, handout the food
         condition[1]->Signal(lock);
+        printf("ConcessionClerk [%d] has been paid for the order.\n",getId());
         // customer leave, get next customer
         condition[1]->Wait(lock);
         lock->Release();
