@@ -21,6 +21,12 @@ char * Employee::getEmployeeType() {
 int Employee::getId() {
     return id;
 }
+int Employee::getGroupId() {
+    return groupId;
+}
+void Employee::setGroupId(int gId) {
+    groupId = gId;
+}
 
 Employee::Employee(int eId, char * type) {
     id = eId;

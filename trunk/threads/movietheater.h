@@ -37,7 +37,7 @@ extern Condition *cGroup[MAX_GROUP];  //Condition to make group act together
 extern Condition *cGroupFood[MAX_GROUP];  //Condition for ticketbuyer to ask for if need food
 extern Lock *lGroup[MAX_GROUP];  //Lock for group to act mutex
 extern int groupFoodSum[MAX_GROUP][2];  // order of group for food
-extern int groupTicketSum[MAX_GROUP];  // order of group for tickets
+extern int ticketReceipt[MAX_GROUP];  // order of group for tickets
 extern Semaphore *sGroupFood[MAX_GROUP];  //semaphore to make sure everyone choose if need food
 extern bool groupTicket[MAX_GROUP];  // monitor variable for if buyTickets done
 extern bool groupAskForFood[MAX_GROUP];  // monitor variable for if ask for food
@@ -51,6 +51,8 @@ class Employee {
     bool isBusy;
     bool isBreak;
     int id;
+    // group on service
+    int groupId;
     char employeeType[MAX_VAR];
     // customer in waiting line
     int waitingSize;
@@ -73,6 +75,9 @@ class Employee {
     void addWaitingSize();
     // waitingSize sub 1
     void subWaitingSize();
+    // customer group on service
+    void setGroupId(int gId);
+    int getGroupId();
 };
 
 class Customer {
@@ -128,7 +133,7 @@ extern Customer *cr[MIN_CR];
 
 class TicketClerk : public Employee{
   private:
-    // customer sum in one group
+    // customer order ticket sum
     int ticketSum;
     // amount in one group
     double amount;
