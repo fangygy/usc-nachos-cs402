@@ -31,7 +31,8 @@ void init() {
     memset(groupAskForFood, 0, sizeof(groupAskForFood));
     memset(groupFood, 0, sizeof(groupFood));
     memset(groupSeat, 0, sizeof(groupSeat));
-
+  
+    mr[0] = new Manager(0);
     int i;
     for (i = 0;i < MAX_GROUP; ++i) {
         sGroup[i] = new Semaphore("Semaphore_Group", 0);
@@ -40,5 +41,22 @@ void init() {
         cGroupFood[i] = new Condition("Condition_GroupFood");
         lGroup[i] = new Lock("Lock_Group");
     }
+    for (i = 0;i < MAX_TC; ++i) {
+        tc[i] = new TicketClerk(i);
+    }
+
+    for (i = 0;i < MAX_CC; ++i) {
+        cc[i] = new ConcessionClerk(i);
+    }
+
+    for (i = 0;i < MAX_TT; ++i) {
+        tt[i] = new TicketTaker(i);
+    }
+
+    for (i = 0;i < MAX_MT; ++i) {
+        mt[i] = new MovieTechnician(i);
+    }
+
+
 }
 
