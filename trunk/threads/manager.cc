@@ -19,6 +19,7 @@ void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count) {
             if (rand()%5 == 0) {
                 clerk[i]->lock->Acquire();
                 clerk[i]->setIsBreak(true);
+                printf("Manager has told %s [%d] to go on break.\n", clerk[i]->getEmployeeType(), i);
                 clerk[i]->lock->Release();
             }
         } else if (clerk[i]->getWaitingSize() < 3) {
@@ -36,6 +37,7 @@ void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count) {
                 if (!clerk[i]->getIsBusy()) {
                     clerk[i]->condition[1]->Signal(clerk[i]->lock);
                 }
+                printf("Manager has told %s [%d] to go on break.\n", clerk[i]->getEmployeeType(), i);
                 clerk[i]->lock->Release();
             }
         } else if (clerk[i]->getWaitingSize() > 5) {
