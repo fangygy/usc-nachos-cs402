@@ -12,34 +12,37 @@ Customer::Customer(int cId, int gId, int gSize, bool ticketBuyer) {
 }
 Customer::~Customer() {}
 
-void Customer::waitGroup() {
+/*void Customer::waitGroup() {
     for (int i = 1;i < groupSize; ++i) {
         sGroup[groupId]->P();
     }
-}
+}*/
 void Customer::action() {
     if (getIsTicketBuyer()) {
         // ticket buyer
         DEBUG('z', "\tGroup [%d] start buy tickets.\n", groupId);
         buyTickets();
         DEBUG('z', "\tGroup [%d] finish buy tickets.\n", groupId);
-        DEBUG('z', "\tGroup [%d] start waitGroup after finish buy tickets.\n", groupId);
-        waitGroup();
-        DEBUG('z', "\tGroup [%d] finish waitGroup after finish buy tickets.\n", groupId);
+        proceed(groupTicket);
+//        DEBUG('z', "\tGroup [%d] start waitGroup after finish buy tickets.\n", groupId);
+//        waitGroup();
+//        DEBUG('z', "\tGroup [%d] finish waitGroup after finish buy tickets.\n", groupId);
         if (countFood()) {
             DEBUG('z', "\tGroup [%d] start buy food.\n", groupId);
             buyFood();
             DEBUG('z', "\tGroup [%d] finish buy food.\n", groupId);
         }
-        DEBUG('z', "\tGroup [%d] start waitGroup after finish buy food.\n", groupId);
-        waitGroup();
-        DEBUG('z', "\tGroup [%d] finish waitGroup after finish buy food.\n", groupId);
+        proceed(groupFood);
+//        DEBUG('z', "\tGroup [%d] start waitGroup after finish buy food.\n", groupId);
+//        waitGroup();
+//       DEBUG('z', "\tGroup [%d] finish waitGroup after finish buy food.\n", groupId);
         DEBUG('z', "\tGroup [%d] start check tickets.\n", groupId);
         checkTickets();
         DEBUG('z', "\tGroup [%d] finish check tickets.\n", groupId);
-        DEBUG('z', "\tGroup [%d] start waitGroup after finish check tickets.\n", groupId);
-        waitGroup();
-        DEBUG('z', "\tGroup [%d] finish waitGroup after finish check tickets.\n", groupId);
+        proceed(groupSeat);
+//        DEBUG('z', "\tGroup [%d] start waitGroup after finish check tickets.\n", groupId);
+//        waitGroup();
+//        DEBUG('z', "\tGroup [%d] finish waitGroup after finish check tickets.\n", groupId);
         DEBUG('z', "\tGroup [%d] start take seat.\n", groupId);
         arrangeSeats();
         DEBUG('z', "\tGroup [%d] finish take seat.\n", groupId);
@@ -47,7 +50,7 @@ void Customer::action() {
         // regular customer
         waitTickets();
         waitFood();
-        waitSeats();
+        waitCheck();
     }
 }
 bool Customer::getIsTicketBuyer() {
@@ -143,12 +146,6 @@ void Customer::buyTickets() {
         return;
     }
     clerk->lock->Release();
-    // tell group to go
-    lGroup[groupId]->Acquire();
-    cGroup[groupId]->Broadcast(lGroup[groupId]);
-    // monitor variables
-    groupTicket[groupId] = true;
-    lGroup[groupId]->Release();
 }
 
 void Customer::buyFood() {
@@ -201,12 +198,6 @@ void Customer::buyFood() {
         return;
     }
     clerk->lock->Release();
-    // tell group to go
-    lGroup[groupId]->Acquire();
-    cGroup[groupId]->Broadcast(lGroup[groupId]);
-    // monitor variables
-    groupFood[groupId] = true;
-    lGroup[groupId]->Release();
 
 }
 
@@ -280,13 +271,6 @@ void Customer::checkTickets() {
     }
 
     clerk->lock->Release();
-    // tell group to go
-    lGroup[groupId]->Acquire();
-    cGroup[groupId]->Broadcast(lGroup[groupId]);
-    // monitor variables
-    groupTicket[groupId] = true;
-    lGroup[groupId]->Release();
-
 }
 
 void Customer::goBathroom() {
@@ -298,17 +282,18 @@ void Customer::arrangeSeats() {
     ;
 }
 void Customer::waitTickets() {
+    sGroup[groupId]->V();
     lGroup[groupId]->Acquire();
     // if ticketbuyer had broadcast, do not wait
     if (!groupTicket[groupId]) {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }
-    // after get ticket, semaphore
-    sGroup[groupId]->V();
+    // after get ticket
     lGroup[groupId]->Release();
 }
 // regular customer wait for buyFood
 void Customer::waitFood() {
+    sGroup[groupId]->V();
     lGroup[groupId]->Acquire();
     // wait for ticketbuyer to ask for if need food
     if (!groupAskForFood[groupId]) {
@@ -322,14 +307,14 @@ void Customer::waitFood() {
     if (!groupFood[groupId]) {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }
-    // after get food, semaphore
-    sGroup[groupId]->V();
+    // after get food
     lGroup[groupId]->Release();
 }
-void Customer::waitSeats() {
+void Customer::waitCheck() {
+    sGroup[groupId]->V();
     lGroup[groupId]->Acquire();
     // if ticketbuyer had broadcast, do not wait
-    if (!groupFood[groupId]) {
+    if (!groupSeat[groupId]) {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }
 
@@ -342,7 +327,6 @@ void Customer::waitSeats() {
     lStartMovie->Release();
 
     // after get seat, semaphore
-    sGroup[groupId]->V();
     lGroup[groupId]->Release();
 }
 
@@ -376,4 +360,17 @@ void Customer::printTCStatus(){
     }
     printf("\n");
 
+}
+void Customer::proceed(bool *flag) {
+    for (int i = 1;i < groupSize; ++i) {
+        sGroup[groupId]->P();
+    }
+
+    // tell group to go
+    lGroup[groupId]->Acquire();
+    cGroup[groupId]->Broadcast(lGroup[groupId]);
+    printf("HeadCustomer [%d] of group [%d] has told the group to proceed.\n", customerId, groupId);
+    // monitor variables
+    flag[groupId] = true;
+    lGroup[groupId]->Release();
 }
