@@ -76,34 +76,4 @@ void TicketClerk::sellTickets() {
 
     }
 }
-void TicketClerk::printStatus(){
 
-    //Print the number of waiting customer in each clerk's line
-
-    printf("[TicketClerk]:TC State:");
-    for (int i = 0;i < MAX_TC; ++i) {
-        TicketClerk *clerk = tc[i];
-        if(clerk!=NULL){ // if clerk have not been create, don't print
-            printf("%d,",clerk->getIsBusy());
-        }else{
-            printf("NA,"); 
-        }
-    }
-    printf("\n");
-
-
-    //Print the number of waiting customer in each clerk's line
-
-    printf("[TicketClerk]:TC WaitLine(#):");
-
-    for (int i = 0;i < MAX_TC; ++i) {
-        TicketClerk *clerk = tc[i];
-        if(clerk!=NULL){ // if clerk have not been create, don't print
-            printf("%d,",clerk->getWaitingSize());
-        }else{
-            printf("NA,"); 
-        }
-    }
-    printf("\n");
-
-}
