@@ -118,8 +118,12 @@ class Customer {
     void waitFood();
     // wait for take seats done
     void waitSeats();
+    // wait for ticket check done
+    void waitCheck();
     // wait for group act together
     void waitGroup();
+    // ticketbuyer tell customer to proceed
+    void proceed(bool * flag);
     void setSeatNumber(int seatNum);
 
     // for customer to go bathroom
