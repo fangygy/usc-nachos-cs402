@@ -289,11 +289,11 @@ void Customer::waitTickets() {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }
     // after get ticket
+    printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n", customerId, groupId);
     lGroup[groupId]->Release();
 }
 // regular customer wait for buyFood
 void Customer::waitFood() {
-    sGroup[groupId]->V();
     lGroup[groupId]->Acquire();
     // wait for ticketbuyer to ask for if need food
     if (!groupAskForFood[groupId]) {
@@ -302,12 +302,16 @@ void Customer::waitFood() {
     for (int i = 0;i < 2; ++i) {
         groupFoodSum[groupId][i] += answerForFood(i);
     }
+    // has chosen food
     sGroupFood[groupId]->V();
+    // wait for proceed
+    sGroup[groupId]->V();
     // if ticketbuyer had broadcast, do not wait
     if (!groupFood[groupId]) {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }
     // after get food
+    printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n", customerId, groupId);
     lGroup[groupId]->Release();
 }
 void Customer::waitCheck() {
@@ -318,13 +322,14 @@ void Customer::waitCheck() {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }
 
+    printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n", customerId, groupId);
     // take seat
-    lStartMovie->Acquire();
+    //lStartMovie->Acquire();
     // get seat number from ticketbuyer
     //seatState[] = ture;
     //seatNumber = 
-    sGroup[groupId]->V();
-    lStartMovie->Release();
+    //sGroup[groupId]->V();
+    //lStartMovie->Release();
 
     // after get seat, semaphore
     lGroup[groupId]->Release();
