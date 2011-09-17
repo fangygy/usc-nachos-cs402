@@ -57,18 +57,17 @@ void tt_new(int i) {
 void mt_new(int i) {
    // printf("start mt_new\n");
    // printf("%s: new MovieTechnician %d\n", currentThread->getName(), i);
-    mt[i] = new MovieTechnician(i);
+   // mt[i] = new MovieTechnician(i);
   //  printf("%s: MovieTechnician %d created\n", currentThread->getName(), i);
 }
 
 void mr_new(int i) {
     //printf("start mr_new\n");
     //printf("%s: new Manager %d\n", currentThread->getName(), i);
-    mr[i] = new Manager(i);
+    //mr[i] = new Manager(i);
     test1();
-
-   // printf("%s: Manager %d created\n", currentThread->getName(), i);
 }
+
 
 void test1() {
     char *name;
@@ -79,7 +78,7 @@ void test1() {
         name = new char[MAX_VAR];
         sprintf(name, "Thread_TicketClerk_%d", i); 
         // ? in thread or hear ?
-        tc[i] = new TicketClerk(i);
+//        tc[i] = new TicketClerk(i);
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)tc_new, i);
     }
@@ -119,7 +118,7 @@ void test1() {
         name = new char[MAX_VAR];
         sprintf(name, "Thread_ConcessionClerk_%d", i);
         // ? in thread or here
-        cc[i] = new ConcessionClerk(i);
+//        cc[i] = new ConcessionClerk(i);
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)cc_new, i);
     }
@@ -129,7 +128,7 @@ void test1() {
         name = new char[MAX_VAR];
         sprintf(name, "Thread_TicketTaker_%d", i);
         // ? in thread or here
-        tt[i] = new TicketTaker(i);
+//        tt[i] = new TicketTaker(i);
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)tt_new, i);
     }
@@ -140,7 +139,7 @@ void test1() {
         name = new char[MAX_VAR];
         sprintf(name, "Thread_MovieTechnician_%d", i);
         // ? in thread or here
-        mt[i] = new MovieTechnician(i);
+//        mt[i] = new MovieTechnician(i);
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)mt_new, i);
     }

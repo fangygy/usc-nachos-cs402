@@ -58,15 +58,19 @@ bool Customer::getIsTicketBuyer() {
 }
 
 int Customer::getInLine(Lock *lock, Employee** employee, int count) {
-
     int i, j;
     int lineIndex = -1;
     int lineLen = -1;
     lock->Acquire();
 
+    DEBUG('z', "\tGroup [%d] start find line\n", groupId);    
     for (i = 0;i < count; ++i) {
 
         // get a no busy line
+        DEBUG('z', "line %d\n", i);
+        DEBUG('z', "%d\n", employee[i]->getIsBusy() ? 1:0);
+        DEBUG('z', "%d\n", employee[i]->getIsBreak() ? 1:0);
+        DEBUG('z', "%d\n", employee[i]->getWaitingSize()) ;
         if (!employee[i]->getIsBusy() && !employee[i]->getIsBreak() && employee[i]->getWaitingSize() == 0) {
             lineIndex = i;
             break;
@@ -77,7 +81,7 @@ int Customer::getInLine(Lock *lock, Employee** employee, int count) {
             lineIndex = i;
         }
     }
-    
+    DEBUG('z', "\tGroup [%d] finish find line\n", groupId);    
     // if no service
     if (lineIndex == -1) {
        // TODO need to wait until the manager signal them
