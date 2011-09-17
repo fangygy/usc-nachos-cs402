@@ -12,6 +12,7 @@ Lock *lBuyTickets = new Lock("Lock_BuyTickets_line");
 Lock *lBuyFood = new Lock("Lock_BuyFood_line");
 Lock *lCheckTickets = new Lock("Lock_CheckTickets_line");
 Lock *lStartMovie = new Lock("Lock_StartMovie");
+Lock *lFindSeats = new Lock("Lock_FindSeat");
 Semaphore *sGroup[MAX_GROUP];
 Condition *cGroup[MAX_GROUP];
 Condition *cGroupFood[MAX_GROUP];
@@ -23,6 +24,14 @@ bool groupTicket[MAX_GROUP];
 bool groupAskForFood[MAX_GROUP];
 bool groupFood[MAX_GROUP];
 bool groupSeat[MAX_GROUP];
+int ticketToken;
+int seatPos=-1;
+bool seatState[MAX_SEAT];
+Semaphore *sSeat[MAX_SEAT];
+Semaphore *sWaitSeat[MAX_GROUP]; 
+int SeatLocation[MAX_GROUPSIZE];
+
+
 
 void init() {
     memset(groupFoodSum, 0, sizeof(groupFoodSum));
@@ -40,7 +49,15 @@ void init() {
         cGroup[i] = new Condition("Condition_Group");
         cGroupFood[i] = new Condition("Condition_GroupFood");
         lGroup[i] = new Lock("Lock_Group");
+        sWaitSeat[i]= new Semaphore("Semaphore_WaitSeat", 0); 
     }
+
+    for(i=0;i<MAX_SEAT;i++){
+         sSeat[i] = new Semaphore("Semaphore_Seat", 0);
+         seatState[i]=false;  
+    }
+
+
     for (i = 0;i < MAX_TC; ++i) {
         tc[i] = new TicketClerk(i);
     }

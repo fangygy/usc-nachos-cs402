@@ -13,6 +13,7 @@ Customer::Customer(int cId, int gId, int gSize, bool ticketBuyer) {
 Customer::~Customer() {}
 
 /*void Customer::waitGroup() {
+    //printf("HeadCustomer [%d] of group [%d] is waiting for the group to form.\n",customerId,groupId);
     for (int i = 1;i < groupSize; ++i) {
         sGroup[groupId]->P();
     }
@@ -46,11 +47,15 @@ void Customer::action() {
         DEBUG('z', "\tGroup [%d] start take seat.\n", groupId);
         arrangeSeats();
         DEBUG('z', "\tGroup [%d] finish take seat.\n", groupId);
+
+       // watchMovie();
     } else {
         // regular customer
         waitTickets();
         waitFood();
         waitCheck();
+        waitSeats();
+      //  watchMovie();
     }
 }
 bool Customer::getIsTicketBuyer() {
@@ -283,14 +288,86 @@ void Customer::goBathroom() {
 void Customer::leaveTheater() {
 }
 void Customer::arrangeSeats() {
-    ;
+    
+    lFindSeats->Acquire();
+
+    int i=0;
+    // Head customer get seat for self
+         
+    getSeats(groupSize);
+    seatPos=SeatLocation[0];	
+    printf("Customer [%d] in Group [%d] has found the following seat: row [%d] and seat [%d]\n",customerId,groupId,(seatPos/MAX_ROW),seatPos%MAX_COL);   
+
+    seatState[SeatLocation[0]]=true;
+    for(i=1;i< groupSize;i++){
+        lGroup[groupId]->Acquire();
+        seatPos=SeatLocation[i];	
+        sWaitSeat[groupId]->V(); 
+        cGroup[groupId]->Wait(lGroup[groupId]);
+    }
+    
+    lFindSeats->Release();      
+
 }
+int Customer::getSeats(int Size){
+    
+    int i=0,j=0;
+    int consecutive=0,RequestSeat=0;
+    int SeatAvailable[MAX_ROW]={0};
+
+    bool bFind=false;
+    
+    //assumption:customer always choose seat from the beginning of a row
+    //
+    for(i=0;i<MAX_ROW;i++){
+        consecutive=0;
+        for(j=0;j<MAX_COL;j++){
+            if(seatState[j+i*MAX_COL]==false){
+                consecutive++;         
+            }
+        }
+        SeatAvailable[i]=consecutive; 
+    }
+
+    //Search for the first time if any consecutive seats
+    for(i=0;i<MAX_ROW;i++){  
+        if(SeatAvailable[i]>=Size){
+            for(j=0;j<Size;j++){
+                SeatLocation[j]=(MAX_COL-SeatAvailable[i]+j)+i*MAX_COL;               
+                bFind=true;
+            }
+            SeatAvailable[i]=0;
+            break;
+        }
+    }
+
+    if(bFind==false){
+        for(i=0;i<MAX_ROW;i++){  
+            if(SeatAvailable[i]!=0){
+                  for(j=0;j<SeatAvailable[i];j++){
+                        SeatLocation[RequestSeat]=(MAX_COL-SeatAvailable[i])+i*MAX_COL; 
+                        RequestSeat++;          
+                  }
+                  SeatAvailable[i]=0;
+            }
+            if(RequestSeat==Size-1){
+                break;
+            }
+        }   
+    }
+
+  
+    return 1;
+}
+
 void Customer::waitTickets() {
     sGroup[groupId]->V();
     lGroup[groupId]->Acquire();
     // if ticketbuyer had broadcast, do not wait
     if (!groupTicket[groupId]) {
+        printf("Customer [%d] of group [%d] is waiting for the HeadCustomer.\n",customerId,groupId);
         cGroup[groupId]->Wait(lGroup[groupId]);
+        printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n",customerId,groupId);         
     }
     // after get ticket
     printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n", customerId, groupId);
@@ -312,7 +389,9 @@ void Customer::waitFood() {
     sGroup[groupId]->V();
     // if ticketbuyer had broadcast, do not wait
     if (!groupFood[groupId]) {
+        printf("Customer [%d] of group [%d] is waiting for the HeadCustomer.\n",customerId,groupId);
         cGroup[groupId]->Wait(lGroup[groupId]);
+        printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n",customerId,groupId);       
     }
     // after get food
     printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n", customerId, groupId);
@@ -320,15 +399,39 @@ void Customer::waitFood() {
 }
 void Customer::waitCheck() {
     sGroup[groupId]->V();
-    lGroup[groupId]->Acquire();
-    // if ticketbuyer had broadcast, do not wait
+ 
     if (!groupSeat[groupId]) {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }
+   
+    //TODO:delete
+    /*
+     lStartMovie->Acquire();
+    // get seat number from ticketbuyer
+    //seatState[] = ture;
+    //seatNumber = 
+    sGroup[groupId]->V();
+    lStartMovie->Release();
+   */
+    // after get seat, semaphore
+    lGroup[groupId]->Release();
 
-    printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n", customerId, groupId);
+}
+void Customer::waitSeats() {
+ 
+    sWaitSeat[groupId]->P();
+    lGroup[groupId]->Acquire();
+    seatState[seatPos]=true;
+    printf("Customer [%d] in Group [%d] has found the following seat: row [%d] and seat [%d]\n",customerId,groupId,(seatPos/MAX_ROW),(seatPos%MAX_COL));   
+    cGroup[groupId]->Signal(lGroup[groupId]);
+    lGroup[groupId]->Release();
+       
+        
+     
+    //TODO:to delete
+//    printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n", customerId, groupId);
     // take seat
-    //lStartMovie->Acquire();
+    /*lStartMovie->Acquire();
     // get seat number from ticketbuyer
     //seatState[] = ture;
     //seatNumber = 
@@ -336,38 +439,17 @@ void Customer::waitCheck() {
     //lStartMovie->Release();
 
     // after get seat, semaphore
+    sGroup[groupId]->V();
     lGroup[groupId]->Release();
+
+  */
 }
 
-void Customer::printTCStatus(){
 
-    //Print the number of waiting customer in each clerk's line
+void Customer::watchMovie(){
 
-    printf("TC State:");
-    for (int i = 0;i < MAX_TC; ++i) {
-        TicketClerk *clerk = tc[i];
-        if(clerk!=NULL){ // if clerk have not been create, don't print
-            printf("%d,",clerk->getIsBusy());
-        }else{
-            printf("NA,"); 
-        }
-    }
-    printf("\n");
-
-
-    //Print the number of waiting customer in each clerk's line
-
-    printf("TC WaitLine(#):");
-
-    for (int i = 0;i < MAX_TC; ++i) {
-        TicketClerk *clerk = tc[i];
-        if(clerk!=NULL){ // if clerk have not been create, don't print
-            printf("%d,",clerk->getWaitingSize());
-        }else{
-            printf("NA,"); 
-        }
-    }
-    printf("\n");
+    sSeat[seatNumber]->P();
+   
 
 }
 void Customer::proceed(bool *flag) {

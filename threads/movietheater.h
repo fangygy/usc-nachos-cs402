@@ -27,11 +27,18 @@
 #define FOOD_POPCORN 0
 #define FOOD_SODA    1 
 
+#define MOVIE_PERIOD_BASE  200
+#define MOVIE_PERIOD_VAR  100
+
+#define MAX_SEAT   25
+#define MAX_ROW    5
+#define MAX_COL    5
 
 extern Lock *lBuyTickets;  //Lock to get in line of buyTickets
 extern Lock *lBuyFood;  //Lock to get in line of buyFood
 extern Lock *lCheckTickets;  //Lock to get in line of checkTickets
 extern Lock *lStartMovie;  //Lock to get seats and startMovie
+extern Lock *lFindSeats;
 extern Semaphore *sGroup[MAX_GROUP];  //semaphore to make group act together
 extern Condition *cGroup[MAX_GROUP];  //Condition to make group act together
 extern Condition *cGroupFood[MAX_GROUP];  //Condition for ticketbuyer to ask for if need food
@@ -44,7 +51,16 @@ extern bool groupAskForFood[MAX_GROUP];  // monitor variable for if ask for food
 extern bool groupFood[MAX_GROUP];  // monitor variable for if buyFood done
 extern bool groupSeat[MAX_GROUP];  // monitor variable for if get seats
 
-extern bool seatState[25];
+extern bool seatState[MAX_SEAT];
+extern Semaphore *sSeat[MAX_SEAT];  //semaphore to Seat
+extern int ticketToken;
+extern int seatPos;
+
+extern Semaphore *sWaitSeat[MAX_GROUP];  //semaphore to Seat
+extern int SeatLocation[MAX_GROUPSIZE];
+
+
+
 
 class Employee {
   private:
@@ -111,6 +127,9 @@ class Customer {
     void checkTickets();
     // arrange seats
     void arrangeSeats();
+    //Head Customer get Seat
+    int getSeats(int Size);
+
     // for regular custormer
     // wait for buy tickets done
     void waitTickets();
@@ -132,6 +151,10 @@ class Customer {
     void leaveTheater();
     // find and get in the line
     int getInLine(Lock * lock, Employee** employee, int count);
+    // watch movies when all customer seated
+    void watchMovie();
+    
+
 };
 extern Customer *cr[MIN_CR]; 
 
@@ -143,7 +166,6 @@ class TicketClerk : public Employee{
     double amount;
     // customer pay
     double payment;
-    void printStatus();
   public:
     TicketClerk(int tcId);
     void sellTickets();
@@ -200,6 +222,8 @@ class MovieTechnician : public Employee{
     
   public:
     MovieTechnician(int mtId);
+    void playMovie();
+    void infoCustomer();
 };
 extern MovieTechnician * mt[MAX_MT];
 class Manager : public Employee{
