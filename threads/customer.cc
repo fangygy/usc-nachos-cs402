@@ -47,15 +47,16 @@ void Customer::action() {
         DEBUG('z', "\tGroup [%d] start take seat.\n", groupId);
         arrangeSeats();
         DEBUG('z', "\tGroup [%d] finish take seat.\n", groupId);
-
-       // watchMovie();
+        watchMovie();
+        proceed(groupLeaveRoom);
     } else {
         // regular customer
         waitTickets();
         waitFood();
         waitCheck();
         waitSeats();
-      //  watchMovie();
+        watchMovie();
+        waitLeaveRoom();
     }
 }
 bool Customer::getIsTicketBuyer() {
@@ -302,8 +303,9 @@ void Customer::arrangeSeats() {
     for(i=1;i< groupSize;i++){
         lGroup[groupId]->Acquire();
         seatPos=SeatLocation[i];	
-        sWaitSeat[groupId]->V(); 
+        sWaitSeat[groupId]->V();        
         cGroup[groupId]->Wait(lGroup[groupId]);
+        seatState[seatPos]=true;
     }
     
     lFindSeats->Release();      
@@ -399,7 +401,7 @@ void Customer::waitFood() {
 }
 void Customer::waitCheck() {
     sGroup[groupId]->V();
- 
+    lGroup[groupId]->Acquire();
     if (!groupSeat[groupId]) {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }
@@ -421,7 +423,6 @@ void Customer::waitSeats() {
  
     sWaitSeat[groupId]->P();
     lGroup[groupId]->Acquire();
-    seatState[seatPos]=true;
     printf("Customer [%d] in Group [%d] has found the following seat: row [%d] and seat [%d]\n",customerId,groupId,(seatPos/MAX_ROW),(seatPos%MAX_COL));   
     cGroup[groupId]->Signal(lGroup[groupId]);
     lGroup[groupId]->Release();
@@ -447,11 +448,46 @@ void Customer::waitSeats() {
 
 
 void Customer::watchMovie(){
+   
+    //Customers are checkd by Movie Techinician if they were seated
+    //printf("DEBUG:Customer [%d] in Group [%d] has been wait for MT to verify seat\n",customerId,groupId);
+    sMT_CR_Check->P();
+    //printf("DEBUG:Customer [%d] in Group [%d] seat has been verified\n",customerId,groupId);
+    lStartMovie->Acquire();
+    cMT_CR_Check->Signal(lStartMovie);
+    lStartMovie->Release();
+    printf("Customer [%d] in group [%d] is sitting in a theater room seat.\n",customerId,groupId);
 
-    sSeat[seatNumber]->P();
+    
+ 
+    //watching movie and wait Movie Techinician to wake them up
+    sMT_CR_Stop->P();
+    lStopMovie->Acquire();
+    cMT_CR_Stop->Signal(lStopMovie);
+    lStopMovie->Release();
+  
+
+   
+
+  
    
 
 }
+void Customer::waitLeaveRoom(){
+
+     sGroup[groupId]->V();
+    lGroup[groupId]->Acquire();
+    if (!groupLeaveRoom[groupId]) {
+        cGroup[groupId]->Wait(lGroup[groupId]);
+    }
+
+     //regroup 
+
+    printf("Customer [%d] in group [%d] is getting out of a theater room seat.\n",customerId,groupId);
+
+
+}
+
 void Customer::proceed(bool *flag) {
     for (int i = 1;i < groupSize; ++i) {
         sGroup[groupId]->P();

@@ -12,7 +12,9 @@ Lock *lBuyTickets = new Lock("Lock_BuyTickets_line");
 Lock *lBuyFood = new Lock("Lock_BuyFood_line");
 Lock *lCheckTickets = new Lock("Lock_CheckTickets_line");
 Lock *lStartMovie = new Lock("Lock_StartMovie");
+Lock *lStopMovie = new Lock("Lock_StopMovie");
 Lock *lFindSeats = new Lock("Lock_FindSeat");
+Lock *lIsMovieOver = new Lock("Lock_IsMovieOver");
 Semaphore *sGroup[MAX_GROUP];
 Condition *cGroup[MAX_GROUP];
 Condition *cGroupFood[MAX_GROUP];
@@ -24,13 +26,19 @@ bool groupTicket[MAX_GROUP];
 bool groupAskForFood[MAX_GROUP];
 bool groupFood[MAX_GROUP];
 bool groupSeat[MAX_GROUP];
-int ticketToken;
+bool groupLeaveRoom[MAX_GROUP];
+bool bIsMovieOver;  //monitor variable for Movies State
+int ticketTaken;
 int seatPos=-1;
 bool seatState[MAX_SEAT];
-Semaphore *sSeat[MAX_SEAT];
 Semaphore *sWaitSeat[MAX_GROUP]; 
 int SeatLocation[MAX_GROUPSIZE];
-
+Semaphore *sStartMovie = new Semaphore("Semaphore_StartMovie",0);
+Semaphore *sMT_CR_Check = new Semaphore("Semaphore_CheckCustomerSeated",0);
+Condition *cMT_CR_Check = new Condition("Condition_CheckCustomerSeated");
+Semaphore *sStopMovie = new Semaphore("Semaphore_StopMovie",0);
+Semaphore *sMT_CR_Stop = new Semaphore("Semaphore_WakeCustomer",0);
+Condition *cMT_CR_Stop = new Condition("Condition_WakeCustomer");
 
 
 void init() {
@@ -40,6 +48,7 @@ void init() {
     memset(groupAskForFood, 0, sizeof(groupAskForFood));
     memset(groupFood, 0, sizeof(groupFood));
     memset(groupSeat, 0, sizeof(groupSeat));
+    memset(groupLeaveRoom, 0, sizeof(groupLeaveRoom));
   
     mr[0] = new Manager(0);
     int i;
@@ -53,7 +62,6 @@ void init() {
     }
 
     for(i=0;i<MAX_SEAT;i++){
-         sSeat[i] = new Semaphore("Semaphore_Seat", 0);
          seatState[i]=false;  
     }
 
