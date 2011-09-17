@@ -6,6 +6,7 @@ TicketTaker::TicketTaker(int ttId) : Employee(ttId, "TicketTaker") {
 }
 
 void TicketTaker::checkTickets() {
+
     while(true) {
         lCheckTickets->Acquire();
         lock->Acquire();

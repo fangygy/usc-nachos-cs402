@@ -38,6 +38,7 @@ extern Lock *lBuyTickets;  //Lock to get in line of buyTickets
 extern Lock *lBuyFood;  //Lock to get in line of buyFood
 extern Lock *lCheckTickets;  //Lock to get in line of checkTickets
 extern Lock *lStartMovie;  //Lock to get seats and startMovie
+extern Lock *lStopMovie; //stop Movie
 extern Lock *lFindSeats;
 extern Semaphore *sGroup[MAX_GROUP];  //semaphore to make group act together
 extern Condition *cGroup[MAX_GROUP];  //Condition to make group act together
@@ -50,17 +51,23 @@ extern bool groupTicket[MAX_GROUP];  // monitor variable for if buyTickets done
 extern bool groupAskForFood[MAX_GROUP];  // monitor variable for if ask for food
 extern bool groupFood[MAX_GROUP];  // monitor variable for if buyFood done
 extern bool groupSeat[MAX_GROUP];  // monitor variable for if get seats
-
+extern bool groupLeaveRoom[MAX_GROUP];
+extern bool bIsMovieOver;  //monitor variable for Movies State
+extern Lock *lIsMovieOver;
 extern bool seatState[MAX_SEAT];
 extern Semaphore *sSeat[MAX_SEAT];  //semaphore to Seat
-extern int ticketToken;
+extern int ticketTaken;
 extern int seatPos;
 
 extern Semaphore *sWaitSeat[MAX_GROUP];  //semaphore to Seat
 extern int SeatLocation[MAX_GROUPSIZE];
+extern Semaphore *sStartMovie; 
+extern Semaphore *sMT_CR_Check;
+extern Condition *cMT_CR_Check;
 
-
-
+extern Semaphore *sStopMovie; 
+extern Semaphore *sMT_CR_Stop;
+extern Condition *cMT_CR_Stop;
 
 class Employee {
   private:
@@ -141,6 +148,8 @@ class Customer {
     void waitCheck();
     // wait for group act together
     void waitGroup();
+    // wait for group to leave theater room
+    void waitLeaveRoom(); 
     // ticketbuyer tell customer to proceed
     void proceed(bool * flag);
     void setSeatNumber(int seatNum);
@@ -219,11 +228,14 @@ extern TicketTaker * tt[MAX_TT];
 
 class MovieTechnician : public Employee{
   private:
-    
+    void  checkSeated();
   public:
     MovieTechnician(int mtId);
+    void WaitManager();
     void playMovie();
     void infoCustomer();
+    void infoManager();
+    
 };
 extern MovieTechnician * mt[MAX_MT];
 class Manager : public Employee{

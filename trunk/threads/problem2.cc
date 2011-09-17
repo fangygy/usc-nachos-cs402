@@ -59,6 +59,7 @@ void mt_new(int i) {
    // printf("%s: new MovieTechnician %d\n", currentThread->getName(), i);
    // mt[i] = new MovieTechnician(i);
   //  printf("%s: MovieTechnician %d created\n", currentThread->getName(), i);
+    mt[i]->WaitManager();
 }
 
 void mr_new(int i) {
