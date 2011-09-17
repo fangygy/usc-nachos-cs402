@@ -1,0 +1,20 @@
+#!/bin/bash
+# verify test
+
+fname=f`date +%H%M%S`
+mkdir $fname
+for i in $(seq 0 100); do
+  echo $i
+  nachos -P2 -rs $i > $fname/out$i
+  for (( j=0; j < 15; j++))
+  do
+    cat $fname/out$i | grep "Group\ \[$j\]" >> $fname/resort$i
+    echo '\n' >> $fname/resort$i
+    if cat $fname/out$i|grep "Group\ \[$j\]" > /dev/null
+    then
+      if ! cat $fname/out$i|grep "Group\ \[$j\]\ is\ leaving\ TicketTaker" > /dev/null
+      then echo "test $i : group $j error ending" >> $fname/error; fi
+    fi
+  done
+done
+
