@@ -20,15 +20,29 @@ void Customer::waitGroup() {
 void Customer::action() {
     if (getIsTicketBuyer()) {
         // ticket buyer
+        DEBUG('z', "\tGroup [%d] start buy tickets.\n", groupId);
         buyTickets();
+        DEBUG('z', "\tGroup [%d] finish buy tickets.\n", groupId);
+        DEBUG('z', "\tGroup [%d] start waitGroup after finish buy tickets.\n", groupId);
         waitGroup();
+        DEBUG('z', "\tGroup [%d] finish waitGroup after finish buy tickets.\n", groupId);
         if (countFood()) {
+            DEBUG('z', "\tGroup [%d] start buy food.\n", groupId);
             buyFood();
+            DEBUG('z', "\tGroup [%d] finish buy food.\n", groupId);
         }
+        DEBUG('z', "\tGroup [%d] start waitGroup after finish buy food.\n", groupId);
         waitGroup();
+        DEBUG('z', "\tGroup [%d] finish waitGroup after finish buy food.\n", groupId);
+        DEBUG('z', "\tGroup [%d] start check tickets.\n", groupId);
         checkTickets();
+        DEBUG('z', "\tGroup [%d] finish check tickets.\n", groupId);
+        DEBUG('z', "\tGroup [%d] start waitGroup after finish check tickets.\n", groupId);
         waitGroup();
+        DEBUG('z', "\tGroup [%d] finish waitGroup after finish check tickets.\n", groupId);
+        DEBUG('z', "\tGroup [%d] start take seat.\n", groupId);
         arrangeSeats();
+        DEBUG('z', "\tGroup [%d] finish take seat.\n", groupId);
     } else {
         // regular customer
         waitTickets();
@@ -51,7 +65,6 @@ int Customer::getInLine(Lock *lock, Employee** employee, int count) {
 
         // get a no busy line
         if (!employee[i]->getIsBusy() && !employee[i]->getIsBreak() && employee[i]->getWaitingSize() == 0) {
-            employee[i]->setIsBusy(true);
             lineIndex = i;
             break;
         }
@@ -67,12 +80,12 @@ int Customer::getInLine(Lock *lock, Employee** employee, int count) {
        // TODO need to wait until the manager signal them
        // Wait();
     } else {
-        DEBUG('z', "busy%d\n", employee[lineIndex]->getIsBusy()?1:0);
+        DEBUG('z', "\tbusy%d\n", employee[lineIndex]->getIsBusy()?1:0);
         if(employee[lineIndex]->getIsBusy()){        
             employee[lineIndex]->addWaitingSize();
         }
     }
-    DEBUG('z', "%dline%d\n", lineIndex, employee[lineIndex]->getWaitingSize());
+    DEBUG('z', "\t%dline%d\n", lineIndex, employee[lineIndex]->getWaitingSize());
     return lineIndex; 
 }
 void Customer::buyTickets() {
@@ -206,6 +219,8 @@ bool Customer::countFood() {
         }
         // ask group mate if they want food
         cGroupFood[groupId]->Broadcast(lGroup[groupId]);
+        // set monitor variable true
+        groupAskForFood[groupId] = true;
         lGroup[groupId]->Release();
         //sGroupFood[groupId]->V();
         // wait for all the customer answer for food

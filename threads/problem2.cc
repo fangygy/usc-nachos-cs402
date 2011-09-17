@@ -33,7 +33,7 @@ void cr_new(int arg) {
     //printf("start cr_new\n");
     CustomerData *customerData = (CustomerData *) arg; 
     //printf("%s: new Customer %d\n", currentThread->getName(), customerData->customerNumber);
-    cr[customerData->customerNumber] = new Customer(customerData->customerNumber, customerData->groupNumber, customerData->groupSize, false);
+    //cr[customerData->customerNumber] = new Customer(customerData->customerNumber, customerData->groupNumber, customerData->groupSize, false);
     cr[customerData->customerNumber]->action();
     //printf("%s: Customer TicketBuyer %d created\n", currentThread->getName(), customerData->customerNumber);
 }
@@ -145,7 +145,7 @@ void test1() {
         t->Fork((VoidFunctionPtr)mt_new, i);
     }
      
-    mr[0]->work();
+//    mr[0]->work();
 }
 void Problem2() {
     init();
