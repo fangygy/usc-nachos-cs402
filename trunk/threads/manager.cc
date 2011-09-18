@@ -11,19 +11,44 @@ void Manager::work() {
         for (int i = 0;i < 200; ++i) {
             currentThread->Yield();
         }
-
+        // if all customer leave, collect money
+        lCustomerLeft->Acquire();
+        if (customerLeft == 0) {
+            collectMoney();
+            lCustomerLeft->Release();
+            break;
+        }
+        lCustomerLeft->Release();
     }
+}
+void Manager::collectMoney() {
+    lAmount->Acquire();
+    int i;
+    for (i = 0;i < MAX_TC; ++i) {
+        totalAmount += ticketClerkAmount[i];
+        printf("Manager collected [%.2f] from TicketClerk[%d].\n", ticketClerkAmount[i], i);
+        ticketClerkAmount[i] = 0;
+    }
+
+    for (i = 0;i < MAX_CC; ++i) {
+        totalAmount += concessionClerkAmount[i];
+        printf("Manager collected [%.2f] from ConcessionClerk[%d].\n", concessionClerkAmount[i], i);
+        concessionClerkAmount[i] = 0;
+    }
+    printf("Total money made by office = [%.2f]\n", totalAmount);
+    lAmount->Release();
 }
 // ask MT to startMovie
 void Manager::startMovie() {
     lTicketTaken->Acquire();
-    int i;
+/*    int i;
     for (i = 0; i < MAX_TT; ++i) {
         if (tt[i]->getIsBusy()) {
             break;
         }
     }
-    if (i == MAX_TT || stopTicketTaken) {  //stopTicketTaken ) {
+    if (i == MAX_TT || stopTicketTaken) { */
+    if (stopTicketTaken || totalTicketTaken == nextCustomerNumber) {
         stopTicketTaken = true;
         sStartMovie->V();
     }
@@ -37,6 +62,7 @@ void Manager::startTicketTaken() {
         lTicketTaken->Acquire();
         // set false
         stopTicketTaken = false;
+        ticketTaken = 0;
         // ask customer and ticket clert to start ticket taken
         cTicketTaken->Broadcast(lTicketTaken);
         lTicketTaken->Release();
