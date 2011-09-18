@@ -4,7 +4,7 @@ Group: 50:
              Name:               E-mail:               USC ID: 
              NingChong,Chen      ningchoc@usc.edu      5042823533
              Fang-Yi,Chu 
-             Chien-Ming,Liao       chienmin@usc.edu     5148768361 
+             Chien-Ming,Liao     chienmin@usc.edu      5148768361 
 
 1.      Requirements: 
 Part1: 
@@ -82,7 +82,101 @@ f.
 g.
 h.
 
-4.      Implementation: 
+4.Implementation: 
+     Part1:
+        Files added:
+
+        Files Modified:
+           Main.cc
+           Synch.cc
+           Synch.h
+
+ 	    Data structure modified:
+           class Lock{
+           bool isUsed;    // false: lock unused; true: lock used
+           Thread *ownerThread; // the thread that is being processed right now 
+           List *waitingQueue;    // threads waiting to acquire lock
+           }
+           
+           class Condition{
+           Lock *waitingLock; // the lock which is waited by the queue
+           List *waitingQueue;// the waiting queue for the condition variable. 
+           }
+           
+           Function Modified:
+           -Synch.cc
+				Lock::Lock(char* debugName)
+				Lock::~Lock()
+				void Lock::Acquire()
+				void Lock::Release() 
+				bool Lock::isHeldByCurrentThread()
+				Condition::Condition(char* debugName)
+				Condition::~Condition()
+				void Condition::Wait(Lock* conditionLock)
+				void Condition::Signal(Lock* conditionLock)
+				void Condition::Broadcast(Lock* conditionLock)
+				
+    Part2:
+ 	   Files Added:
+         employee.cc
+       
+ 	   Files Modified:
+         consessionclerk.cc
+         customer.cc
+         manger.cc
+         movietechnician.cc
+         movietheater.cc
+         ticketclerk.cc
+         tickettaker.cc
+         
+       Function added & Modified:
+       -in customer.cc
+       
+       //Constructor of the customer class
+       Customer::Customer(int cId, int gId, int gSize, bool ticketBuyer)
+       //destructor of the customer class
+       Customer::~Customer() 
+       //the action of the customer including buying tickets, buying foods..etc
+       void Customer::action()
+       //verify if this customer is the ticket buyer
+       bool Customer::getIsTicketBuyer()
+       //customer gets in to a valid and shortest line
+       int Customer::getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk, Employee** employee )
+       //customer buys tickets from ticket clerk then leave the counter
+       void Customer::buyTickets()
+       //customer buys food from the consession clerk 
+       void Customer::buyFood()
+       //ask if others in the group also wants food and set the total amout of cokes and popcorns
+       bool Customer::countFood()
+       //determin if the customer wants cokes or popcorns based on probability
+       int Customer::answerForFood(int food)
+       //customer interactwith the ticket taker, may enter or wait in the lobby
+       void Customer::checkTickets()
+       //customer may go to the bathroom based on probability
+       void Customer::goBathroom()
+       //customer leave the theater
+       void Customer::leaveTheater()
+       //customer find the seats for themselfs
+       void Customer::arrangeSeats()
+       //customer choose seats from the beginning of the row and also prefer consecutive seats
+       int Customer::getSeats(int Size)
+       //customer waits for the head customer to buy tickets
+       void Customer::waitTickets()
+       //wait for the head customer to ask themselfs if needs food 
+       void Customer::waitFood()
+       //wait for the ticket taker to check their recipeps
+       void Customer::waitCheck()
+       //wait to see if there is a seat available
+       void Customer::waitSeats()
+       //watching movie and wait for the movie techinician to wake them up
+       void Customer::watchMovie()
+       //wait to leave the theater
+       void Customer::waitLeaveRoom()
+       //head customer notify all the group member to proceed to the next step
+       void Customer::proceed(bool *flag)
+
+ 	
+
 5.      Testing: 
 6.      Discussions: 
 7.      Miscellaneous: 
