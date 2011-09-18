@@ -20,8 +20,11 @@ void TicketTaker::checkTickets() {
         if (getIsBreak()) {
             // wait for manager signal
             printf("%s [%d] is going on break.\n", getEmployeeType(), getId());
-            condition[1]->Wait(lock);
+            lCheckTickets->Release();
+            sNoTicketTaker->P();
             printf("%s [%d] is coming off break.\n", getEmployeeType(), getId());
+            lCheckTickets->Acquire();
+            setIsBreak(false);
 
 //            printf("TicketTaker [%d] is going on break.\n",getId());
 //            continue;

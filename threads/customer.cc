@@ -63,7 +63,7 @@ bool Customer::getIsTicketBuyer() {
     return isTicketBuyer;
 }
 
-int Customer::getInLine(Lock *lock, Employee** employee, int count) {
+int Customer::getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk, Employee** employee ) {
     int i, j;
     int lineIndex = -1;
     int lineLen = -1;
@@ -86,8 +86,9 @@ int Customer::getInLine(Lock *lock, Employee** employee, int count) {
     DEBUG('z', "\tGroup [%d] finish find line\n", groupId);    
     // if no service
     if (lineIndex == -1) {
-       // TODO need to wait until the manager signal them
-       // Wait();
+        // need to wait until the manager signal them
+        noClerk = true;
+        cNoClerk->Wait(lock);
     } else {
         DEBUG('z', "\tbusy%d\n", employee[lineIndex]->getIsBusy()?1:0);
         if(employee[lineIndex]->getIsBusy()){        
@@ -104,7 +105,7 @@ void Customer::buyTickets() {
     //printTCStatus();
 
     while (lineIndex == -1) {
-        lineIndex = getInLine(lBuyTickets, (Employee**)tc, MAX_TC);        
+        lineIndex = getInLine(lBuyTickets, cNoTicketClerk, MAX_TC, noTicketClerk, (Employee**)tc);        
     }
     // get in which line
     printf("Customer [%d] in Group [%d] is getting in TicketClerk line [%d]\n",customerId,groupId,lineIndex);
@@ -157,7 +158,7 @@ void Customer::buyTickets() {
 void Customer::buyFood() {
     int lineIndex = -1;
     while (lineIndex == -1) {
-        lineIndex = getInLine(lBuyFood, (Employee**)cc, MAX_CC);
+        lineIndex = getInLine(lBuyFood, cNoConcessionClerk, MAX_CC, noConcessionClerk, (Employee**)cc);
     }
     printf("Customer [%d] in Group [%d] is getting in ConcessionClerk line [%d]\n",customerId,groupId,lineIndex);
 
@@ -243,7 +244,7 @@ int Customer::answerForFood(int food) {
 void Customer::checkTickets() {
     int lineIndex = -1;
     while (lineIndex == -1) {
-        lineIndex = getInLine(lCheckTickets, (Employee**)tt, MAX_TT);
+        lineIndex = getInLine(lCheckTickets, cNoTicketTaker, MAX_TT, noTicketTaker, (Employee**)tt);
     }
     printf("Customer [%d] in Group [%d] is getting in TicketTaker line [%d]\n",customerId,groupId,lineIndex);
     TicketTaker *clerk = tt[lineIndex];
@@ -253,8 +254,8 @@ void Customer::checkTickets() {
     }
     if (stopTicketTaken) {
         // TODO: ask all group to goto lobby
-        printf("Customer [customerNumber] in Group [groupNumber] sees TicketTaker [clerkNumber] is no longer taking tickets. Going to the lobby.", customerId, groupId, lineIndex); 
-        clerk->subWaitingLine();
+        printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.", customerId, groupId, lineIndex); 
+        clerk->subWaitingSize();
         cTicketTaken->Wait(lCheckTickets);
         lCheckTickets->Release();
         checkTickets();
@@ -279,7 +280,7 @@ void Customer::checkTickets() {
             lCheckTickets->Acquire();
             clerk->lock->Release();
             lTicketTaken->Release();
-            printf("Customer [customerNumber] in Group [groupNumber] sees TicketTaker [clerkNumber] is no longer taking tickets. Going to the lobby.", customerId, groupId, lineIndex);
+            printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.", customerId, groupId, lineIndex);
             cTicketTaken->Wait(lCheckTickets);
             lCheckTickets->Release();
             checkTickets();

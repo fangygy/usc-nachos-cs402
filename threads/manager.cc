@@ -3,9 +3,9 @@
 
 void Manager::work() {
     while (true) {
-        randToBreak(lBuyTickets, (Employee**)tc, MAX_TC);
-        randToBreak(lBuyFood, (Employee**)cc, MAX_CC);
-        randToBreak(lCheckTickets, (Employee**)tt, MAX_TT);
+        randToBreak(lBuyTickets, (Employee**)tc, MAX_TC, noTicketClerk, cNoTicketClerk, sNoTicketClerk);
+        randToBreak(lBuyFood, (Employee**)cc, MAX_CC, noConcessionClerk, cNoConcessionClerk, sNoConcessionClerk);
+        randToBreak(lCheckTickets, (Employee**)tt, MAX_TT, noTicketTaker, cNoTicketTaker, sNoTicketTaker);
         startTicketTaken();
         startMovie();
         for (int i = 0;i < 200; ++i) {
@@ -44,7 +44,7 @@ void Manager::startTicketTaken() {
     lIsMovieOver->Release();
 }
 // rand ask employee to break
-void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count) {
+void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count, bool noClerk, Condition *cNoClerk, Semaphore * sNoClerk) {
     // lock to get in line
     lockWaiting->Acquire();
     for (int i = 0;i < count; ++i) {
@@ -81,7 +81,7 @@ void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count) {
                 clerk[i]->lock->Release();
             }
         } else if (clerk[i]->getWaitingSize() > 5) {
-            int j = 0;
+            /*int j = 0;
             for (j = 0;j < count; ++j) {
                 if (i == j) continue;
                 if (clerk[j]->getIsBreak()) {
@@ -90,8 +90,18 @@ void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count) {
                     clerk[j]->lock->Release();
                     break;
                 }
-            }
+            }*/
+            sNoClerk->V();
         }
+    }
+    // if no clerk work and customers come, have to ask one to off break
+    if (noClerk) {
+        noClerk = false;
+        // semaphore to get one clerk
+        sNoClerk->V();
+        // ? should get resp from clerk
+        // signal the customer
+        cNoClerk->Broadcast(lockWaiting);
     }
     lockWaiting->Release();
 
