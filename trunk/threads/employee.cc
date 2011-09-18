@@ -42,6 +42,9 @@ Employee::Employee(int eId, char * type) {
     condition[0] = new Condition(str);
     sprintf(str, "cond_action_%s_%d", employeeType, id);
     condition[1] = new Condition(str); 
+    sprintf(str, "cond_break_%s_%d", employeeType, id);
+    condition[2] = new Condition(str);
+
    // printf("employee construction\n", str);
 }
 

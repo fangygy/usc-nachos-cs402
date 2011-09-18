@@ -43,6 +43,16 @@ Semaphore *sStopMovie = new Semaphore("Semaphore_StopMovie",0);
 Semaphore *sMT_CR_Stop = new Semaphore("Semaphore_WakeCustomer",0);
 Condition *cMT_CR_Stop = new Condition("Condition_WakeCustomer");
 
+bool noTicketClerk = false;
+bool noConcessionClerk = false;
+bool noTicketTaker = false;
+Condition *cNoTicketClerk = new Condition("Condition_NoTicketClerk");
+Condition *cNoConcessionClerk = new Condition("Condition_NoConcessionClerk");;
+Condition *cNoTicketTaker = new Condition("Condition_NoTicketTaker");;
+Semaphore *sNoTicketClerk = new Semaphore("Semaphore_NoTicketClerk",0);
+Semaphore *sNoConcessionClerk = new Semaphore("Semaphore_NoConcessionClerk",0);
+Semaphore *sNoTicketTaker = new Semaphore("Semaphore_NoTicketTaker",0);
+
 
 void init() {
     memset(groupFoodSum, 0, sizeof(groupFoodSum));

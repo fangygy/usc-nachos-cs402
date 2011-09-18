@@ -64,6 +64,17 @@ extern Semaphore *sSeat[MAX_SEAT];  //semaphore to Seat
 extern int ticketTaken;
 extern int seatPos;
 
+extern bool noTicketClerk;
+extern bool noConcessionClerk;
+extern bool noTicketTaker;
+extern Condition *cNoTicketClerk;
+extern Condition *cNoConcessionClerk;
+extern Condition *cNoTicketTaker;
+extern Semaphore *sNoTicketClerk;
+extern Semaphore *sNoConcessionClerk;
+extern Semaphore *sNoTicketTaker;
+
+
 extern Semaphore *sWaitSeat[MAX_GROUP];  //semaphore to Seat
 extern int SeatLocation[MAX_GROUPSIZE];
 extern Semaphore *sStartMovie; 
@@ -91,7 +102,7 @@ class Employee {
     Lock *lock;
     // c0 is for customer in waiting line
     // c1 is action between customer and employee
-    Condition *condition[2];
+    Condition *condition[3];
     bool getIsBusy();
     bool getIsBreak();
     int getId();
@@ -164,7 +175,7 @@ class Customer {
     // for ticketBuyer to check group is ready to leave
     void leaveTheater();
     // find and get in the line
-    int getInLine(Lock * lock, Employee** employee, int count);
+    int getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk, Employee** employee);
     // watch movies when all customer seated
     void watchMovie();
     
@@ -245,7 +256,7 @@ class MovieTechnician : public Employee{
 extern MovieTechnician * mt[MAX_MT];
 class Manager : public Employee{
   private:
-    void randToBreak(Lock * lockWaiting, Employee ** clerk, int count);
+    void randToBreak(Lock * lockWaiting, Employee ** clerk, int count,  bool noClerk, Condition *cNoClerk, Semaphore * sNoClerk);
     // ask ticketTaker and customer to start
     void startTicketTaken();
     // ask MT to startMovie
