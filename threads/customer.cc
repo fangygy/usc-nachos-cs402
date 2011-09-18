@@ -519,9 +519,7 @@ void Customer::waitSeats() {
 void Customer::watchMovie(){
    
     //Customers are checkd by Movie Techinician if they were seated
-   printf("DEBUG:Customer [%d] in Group [%d] has been wait for MT to verify seat\n",customerId,groupId);
     sMT_CR_Check->P();
-    printf("DEBUG:Customer [%d] in Group [%d] seat has been verified\n",customerId,groupId);
     lStartMovie->Acquire();
     cMT_CR_Check->Signal(lStartMovie);
     lStartMovie->Release();
@@ -551,9 +549,9 @@ void Customer::waitLeaveRoom(){
 void Customer::checkBathroom(){
 
 
-        lGroup[groupId]->Acquire();
-        // ask group mate if they want to go bathroom
-        cGroup[groupId]->Broadcast(lGroup[groupId]);
+    lGroup[groupId]->Acquire();
+    // ask group mate if they want to go bathroom
+    cGroup[groupId]->Broadcast(lGroup[groupId]);
         // set monitor variable true
         groupAskForBathroom[groupId] = true;
         lGroup[groupId]->Release();
@@ -571,12 +569,14 @@ void Customer::checkBathroom(){
     	}else{
         	 printf("DEBUG_O:Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
     	}
-       
 
-        for (int i = 0;i < groupBathroomSum[groupId]; ++i) {
-            sGroupBathroom[groupId]->P();
-        }
-      
+printf("DEBUG_O:CCustomer [%d] in Group [%d] , bathroom#[%d]\n",customerId,groupId,groupBathroomSum[groupId]);
+       
+        
+    for (int i = 1;i < groupBathroomSum[groupId]; ++i) {
+        sGroupLeaveBathroom[groupId]->P();
+    }
+
 }
 void Customer::waitBathroom(){
 
@@ -585,22 +585,28 @@ void Customer::waitBathroom(){
     if (!groupAskForBathroom[groupId]) {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }
-    if(answerForBathroom()){
-         groupBathroomSum[groupId]++;
-         sGroupBathroom[groupId]->V();
-         printf("DEBUG_O:Customer [%d] in Group [%d] is going to the bathroom.\n",customerId,groupId); 
-         //goBathroom(); 
-         printf("DEBUG_O:Customer [%d] in Group [%d] is leaving the bathroom.\n",customerId,groupId);
-         printf("DEBUG_O:Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
-         sGroupBathroom[groupId]->V();
-    }else{
-         sGroupBathroom[groupId]->V();   
-         printf("DEBUG_O:Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
-    }
+
     lGroup[groupId]->Release();
 
+    if(answerForBathroom()){
+         groupBathroomSum[groupId]++;
+         printf("DEBUG_O:Customer [%d] in Group [%d] is going to the bathroom.\n",customerId,groupId); 
+         //goBathroom(); 
+         sGroupBathroom[groupId]->V();
+         printf("DEBUG_O:Customer [%d] in Group [%d] is leaving the bathroom.\n",customerId,groupId);
+         sGroupLeaveBathroom[groupId]->V();
+         printf("DEBUG_O:Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId);   
+    }else{
+         printf("DEBUG_O:Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
 
+        sGroupBathroom[groupId]->V();
+    }
+
+
+  
+    
 }
+
 void Customer::prtLeaveRoomMsg(){
 
     printf("Customer [%d] in group [%d] is getting out of a theater room seat.\n",customerId,groupId);
