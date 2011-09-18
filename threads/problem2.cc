@@ -146,7 +146,7 @@ void test1() {
         t->Fork((VoidFunctionPtr)mt_new, i);
     }
      
-//    mr[0]->work();
+    mr[0]->work();
 }
 void Problem2() {
     init();

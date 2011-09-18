@@ -3,9 +3,9 @@
 
 void Manager::work() {
     while (true) {
-        randToBreak(lBuyTickets, (Employee**)tc, MAX_TC, noTicketClerk, cNoTicketClerk, sNoTicketClerk);
-        randToBreak(lBuyFood, (Employee**)cc, MAX_CC, noConcessionClerk, cNoConcessionClerk, sNoConcessionClerk);
-        randToBreak(lCheckTickets, (Employee**)tt, MAX_TT, noTicketTaker, cNoTicketTaker, sNoTicketTaker);
+//        randToBreak(lBuyTickets, (Employee**)tc, MAX_TC, noTicketClerk, cNoTicketClerk, sNoTicketClerk);
+//        randToBreak(lBuyFood, (Employee**)cc, MAX_CC, noConcessionClerk, cNoConcessionClerk, sNoConcessionClerk);
+//        randToBreak(lCheckTickets, (Employee**)tt, MAX_TT, noTicketTaker, cNoTicketTaker, sNoTicketTaker);
         startTicketTaken();
         startMovie();
         for (int i = 0;i < 200; ++i) {
