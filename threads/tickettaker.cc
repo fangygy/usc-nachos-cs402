@@ -69,7 +69,7 @@ void TicketTaker::checkTickets() {
         // ? if there is another ticketTaker on process, still not stop him
         if (ticketTaken + getTicketSum() > 25) {
             stopTicketTaken = true;
-            printf("TicketTaker [%d] is not allowing the group into the theater. The number of taken tickets is [%d] and the group size is [%d].", getId(), ticketTaken, getTicketSum());
+            printf("TicketTaker [%d] is not allowing the group into the theater. The number of taken tickets is [%d] and the group size is [%d].\n", getId(), ticketTaken, getTicketSum());
             // signal the service one
             printf("TicketTaker [%d] has stopped taking tickets.\n", getId());
             condition[1]->Signal(lock);
@@ -82,6 +82,7 @@ void TicketTaker::checkTickets() {
             continue;
         }
         ticketTaken += getTicketSum();
+        totalTicketTaken += getTicketSum();
         printf("TicketTaker [%d] is allowing the group into the theater. The number of tickets taken is [%d].",getId(), ticketTaken);
         lTicketTaken->Release();
         // should just let in, not tell customers seats number 

@@ -16,6 +16,8 @@ Lock *lStopMovie = new Lock("Lock_StopMovie");
 Lock *lFindSeats = new Lock("Lock_FindSeat");
 Lock *lTicketTaken = new Lock("Lock_TicketTaken");
 Lock *lIsMovieOver = new Lock("Lock_IsMovieOver");
+Lock *lAmount = new Lock("Lock_Amount"); 
+Lock *lCustomerLeft = new Lock("Lock_CustomerLeft");
 Semaphore *sGroup[MAX_GROUP];
 Condition *cGroup[MAX_GROUP];
 Condition *cGroupFood[MAX_GROUP];
@@ -52,6 +54,14 @@ Condition *cNoTicketTaker = new Condition("Condition_NoTicketTaker");;
 Semaphore *sNoTicketClerk = new Semaphore("Semaphore_NoTicketClerk",0);
 Semaphore *sNoConcessionClerk = new Semaphore("Semaphore_NoConcessionClerk",0);
 Semaphore *sNoTicketTaker = new Semaphore("Semaphore_NoTicketTaker",0);
+
+int nextCustomerNumber;
+int groupSum;
+int totalTicketTaken;
+double totalAmount;
+double ticketClerkAmount[MAX_TC];
+double concessionClerkAmount[MAX_CC];
+int customerLeft = -1;
 
 
 void init() {

@@ -85,9 +85,9 @@ void test1() {
     }
     printf("Number of TicketClerks = [%d]\n",MAX_TC);
     // create Customer
-    int group = rand()%MAX_GROUP + 1;
-    int nextCustomerNumber = 0; 
-    for (int i = 0;i < group; ++i) {
+    groupSum = rand()%MAX_GROUP + 1;
+    nextCustomerNumber = 0; 
+    for (int i = 0;i < groupSum; ++i) {
         int groupSize = rand()%MAX_GROUPSIZE+1;
         for (int j = 0;j < groupSize - 1; ++j) {
             name = new char[MAX_VAR];
@@ -113,7 +113,8 @@ void test1() {
         t->Fork((VoidFunctionPtr)cr_tb_new, int(customerData));
     }
     printf("Number of Customers = [%d]\n",nextCustomerNumber);
-    printf("Number of Groups = [%d]\n",group);
+    customerLeft = nextCustomerNumber;
+    printf("Number of Groups = [%d]\n",groupSum);
     // create ConcessionClerk 
     for (int i = 0;i < MAX_CC; ++i) {
         name = new char[MAX_VAR];

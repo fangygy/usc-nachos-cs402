@@ -84,6 +84,11 @@ void ConcessionClerk::sellFood() {
         condition[1]->Signal(lock);
         // wait for customer go pay
         condition[1]->Wait(lock);
+        // amount
+        lAmount->Acquire();
+        concessionClerkAmount[getId()] += getAmount();
+        lAmount->Release();
+
         // get money, handout the food
         condition[1]->Signal(lock);
         printf("ConcessionClerk [%d] has been paid for the order.\n",getId());

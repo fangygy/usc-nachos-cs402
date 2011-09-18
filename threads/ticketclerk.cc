@@ -68,6 +68,10 @@ void TicketClerk::sellTickets() {
       
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
+        // cal amount
+        lAmount->Acquire();
+        ticketClerkAmount[getId()] += getAmount();
+        lAmount->Release();
         // get money, handout the tickets 
         ticketReceipt[getGroupId()] = ticketSum;
         condition[1]->Signal(lock);

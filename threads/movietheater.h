@@ -42,6 +42,8 @@ extern Lock *lStopMovie; //stop Movie
 extern Lock *lFindSeats;
 extern Lock *lGroup[MAX_GROUP];  //Lock for group to act mutex
 extern Lock *lTicketTaken;  // lock for ticket taken
+extern Lock *lAmount;  // lock for money collect
+extern Lock *lCustomerLeft;  // lock for leave sum
 
 extern Semaphore *sGroup[MAX_GROUP];  //semaphore to make group act together
 extern Semaphore *sGroupFood[MAX_GROUP];  //semaphore to make sure everyone choose if need food
@@ -62,6 +64,10 @@ extern Lock *lIsMovieOver;
 extern bool seatState[MAX_SEAT];
 extern Semaphore *sSeat[MAX_SEAT];  //semaphore to Seat
 extern int ticketTaken;
+extern int totalTicketTaken;
+extern double totalAmount;
+extern double ticketClerkAmount[MAX_TC];
+extern double concessionClerkAmount[MAX_CC];
 extern int seatPos;
 
 extern bool noTicketClerk;
@@ -84,6 +90,10 @@ extern Condition *cMT_CR_Check;
 extern Semaphore *sStopMovie; 
 extern Semaphore *sMT_CR_Stop;
 extern Condition *cMT_CR_Stop;
+
+extern int nextCustomerNumber;
+extern int groupSum;
+extern int customerLeft;
 
 class Employee {
   private:
@@ -261,6 +271,8 @@ class Manager : public Employee{
     void startTicketTaken();
     // ask MT to startMovie
     void startMovie();
+    // collect money from clerk
+    void collectMoney();
   public:
     void work();
     Manager(int mrId);
