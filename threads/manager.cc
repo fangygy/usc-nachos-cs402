@@ -41,14 +41,8 @@ void Manager::collectMoney() {
 // ask MT to startMovie
 void Manager::startMovie() {
     lTicketTaken->Acquire();
-/*    int i;
-    for (i = 0; i < MAX_TT; ++i) {
-        if (tt[i]->getIsBusy()) {
-            break;
-        }
-    }
-    if (i == MAX_TT || stopTicketTaken) { */
-    if (stopTicketTaken || totalTicketTaken == nextCustomerNumber) {
+    lTicketSold->Acquire();
+    if (stopTicketTaken || totalTicketTaken == totalTicketSold) {
         stopTicketTaken = true;
         sStartMovie->V();
     }

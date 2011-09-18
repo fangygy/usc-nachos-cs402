@@ -74,6 +74,9 @@ void TicketClerk::sellTickets() {
         lAmount->Release();
         // get money, handout the tickets 
         ticketReceipt[getGroupId()] = ticketSum;
+        lTicketSold->Acquire();
+        totalTicketSold += ticketSum;
+        lTicketSold->Release();
         condition[1]->Signal(lock);
         // customer leave, get next customer 
         condition[1]->Wait(lock);
