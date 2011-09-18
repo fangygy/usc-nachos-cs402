@@ -8,8 +8,15 @@ TicketTaker::TicketTaker(int ttId) : Employee(ttId, "TicketTaker") {
 void TicketTaker::checkTickets() {
 
     while(true) {
+        // stop ticket check
+        lTicketTaken->Acquire();
+        if (stopTicketTaken == true) {
+            // wait for manager to broadcast
+            cTicketTaken->Wait(lTicketTaken);
+        }
+        lTicketTaken->Release();
+            
         lCheckTickets->Acquire();
-        lock->Acquire();
         if (getIsBreak()) {
             // wait for manager signal
             printf("%s [%d] is going on break.\n", getEmployeeType(), getId());
@@ -29,23 +36,52 @@ void TicketTaker::checkTickets() {
             printf("TicketTaker [%d] has no one in line. I am available for a customer.\n",getId());
             setIsBusy(false);
         }
+        lock->Acquire();
         // on service
         lCheckTickets->Release();
         // wait customer to signal
         condition[1]->Wait(lock);
-        // if break 
+        // if break ? race condition 
+        lCheckTickets->Acquire();
         if (getIsBreak()) {
             setIsBusy(false);
+            lCheckTickets->Release();
             lock->Release();
             continue;
         } else {
             setIsBusy(true);
         }
+        lCheckTickets->Release();
 
         //get tickets sum
         printf("TicketTaker [%d] has received [%d] tickets.\n",getId(), getTicketSum());
 
-        // TODO: ? should just let in or tell customers seats number 
+        // if stopped
+        lTicketTaken->Acquire();
+//        if (stopTicketTaken) {
+//            lTicketTaken->Release();
+//            continue;
+//        }
+        // if too much, has to stop
+        // ? if there is another ticketTaker on process, still not stop him
+        if (ticketTaken + getTicketSum() > 25) {
+            stopTicketTaken = true;
+            printf("TicketTaker [%d] is not allowing the group into the theater. The number of taken tickets is [%d] and the group size is [%d].", getId(), ticketTaken, getTicketSum());
+            // signal the service one
+            printf("TicketTaker [%d] has stopped taking tickets.\n", getId());
+            condition[1]->Signal(lock);
+            lock->Release();
+            // broadcast the waiting list
+            lCheckTickets->Acquire();
+            condition[0]->Broadcast(lCheckTickets);
+            lCheckTickets->Release();
+            lTicketTaken->Release();
+            continue;
+        }
+        ticketTaken += getTicketSum();
+        printf("TicketTaker [%d] is allowing the group into the theater. The number of tickets taken is [%d].",getId(), ticketTaken);
+        lTicketTaken->Release();
+        // should just let in, not tell customers seats number 
         // better not to enforce seats number, which needs more variables to state
         condition[1]->Signal(lock);
         // customer leave, get next customer

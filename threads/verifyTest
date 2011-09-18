@@ -8,11 +8,11 @@ for i in $(seq 0 100); do
   nachos -P2 -rs $i > $fname/out$i
   for (( j=0; j < 15; j++))
   do
-    cat $fname/out$i | grep "Group\ \[$j\]" >> $fname/resort$i
+    cat $fname/out$i | grep -i "Group\ \[$j\]" >> $fname/resort$i
     echo '\n' >> $fname/resort$i
-    if cat $fname/out$i|grep "Group\ \[$j\]" > /dev/null
+    if cat $fname/out$i|grep -i "Group\ \[$j\]" > /dev/null
     then
-      if ! cat $fname/out$i|grep "Group\ \[$j\]\ is\ leaving\ TicketTaker" > /dev/null
+      if ! cat $fname/out$i|grep -i "Group\ \[$j\]\ is\ leaving\ TicketTaker" > /dev/null
       then echo "test $i : group $j error ending" >> $fname/error; fi
     fi
   done
