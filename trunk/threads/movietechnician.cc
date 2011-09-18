@@ -8,7 +8,7 @@ MovieTechnician::MovieTechnician(int id) : Employee(id, "MovieTechnician"){
 void MovieTechnician::WaitManager(){
 
     sStartMovie->P();
-    //printf("DEBUG:MT has been told to start movie\n");
+    printf("DEBUG:MT has been told to start movie\n");
 
     checkSeated();
 
@@ -22,7 +22,7 @@ void MovieTechnician::checkSeated(){
         sMT_CR_Check->V();
         cMT_CR_Check->Wait(lStartMovie);
     }
-    //printf("DEBUG:The MovieTechnician has check all customer\n");
+    printf("DEBUG:The MovieTechnician has check all customer\n");
     playMovie();
 }
 void MovieTechnician::playMovie(){
