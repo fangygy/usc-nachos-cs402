@@ -47,18 +47,23 @@ extern Lock *lCustomerLeft;  // lock for leave sum
 
 extern Semaphore *sGroup[MAX_GROUP];  //semaphore to make group act together
 extern Semaphore *sGroupFood[MAX_GROUP];  //semaphore to make sure everyone choose if need food
+extern Semaphore *sGroupBathroom[MAX_GROUP];  //semaphore to make sure everyone choose if need food
 extern Condition *cGroup[MAX_GROUP];  //Condition to make group act together
 extern Condition *cGroupFood[MAX_GROUP];  //Condition for ticketbuyer to ask for if need food
+//extern Condition *cGroupBathroom[MAX_GROUP];  //Condition for ticketbuyer to ask for if need bathroom
 extern Condition *cTicketTaken;  // Condition for ticketTaker and customer to know start ticket taken 
 extern int groupFoodSum[MAX_GROUP][2];  // order of group for food
+extern int groupBathroomSum[MAX_GROUP];  // order of group for food
 extern int ticketReceipt[MAX_GROUP];  // order of group for tickets
 extern int ticketTaken;  // ticket taken num
 extern bool stopTicketTaken;  // monitor variable for stop ticketTaken
 extern bool groupTicket[MAX_GROUP];  // monitor variable for if buyTickets done
 extern bool groupAskForFood[MAX_GROUP];  // monitor variable for if ask for food
+extern bool groupAskForBathroom[MAX_GROUP];  // monitor variable for if ask for food
 extern bool groupFood[MAX_GROUP];  // monitor variable for if buyFood done
 extern bool groupSeat[MAX_GROUP];  // monitor variable for if get seats
 extern bool groupLeaveRoom[MAX_GROUP];
+extern bool groupLeaveTheater[MAX_GROUP];
 extern bool bIsMovieOver;  //monitor variable for Movies State
 extern Lock *lIsMovieOver;
 extern bool seatState[MAX_SEAT];
@@ -188,7 +193,14 @@ class Customer {
     int getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk, Employee** employee);
     // watch movies when all customer seated
     void watchMovie();
-    
+    void prtLeaveRoomMsg();
+    // head customer check if any one wants go bathroom
+    void checkBathroom();
+   // customer go to bathroom or wait in the lobby    
+    void waitBathroom();
+     // for customer to decide if want to go bathroom
+    bool answerForBathroom();
+    void waitLeaveTheater();
 
 };
 extern Customer *cr[MIN_CR]; 
