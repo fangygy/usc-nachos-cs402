@@ -6,19 +6,56 @@ void Manager::work() {
         randToBreak(lBuyTickets, (Employee**)tc, MAX_TC);
         randToBreak(lBuyFood, (Employee**)cc, MAX_CC);
         randToBreak(lCheckTickets, (Employee**)tt, MAX_TT);
+        startTicketTaken();
+        startMovie();
+        for (int i = 0;i < 200; ++i) {
+            currentThread->Yield();
+        }
+
     }
 }
-
+// ask MT to startMovie
+void Manager::startMovie() {
+    lTicketTaken->Acquire();
+    int i;
+    for (i = 0; i < MAX_TT; ++i) {
+        if (tt[i]->getIsBusy()) {
+            break;
+        }
+    }
+    if (i == MAX_TT || stopTicketTaken) {  //stopTicketTaken ) {
+        stopTicketTaken = true;
+        sStartMovie->V();
+    }
+    lTicketTaken->Release();
+}
+// ask ticketTaker and customer to start
+void Manager::startTicketTaken() {
+    lIsMovieOver->Acquire();
+    if (bIsMovieOver == true) {
+        bIsMovieOver = false;
+        lTicketTaken->Acquire();
+        // set false
+        stopTicketTaken = false;
+        // ask customer and ticket clert to start ticket taken
+        cTicketTaken->Broadcast(lTicketTaken);
+        lTicketTaken->Release();
+    }
+    lIsMovieOver->Release();
+}
 // rand ask employee to break
 void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count) {
     // lock to get in line
     lockWaiting->Acquire();
     for (int i = 0;i < count; ++i) {
+        if (clerk[i]->getIsBreak()) continue;
         if (!clerk[i]->getWaitingSize()) {
             // rand to break
             if (rand()%5 == 0) {
                 clerk[i]->lock->Acquire();
                 clerk[i]->setIsBreak(true);
+                // signal the waiting customer
+                clerk[i]->condition[0]->Broadcast(clerk[i]->lock);
                 printf("Manager has told %s [%d] to go on break.\n", clerk[i]->getEmployeeType(), i);
                 clerk[i]->lock->Release();
             }
@@ -33,6 +70,9 @@ void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count) {
             if (j != count && rand()%5 == 0) {
                 clerk[i]->lock->Acquire();
                 clerk[i]->setIsBreak(true);
+                // signal the waiting customer
+                clerk[i]->condition[0]->Broadcast(clerk[i]->lock);
+
                 // if not busy, manager should signal clerk to get break
                 if (!clerk[i]->getIsBusy()) {
                     clerk[i]->condition[1]->Signal(clerk[i]->lock);

@@ -73,10 +73,6 @@ int Customer::getInLine(Lock *lock, Employee** employee, int count) {
     for (i = 0;i < count; ++i) {
 
         // get a no busy line
-        DEBUG('z', "line %d\n", i);
-        DEBUG('z', "%d\n", employee[i]->getIsBusy() ? 1:0);
-        DEBUG('z', "%d\n", employee[i]->getIsBreak() ? 1:0);
-        DEBUG('z', "%d\n", employee[i]->getWaitingSize()) ;
         if (!employee[i]->getIsBusy() && !employee[i]->getIsBreak() && employee[i]->getWaitingSize() == 0) {
             lineIndex = i;
             break;
@@ -251,13 +247,24 @@ void Customer::checkTickets() {
     }
     printf("Customer [%d] in Group [%d] is getting in TicketTaker line [%d]\n",customerId,groupId,lineIndex);
     TicketTaker *clerk = tt[lineIndex];
-    if (clerk->getIsBusy()) {
+    // ? race condition
+    if (clerk->getIsBusy() && !stopTicketTaken) {
         clerk->condition[0]->Wait(lCheckTickets);
     }
+    if (stopTicketTaken) {
+        // TODO: ask all group to goto lobby
+        printf("Customer [customerNumber] in Group [groupNumber] sees TicketTaker [clerkNumber] is no longer taking tickets. Going to the lobby.", customerId, groupId, lineIndex); 
+        clerk->subWaitingLine();
+        cTicketTaken->Wait(lCheckTickets);
+        lCheckTickets->Release();
+        checkTickets();
+        return;
+    }
+
     printf("Customer [%d] in Group [%d] is walking up to TicketTaker[%d] to give [%d] tickets.\n",customerId,groupId,lineIndex, ticketReceipt[groupId]);
     // interact with TicketTaker 
     clerk->lock->Acquire();
-    if (!clerk->getIsBreak()) {
+    if (!clerk->getIsBreak() ) {
         clerk->setIsBusy(true);
         lCheckTickets->Release();
         clerk->setGroupId(groupId);
@@ -266,7 +273,19 @@ void Customer::checkTickets() {
         clerk->condition[1]->Signal(clerk->lock);
 
         clerk->condition[1]->Wait(clerk->lock);
-        
+        lTicketTaken->Acquire();
+        if (stopTicketTaken) {
+            // TODO: ask all group to go back lobby
+            lCheckTickets->Acquire();
+            clerk->lock->Release();
+            lTicketTaken->Release();
+            printf("Customer [customerNumber] in Group [groupNumber] sees TicketTaker [clerkNumber] is no longer taking tickets. Going to the lobby.", customerId, groupId, lineIndex);
+            cTicketTaken->Wait(lCheckTickets);
+            lCheckTickets->Release();
+            checkTickets();
+            return;
+        }
+        lTicketTaken->Release();
         // get into room
         clerk->condition[1]->Signal(clerk->lock);
         printf("Customer [%d] in Group [%d] is leaving TicketTaker[%d]\n",customerId,groupId,lineIndex);
@@ -402,6 +421,8 @@ void Customer::waitFood() {
 void Customer::waitCheck() {
     sGroup[groupId]->V();
     lGroup[groupId]->Acquire();
+
+    // TODO: wait in the lobby 
     if (!groupSeat[groupId]) {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }

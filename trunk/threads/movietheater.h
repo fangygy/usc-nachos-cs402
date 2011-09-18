@@ -40,13 +40,18 @@ extern Lock *lCheckTickets;  //Lock to get in line of checkTickets
 extern Lock *lStartMovie;  //Lock to get seats and startMovie
 extern Lock *lStopMovie; //stop Movie
 extern Lock *lFindSeats;
+extern Lock *lGroup[MAX_GROUP];  //Lock for group to act mutex
+extern Lock *lTicketTaken;  // lock for ticket taken
+
 extern Semaphore *sGroup[MAX_GROUP];  //semaphore to make group act together
+extern Semaphore *sGroupFood[MAX_GROUP];  //semaphore to make sure everyone choose if need food
 extern Condition *cGroup[MAX_GROUP];  //Condition to make group act together
 extern Condition *cGroupFood[MAX_GROUP];  //Condition for ticketbuyer to ask for if need food
-extern Lock *lGroup[MAX_GROUP];  //Lock for group to act mutex
+extern Condition *cTicketTaken;  // Condition for ticketTaker and customer to know start ticket taken 
 extern int groupFoodSum[MAX_GROUP][2];  // order of group for food
 extern int ticketReceipt[MAX_GROUP];  // order of group for tickets
-extern Semaphore *sGroupFood[MAX_GROUP];  //semaphore to make sure everyone choose if need food
+extern int ticketTaken;  // ticket taken num
+extern bool stopTicketTaken;  // monitor variable for stop ticketTaken
 extern bool groupTicket[MAX_GROUP];  // monitor variable for if buyTickets done
 extern bool groupAskForFood[MAX_GROUP];  // monitor variable for if ask for food
 extern bool groupFood[MAX_GROUP];  // monitor variable for if buyFood done
@@ -241,6 +246,10 @@ extern MovieTechnician * mt[MAX_MT];
 class Manager : public Employee{
   private:
     void randToBreak(Lock * lockWaiting, Employee ** clerk, int count);
+    // ask ticketTaker and customer to start
+    void startTicketTaken();
+    // ask MT to startMovie
+    void startMovie();
   public:
     void work();
     Manager(int mrId);
