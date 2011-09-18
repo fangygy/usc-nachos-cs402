@@ -22,9 +22,10 @@ Lock *lCustomerLeft = new Lock("Lock_CustomerLeft");
 Semaphore *sGroup[MAX_GROUP];
 Condition *cGroup[MAX_GROUP];
 Condition *cGroupFood[MAX_GROUP];
+Condition *cLeaveBathroomGroup[MAX_GROUP]; 
 //Condition *cGroupBathroom[MAX_GROUP]; 
 Condition *cTicketTaken = new Condition("Condition_TicketTaken");
-Lock *lGroup[MAX_GROUP];
+Lock *lGroup[MAX_GROUP]; 
 int groupFoodSum[MAX_GROUP][2];
 int groupBathroomSum[MAX_GROUP];
 int ticketReceipt[MAX_GROUP];
@@ -32,6 +33,7 @@ int ticketTaken = 0;
 bool stopTicketTaken = false;
 Semaphore *sGroupFood[MAX_GROUP];
 Semaphore *sGroupBathroom[MAX_GROUP];
+Semaphore *sGroupLeaveBathroom[MAX_GROUP]; 
 bool groupTicket[MAX_GROUP];
 bool groupAskForFood[MAX_GROUP];
 bool groupAskForBathroom[MAX_GROUP];
@@ -39,6 +41,7 @@ bool groupFood[MAX_GROUP];
 bool groupSeat[MAX_GROUP];
 bool groupLeaveRoom[MAX_GROUP];
 bool groupLeaveTheater[MAX_GROUP];
+bool groupLeaveBathRoom[MAX_GROUP];
 bool bIsMovieOver;  //monitor variable for Movies State
 int seatPos=-1;
 bool seatState[MAX_SEAT];
@@ -82,18 +85,23 @@ void init() {
     memset(groupAskForBathroom, 0, sizeof(groupAskForBathroom));
     memset(groupBathroomSum, 0, sizeof(groupBathroomSum));
     memset(groupLeaveTheater, 0, sizeof(groupLeaveTheater));
+
+  
   
     mr[0] = new Manager(0);
     int i;
     for (i = 0;i < MAX_GROUP; ++i) {
         sGroup[i] = new Semaphore("Semaphore_Group", 0);
         sGroupFood[i] = new Semaphore("Semaphore_GroupFood", 0);
-        sGroupBathroom[i] = new Semaphore("Semaphore_GroupFood", 0);
+        sGroupBathroom[i] = new Semaphore("Semaphore_GroupBathroom", 0);
+        sGroupBathroom[i] = new Semaphore("Semaphore_GroupBathroom", 0);
+        sGroupLeaveBathroom[i] = new Semaphore("Semaphore_GroupLeaveBathroom", 0);
         cGroup[i] = new Condition("Condition_Group");
         cGroupFood[i] = new Condition("Condition_GroupFood");
-       // cGroupBathroom[i]=new Condition("Condition_GroupBathroom");
+        cLeaveBathroomGroup[i] = new Condition("Condition_LeaveBathroomGroup");
         lGroup[i] = new Lock("Lock_Group");
         sWaitSeat[i]= new Semaphore("Semaphore_WaitSeat", 0); 
+
     }
 
     for(i=0;i<MAX_SEAT;i++){
