@@ -14,6 +14,7 @@ Lock *lCheckTickets = new Lock("Lock_CheckTickets_line");
 Lock *lStartMovie = new Lock("Lock_StartMovie");
 Lock *lStopMovie = new Lock("Lock_StopMovie");
 Lock *lFindSeats = new Lock("Lock_FindSeat");
+Lock *lTicketSold = new Lock("Lock_TicketSold");
 Lock *lTicketTaken = new Lock("Lock_TicketTaken");
 Lock *lIsMovieOver = new Lock("Lock_IsMovieOver");
 Lock *lAmount = new Lock("Lock_Amount"); 
@@ -62,6 +63,7 @@ Semaphore *sNoTicketTaker = new Semaphore("Semaphore_NoTicketTaker",0);
 
 int nextCustomerNumber;
 int groupSum;
+int totalTicketSold;
 int totalTicketTaken;
 double totalAmount;
 double ticketClerkAmount[MAX_TC];

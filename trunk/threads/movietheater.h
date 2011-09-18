@@ -41,6 +41,7 @@ extern Lock *lStartMovie;  //Lock to get seats and startMovie
 extern Lock *lStopMovie; //stop Movie
 extern Lock *lFindSeats;
 extern Lock *lGroup[MAX_GROUP];  //Lock for group to act mutex
+extern Lock *lTicketSold;  // Lock for ticket sold
 extern Lock *lTicketTaken;  // lock for ticket taken
 extern Lock *lAmount;  // lock for money collect
 extern Lock *lCustomerLeft;  // lock for leave sum
@@ -70,6 +71,7 @@ extern bool seatState[MAX_SEAT];
 extern Semaphore *sSeat[MAX_SEAT];  //semaphore to Seat
 extern int ticketTaken;
 extern int totalTicketTaken;
+extern int totalTicketSold;
 extern double totalAmount;
 extern double ticketClerkAmount[MAX_TC];
 extern double concessionClerkAmount[MAX_CC];
