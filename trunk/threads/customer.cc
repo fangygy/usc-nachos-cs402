@@ -369,12 +369,14 @@ void Customer::arrangeSeats() {
     seatState[SeatLocation[0]]=true;
     for(i=1;i< groupSize;i++){
         lGroup[groupId]->Acquire();
-        seatPos=SeatLocation[i];	
+        seatPos=SeatLocation[i];
+        //groupArrangeSeat[groupId]=true;	
         sWaitSeat[groupId]->V();        
         cGroup[groupId]->Wait(lGroup[groupId]);
         seatState[seatPos]=true;
+        //groupArrangeSeat[groupId]=false;	
     }
-    
+    lGroup[groupId]->Release();
     lFindSeats->Release();      
 
 }
@@ -490,7 +492,9 @@ void Customer::waitCheck() {
 }
 void Customer::waitSeats() {
  
-    sWaitSeat[groupId]->P();
+    //if(!groupArrangeSeat[groupId]){
+        sWaitSeat[groupId]->P();
+   // }
     lGroup[groupId]->Acquire();
     printf("Customer [%d] in Group [%d] has found the following seat: row [%d] and seat [%d]\n",customerId,groupId,(seatPos/MAX_ROW),(seatPos%MAX_COL));   
     cGroup[groupId]->Signal(lGroup[groupId]);

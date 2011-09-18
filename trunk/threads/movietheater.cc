@@ -39,9 +39,11 @@ bool groupAskForFood[MAX_GROUP];
 bool groupAskForBathroom[MAX_GROUP];
 bool groupFood[MAX_GROUP];
 bool groupSeat[MAX_GROUP];
+bool groupArrangeSeat[MAX_GROUP];
 bool groupLeaveRoom[MAX_GROUP];
 bool groupLeaveTheater[MAX_GROUP];
 bool groupLeaveBathRoom[MAX_GROUP];
+extern bool groupLeaveTheater[MAX_GROUP];
 bool bIsMovieOver;  //monitor variable for Movies State
 int seatPos=-1;
 bool seatState[MAX_SEAT];
@@ -85,6 +87,8 @@ void init() {
     memset(groupAskForBathroom, 0, sizeof(groupAskForBathroom));
     memset(groupBathroomSum, 0, sizeof(groupBathroomSum));
     memset(groupLeaveTheater, 0, sizeof(groupLeaveTheater));
+    memset(groupArrangeSeat, 0, sizeof(groupArrangeSeat));
+    
 
   
   

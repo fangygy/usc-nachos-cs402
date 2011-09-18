@@ -22,6 +22,7 @@ void MovieTechnician::checkSeated(){
         sMT_CR_Check->V();
         cMT_CR_Check->Wait(lStartMovie);
     }
+    lStartMovie->Release();       
     printf("DEBUG:The MovieTechnician has check all customer\n");
     playMovie();
 }
@@ -53,6 +54,7 @@ void MovieTechnician::infoCustomer(){
             seatState[i]=false; //reset seat state
         }
     }
+   lStopMovie->Release();
    printf("The MovieTechnician has told all customers to leave the theater room.\n"); 
 
     infoManager();
@@ -67,3 +69,5 @@ void  MovieTechnician::infoManager(){
   
 
 }
+
+
