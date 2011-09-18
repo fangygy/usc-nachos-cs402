@@ -66,6 +66,7 @@ extern bool groupAskForFood[MAX_GROUP];  // monitor variable for if ask for food
 extern bool groupAskForBathroom[MAX_GROUP];  // monitor variable for if ask for food
 extern bool groupFood[MAX_GROUP];  // monitor variable for if buyFood done
 extern bool groupSeat[MAX_GROUP];  // monitor variable for if get seats
+extern bool groupArrangeSeat[MAX_GROUP];  // monitor variable for if get seats
 extern bool groupLeaveRoom[MAX_GROUP];
 extern bool groupLeaveTheater[MAX_GROUP];
 
