@@ -1,0 +1,88 @@
+Write-up for project 1: Fall 2011 
+Date:09/26/2011 
+Group: 50: 
+             Name:               E-mail:               USC ID: 
+             NingChong,Chen      ningchoc@usc.edu      5042823533
+             Fang-Yi,Chu 
+             Chien-Ming,Liao       chienmin@usc.edu     5148768361 
+
+1.      Requirements: 
+Part1: 
+     To achieve synchronization among threads by implementing semaphores(which is already provided), locks, and condition variables. 
+Part2: 
+     Simulates a movie theater with the following types of people: 
+Customer - Someone who has come to watch a movie - and perhaps buy some food 
+TicketClerk - TicketClerks sell movie tickets to Customers. 
+ConcessionClerk - ConcessionClerks sell food to Customers. 
+TicketTaker - TicketTakers take movie tickets that Customers have purchased from a TicketClerk, and they also remind the Customer the number of the theater that their movie is being shown in. 
+MovieTechnician - MovieTechnicians start and stop movies in each theater . 
+Manager - Managers keep the theater running by making sure the various employees are doing their job. Managers also collect money from cash registers every so often. 
+2.      Assumptions: 
+Customer:
+a. customers get into the movie theater with their group and ticketbuyers will interact with clerk after entering theater.
+b. if no clerks on service, customers cannot find a line and they need to wait in the lobby until the manager signal them
+c. if clerk is break, customers in the same line have to go back to re-line.
+d. customers tell ticketbuyer what food they want in one response.
+e. 
+3.      Design: 
+Customer of TicketBuyer:
+a. enter theater with group
+b. buy tickets
+c. proceed with group after getting tickets
+d. count food requests
+e. buy food
+f. proceed with group after getting food
+g. check tickets
+h. proceed with group after allowed into theater room
+i. arrange seats
+j. sit in the theater room
+k. proceed with group after movie over
+l. go bathroom or wait in lobby
+m. proceed with group after bathroom
+n. leave theater
+
+Customer of regular:
+a. enter theater with group
+b. proceed with group after getting tickets
+c. requests for food
+d. proceed with group after getting food
+e. proceed with group after allowed into theater room
+f. sit in the theater room
+g. proceed with group after movie over
+h. go bathroom or wait in lobby
+i. proceed with group after bathroom
+j. leave theater
+
+Manager:
+a. check and break clerk (TicketClerk, ConcessionClerk, TicketTaker)
+b. start movie and stop ticket taken
+c. start ticket taken
+d. collect money after all customers leave
+
+TicketClerk:
+a. sell tickets
+b. stop working if manager asks
+c. give money to manager
+
+ConcessionClerk:
+a. sell food
+b. stop working if manager asks
+c. give money to manager
+
+TicketTaker:
+
+
+Manager:
+a. check and break clerk (TicketClerk, ConcessionClerk, TicketTaker)
+b. start movie and stop ticket taken
+c. start ticket taken
+d. collect money after all customers leave
+e.
+f.
+g.
+h.
+
+4.      Implementation: 
+5.      Testing: 
+6.      Discussions: 
+7.      Miscellaneous: 
