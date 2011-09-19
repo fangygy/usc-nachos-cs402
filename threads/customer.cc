@@ -24,7 +24,7 @@ void Customer::action() {
         DEBUG('z', "\tGroup [%d] start buy tickets.\n", groupId);
         buyTickets();
         DEBUG('z', "\tGroup [%d] finish buy tickets.\n", groupId);
-        proceed(groupTicket);
+       /* proceed(groupTicket);
 //        DEBUG('z', "\tGroup [%d] start waitGroup after finish buy tickets.\n", groupId);
 //        waitGroup();
 //        DEBUG('z', "\tGroup [%d] finish waitGroup after finish buy tickets.\n", groupId);
@@ -52,11 +52,11 @@ void Customer::action() {
         prtLeaveRoomMsg();
         checkBathroom();
         proceed(groupLeaveTheater);
-        leaveTheater();
+        leaveTheater(); */
     } else {
         // regular customer
         waitTickets();
-        waitFood();
+        /*waitFood();
         waitCheck();
         waitSeats();
         watchMovie();
@@ -64,7 +64,7 @@ void Customer::action() {
         prtLeaveRoomMsg();
         waitBathroom();
         waitLeaveTheater();
-        leaveTheater();
+        leaveTheater(); */
     }
 }
 bool Customer::getIsTicketBuyer() {
