@@ -200,7 +200,6 @@ d. collect money after all customers leave
        class TicketClerk : public Employee{}
        class ConcessionClerk : public Employee{}
        class TicketTaker : public Employee{}
-       class TicketTaker : public Employee{}
        class Manager : public Employee{}
 
        -in customer.cc
@@ -247,7 +246,7 @@ d. collect money after all customers leave
        //head customer notify all the group member to proceed to the next step
        void Customer::proceed(bool *flag)
        
-       -employee.cc
+       -in employee.cc
        //set the state of the employee to busy
        void Employee::setIsBusy(bool busy)
        //see if the employee is in busy state 
@@ -290,6 +289,31 @@ d. collect money after all customers leave
        void TicketClerk::setPayment(double p) {}
        //for ticket clerk tp sell tickets
        void TicketClerk::sellTickets() {}
+       
+       -in consessionclerk.cc
+       //create a conssion clerk       
+       ConcessionClerk::ConcessionClerk(int ccId) : Employee(ccId, "ConcessionClerk") {}
+       //calculate the mount of money the customer should pay
+       void ConcessionClerk::calAmount() {}
+       //get the amount of money the customer should pay
+       double ConcessionClerk::getAmount() {}
+       //set the amount of money the customer should pay
+       void ConcessionClerk::setAmount(double a) {}
+       //set payment
+       void ConcessionClerk::setPayment(double p) {}
+       //get payment
+       double ConcessionClerk::getPayment() {}
+       //set the food that have been bought   
+       void ConcessionClerk::setFood(int pos, int sum) {
+       //get the food that have been bought
+       int ConcessionClerk::getFood(int pos){}
+       //see if the manager signals to go on break
+       // if have customer, then set busy and signal the customer, else set free
+       // tell customers food price and ask to pay
+       // customer leave, get next customer
+       void ConcessionClerk::sellFood() {}
+       //Print the number of waiting customer in each clerk's line
+       void ConcessionClerk::printStatus(){}
 
        -in manager.cc
        //order ticket taker to take tickets
@@ -319,221 +343,26 @@ d. collect money after all customers leave
        void MovieTechnician::infoCustomer(){}
        //acknoledge the manger that the movie is over
        void  MovieTechnician::infoManager(){}
-
-           
-           
-           
-Customer of TicketBuyer:
-a. enter theater with group
-   //create a customer and initialize it's value
-   Customer::Customer(int cId, int gId, int gSize, bool ticketBuyer)
-b. buy tickets
-   // get in which line
-   TicketClerk *clerk = tc[lineIndex];
-   // if busy wait for ticketClerk
-   if (clerk->getIsBusy()) {
-        clerk->condition[0]->Wait(lBuyTickets);
-   }
-   // start to interact with a TicketClerk
-    clerk->lock->Acquire();
-    if (!clerk->getIsBreak()) {
-        clerk->setIsBusy(true);
-        lBuyTickets->Release(); 
-        // tell clerk tickets sum
-        clerk->setGroupId(groupId);
-        clerk->setTicketSum(groupSize);
-        clerk->condition[1]->Signal(clerk->lock);
-
-        // wait for money amount
-        clerk->condition[1]->Wait(clerk->lock);
-        // ask ticket clerk for total price
-        double amount = clerk->getAmount();
-        // pay money 
-        clerk->setPayment(amount);
-        printf("Customer [%d] in Group [%d] in TicketClerk line [%d] is paying [%.2f] for tickets\n",customerId,groupId,lineIndex,amount);
-        
-        clerk->condition[1]->Signal(clerk->lock);
-
-        // wait to get tickets back
-        clerk->condition[1]->Wait(clerk->lock);
-        // finish and leave
-        clerk->condition[1]->Signal(clerk->lock);
-    }
-    // if the ticket clerk is on a break
-    else {
-    clerk->subWaitingSize();
-        // for race condition of waiting size
-        lBuyTickets->Release();
-        clerk->lock->Release();
-        buyTickets();     
-    }
-    clerk->lock->Release();
-    
-c. proceed with group after getting tickets
-
-d. count food requests
-   //head customer counts the amount of cokes and popcorns needed in the group
-   if (getIsTicketBuyer()) {
-        lGroup[groupId]->Acquire();
-        // if one of the member wants food
-        for (int i = 0;i < 2; ++i) {
-            groupFoodSum[groupId][i] += answerForFood(i);
-        }
-        // ask group member if they want food
-        cGroupFood[groupId]->Broadcast(lGroup[groupId]);
-        // set monitor variable true
-        groupAskForFood[groupId] = true;
-        lGroup[groupId]->Release();
-        //sGroupFood[groupId]->V();
-        // wait for all the customer answer for food
-        for (int i = 1;i < groupSize; ++i) {
-            sGroupFood[groupId]->P();
-        }
-e. buy food
-    //Customer getting in ConcessionClerk line
-    ConcessionClerk *clerk = cc[lineIndex];
-    if (clerk->getIsBusy()) {
-        clerk->condition[0]->Wait(lBuyFood);
-    }
-    //Customer walking up to ConcessionClerk to buy popcorn and sodas.
-    clerk->lock->Acquire();
-    if (!clerk->getIsBreak()) {
-        clerk->setIsBusy(true);
-        lBuyFood->Release();
- 
-        clerk->setGroupId(groupId);
-    // tell clerk popcorn sum and soda sum
-    for (int i = 0;i < 2; ++i) {
-            clerk->setFood(i, groupFoodSum[groupId][i]);
-            clerk->condition[1]->Signal(clerk->lock);
-            // wait for acknowledgement and amount
-            clerk->condition[1]->Wait(clerk->lock);
-        }
-    // give money
-        clerk->setPayment(amount);
-        clerk->condition[1]->Signal(clerk->lock);
-        //wait for clerk to acknowledge money 
-        clerk->condition[1]->Wait(clerk->lock);
-        // customer leave, get next customer
-        clerk->condition[1]->Signal(clerk->lock);
-    } else {
-    // if the concession clerk is on break
-        clerk->subWaitingSize();
-    // for race condition of waiting size
-        lBuyFood->Release();
-        clerk->lock->Release();
-        buyFood();
-    }
-    
-f. proceed with group after getting food
-
-g. check tickets
-    //Customer gets in a TicketTaker line
-    lCheckTickets->Acquire();
-    int lineIndex = -1;
-    while (lineIndex == -1) {
-        lineIndex = getInLine(lCheckTickets, cNoTicketTaker, MAX_TT, noTicketTaker, (Employee**)tt);
-    }
-    TicketTaker *clerk = tt[lineIndex];
-    // if the ticket taker is not avaliable
-    lTicketTaken->Acquire();
-    if (stopTicketTaken) {
-    // all customer should be waiting in the lobby
-        clerk->subWaitingSize();
-        cTicketTaken->Wait(lTicketTaken);
-        lTicketTaken->Release();
-        lCheckTickets->Release();
-        checkTickets();
-    }
-    lTicketTaken->Release();
-    // if the ticket taker is available
-    clerk->lock->Acquire();
-    if (!clerk->getIsBreak() ) {
-        clerk->setIsBusy(true);
-        lCheckTickets->Release();
-        clerk->setGroupId(groupId);
-        // give ticket receipt to the ticket taker 
-        clerk->setTicketSum(ticketReceipt[groupId]);
-        clerk->condition[1]->Signal(clerk->lock);
-        clerk->condition[1]->Wait(clerk->lock);
-        lTicketTaken->Acquire();
-h. proceed with group after allowed into theater room
-i. arrange seats
-    lFindSeats->Acquire();
-    // Head customer get a seat for him/herself         
-    getSeats(groupSize);
-    seatPos=SeatLocation[0];	
-    seatState[SeatLocation[0]]=true;
-    for(i=1;i< groupSize;i++){
-        lGroup[groupId]->Acquire();
-        seatPos=SeatLocation[i];	
-        sWaitSeat[groupId]->V();        
-        cGroup[groupId]->Wait(lGroup[groupId]);
-        seatState[seatPos]=true;
-    }
-    lFindSeats->Release();      
-    
-j. sit in the theater room
-    //assumption:customer always choose seat from the beginning of a row
-    for(i=0;i<MAX_ROW;i++){
-        consecutive=0;
-        for(j=0;j<MAX_COL;j++){
-            if(seatState[j+i*MAX_COL]==false){
-                consecutive++;         
-            }
-        }
-        SeatAvailable[i]=consecutive; 
-    }
-    //Search for the first time if any consecutive seats
-    for(i=0;i<MAX_ROW;i++){  
-        if(SeatAvailable[i]>=Size){
-            for(j=0;j<Size;j++){
-                SeatLocation[j]=(MAX_COL-SeatAvailable[i]+j)+i*MAX_COL;               
-                bFind=true;
-            }
-            SeatAvailable[i]=0;
-        }
-    }
-    if(bFind==false){
-        for(i=0;i<MAX_ROW;i++){  
-            if(SeatAvailable[i]!=0){
-                  for(j=0;j<SeatAvailable[i];j++){
-                        SeatLocation[RequestSeat]=(MAX_COL-SeatAvailable[i])+i*MAX_COL; 
-                        RequestSeat++;          
-                  }
-                  SeatAvailable[i]=0;
-            }
-            if(RequestSeat==Size-1){
-                break;
-            }
-        }   
-    }
-k. proceed with group after movie over
-
-l. go bathroom or wait in lobby
-    lGroup[groupId]->Acquire();
-    //head customer ask if the members needs to go to the bathroom
-    if (!groupAskForBathroom[groupId]) {
-        cGroup[groupId]->Wait(lGroup[groupId]);
-    }
-    if(answerForBathroom()){
-         groupBathroomSum[groupId]++;
-         sGroupBathroom[groupId]->V();
-         //customer goes to the bathroom and go back to lobby afterwords 
-         goBathroom();  
-         sGroupBathroom[groupId]->V();
-    }else{
-    //the member doesn't want to go to the bathroom
-         sGroupBathroom[groupId]->V();   
-    }
-    lGroup[groupId]->Release();
-m. proceed with group after bathroom
-n. leave theater
+       
+       -in tickettaker.cc
+       //create a ticket taker
+       TicketTaker::TicketTaker(int ttId) : Employee(ttId, "TicketTaker")
+       //ticket taker goes on break if the manager signals 
+       //if not in a break, start taking tickets if there is a line
+       //do not let anyone to go in when the theater is full       
+       void TicketTaker::checkTickets() 
+       //set the number of tickets taken
+       void TicketTaker::setTicketSum(int sum) 
+       //get the number of tickets taken
+       int TicketTaker::getTicketSum() 
        
 5.      Testing: 
         -Part I
+	     The test cases are already provided, and it will run all together at once.
+
          How to run:
             To run test case 1, use "nachos -T" as the command.
+
          Test Output:
 	        Five tests will start one by one. The threads will try to acquire locks and use CVs.
 
@@ -541,168 +370,27 @@ n. leave theater
         - Part II
 	      
     	##TEST CASE 1##
-    	    Customers always take the shortest line, but no 2 customers ever choose the same shortest line at the same time
-
-           How to run: nachos -rs 10 -TC1 | grep "getting in TicketClerk line"
+    	
+           How to run:
                
-           Test result: 
-
+           Test result:
                 
     	##TEST CASE 2##
-    	    Managers only read one from one Clerk's total money received, at a time.
-
-           How to run: nachos -rs 10 -TC2 | egrep "Manager collected|Total money"
+    	
+           How to run:
                
            Test result:
-                Manager collected [36.00] from TicketClerk[0].
-                Manager collected [96.00] from TicketClerk[1].
-                Manager collected [60.00] from TicketClerk[2].
-                Manager collected [12.00] from TicketClerk[3].
-                Manager collected [24.00] from TicketClerk[4].
-                Manager collected [44.00] from ConcessionClerk[0].
-                Manager collected [41.00] from ConcessionClerk[1].
-                Manager collected [17.00] from ConcessionClerk[2].
-                Manager collected [14.00] from ConcessionClerk[3].
-                Manager collected [0.00] from ConcessionClerk[4].
-                Total money made by office = [344.00]
-
+                
     	##TEST CASE 3##
-    	    Customers do not leave a Clerk, or TicketTaker, until they are told to do so. Clerks and TicketTakers do not start with another Customer until they know the current Customer has left. customer until they know that the last Customer has left their area
-
-           How to run: a. nachos -rs 10 -TC3 | egrep "is walking up to TicketClerk|is leaving TicketClerk"
-                       b. nachos -rs 10 -TC3 | egrep "is walking up to ConcessionClerk|is leaving ConcessionClerk"
-                       c. nachos -rs 10 -TC3 | egrep "is walking up to TicketTaker|is leaving TicketTaker"
-
-           Test result:
-                a.
-                Customer [0] in Group [0] is walking up to TicketClerk[0] to buy [1] tickets
-                Customer [3] in Group [1] is walking up to TicketClerk[1] to buy [3] tickets
-                Customer [8] in Group [2] is walking up to TicketClerk[2] to buy [5] tickets
-                Customer [9] in Group [3] is walking up to TicketClerk[3] to buy [1] tickets
-                Customer [11] in Group [4] is walking up to TicketClerk[4] to buy [2] tickets
-                Customer [0] in Group [0] is leaving TicketClerk[0]
-                Customer [3] in Group [1] is leaving TicketClerk[1]
-                Customer [9] in Group [3] is leaving TicketClerk[3]
-                Customer [13] in Group [5] is walking up to TicketClerk[0] to buy [2] tickets
-                Customer [8] in Group [2] is leaving TicketClerk[2]
-                Customer [11] in Group [4] is leaving TicketClerk[4]
-                Customer [18] in Group [6] is walking up to TicketClerk[1] to buy [5] tickets
-                Customer [18] in Group [6] is leaving TicketClerk[1]
-                Customer [13] in Group [5] is leaving TicketClerk[0]
-
-                b. 
-                Customer [0] in Group [0] is walking up to ConcessionClerk[0] to buy [1] popcorn and [1] soda.
-                Customer [9] in Group [3] is walking up to ConcessionClerk[1] to buy [0] popcorn and [1] soda.
-                Customer [3] in Group [1] is walking up to ConcessionClerk[2] to buy [1] popcorn and [3] soda.
-                Customer [11] in Group [4] is walking up to ConcessionClerk[3] to buy [2] popcorn and [1] soda.
-                Customer [0] in Group [0] is leaving ConcessionClerk[0]
-                Customer [9] in Group [3] is leaving ConcessionClerk[1]
-                Customer [13] in Group [5] is walking up to ConcessionClerk[0] to buy [0] popcorn and [2] soda.
-                Customer [3] in Group [1] is leaving ConcessionClerk[2]
-                Customer [11] in Group [4] is leaving ConcessionClerk[3]
-                Customer [8] in Group [2] is walking up to ConcessionClerk[1] to buy [5] popcorn and [3] soda.
-                Customer [13] in Group [5] is leaving ConcessionClerk[0]
-                Customer [18] in Group [6] is walking up to ConcessionClerk[0] to buy [3] popcorn and [3] soda.
-                Customer [8] in Group [2] is leaving ConcessionClerk[1]
-                Customer [18] in Group [6] is leaving ConcessionClerk[0]
-
-                c. 
-                Customer [0] in Group [0] is walking up to TicketTaker[0] to give [1] tickets.
-                Customer [0] in Group [0] is leaving TicketTaker[0]
-                Customer [9] in Group [3] is walking up to TicketTaker[1] to give [1] tickets.
-                Customer [11] in Group [4] is walking up to TicketTaker[0] to give [2] tickets.
-                Customer [9] in Group [3] is leaving TicketTaker[1]
-                Customer [11] in Group [4] is leaving TicketTaker[0]
-                Customer [3] in Group [1] is walking up to TicketTaker[2] to give [3] tickets.
-                Customer [3] in Group [1] is leaving TicketTaker[2]
-                Customer [13] in Group [5] is walking up to TicketTaker[0] to give [2] tickets.
-                Customer [13] in Group [5] is leaving TicketTaker[0]
-                Customer [8] in Group [2] is walking up to TicketTaker[1] to give [5] tickets.
-                Customer [8] in Group [2] is leaving TicketTaker[1]
-                Customer [18] in Group [6] is walking up to TicketTaker[0] to give [5] tickets.
-                Customer [18] in Group [6] is leaving TicketTaker[0]
-
-    	##TEST CASE 4##
-    	    Managers get Clerks off their break when lines get too long
-
-           How to run: 
-
+    	
+           How to run:
+               
            Test result:
                 
-    	##TEST CASE 5##
-    	    Total sales never suffers from a race condition
-
-           How to run: nachos -rs 10 -TC5 | egrep "Number of Customer|Total tickets"
-
-           Test result: 
-                Number of Customers = [19]
-                Total tickets sold by office = [19]
-                Total tickets taken by office = [19]
-                
-    	##TEST CASE 6##
-    	    Customer groups always move together through the theater. This requires explicit synchronization that you implement.
-
-           How to run: nachos -rs 10 -TC6 | egrep "group \[1\]" | egrep "HeadCustomer"
-                       nachos -rs 10 -TC6 | egrep "group \[2\]" | egrep "HeadCustomer"
-           Test result:
-
-                Customer [1] of group [1] is waiting for the HeadCustomer.
-                Customer [2] of group [1] is waiting for the HeadCustomer.
-                HeadCustomer [3] of group [1] has told the group to proceed.
-                Customer [1] of group [1] has been told by the HeadCustomer to proceed.
-                Customer [1] of group [1] is waiting for the HeadCustomer.
-                Customer [2] of group [1] has been told by the HeadCustomer to proceed.
-                Customer [2] of group [1] is waiting for the HeadCustomer.
-                HeadCustomer [3] of group [1] has told the group to proceed.
-                Customer [1] of group [1] has been told by the HeadCustomer to proceed.
-                Customer [1] of group [1] is waiting for the HeadCustomer.
-                Customer [2] of group [1] has been told by the HeadCustomer to proceed.
-                Customer [2] of group [1] is waiting for the HeadCustomer.
-                HeadCustomer [3] of group [1] has told the group to proceed.
-                Customer [1] of group [1] has been told by the HeadCustomer to proceed.
-                Customer [2] of group [1] has been told by the HeadCustomer to proceed.
-                HeadCustomer [3] of group [1] has told the group to proceed.
-                HeadCustomer [3] of group [1] has told the group to proceed.
-
-                Customer [5] of group [2] is waiting for the HeadCustomer.
-                Customer [6] of group [2] is waiting for the HeadCustomer.
-                Customer [7] of group [2] is waiting for the HeadCustomer.
-                Customer [4] of group [2] is waiting for the HeadCustomer.
-                HeadCustomer [8] of group [2] has told the group to proceed.
-                Customer [5] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [6] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [7] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [4] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [5] of group [2] is waiting for the HeadCustomer.
-                Customer [7] of group [2] is waiting for the HeadCustomer.
-                Customer [6] of group [2] is waiting for the HeadCustomer.
-                Customer [4] of group [2] is waiting for the HeadCustomer.
-                HeadCustomer [8] of group [2] has told the group to proceed.
-                Customer [5] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [5] of group [2] is waiting for the HeadCustomer.
-                Customer [7] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [7] of group [2] is waiting for the HeadCustomer.
-                Customer [6] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [4] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [6] of group [2] is waiting for the HeadCustomer.
-                Customer [4] of group [2] is waiting for the HeadCustomer.
-                HeadCustomer [8] of group [2] has told the group to proceed.
-                Customer [5] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [7] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [6] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [4] of group [2] has been told by the HeadCustomer to proceed.
-                HeadCustomer [8] of group [2] has told the group to proceed.
-                HeadCustomer [8] of group [2] has told the group to proceed.
-
-
-
 6.      Discussions:
+        
          
-a. about process of each clerk.
-b. 
 7.      Miscellaneous: 
-a. we still have problems in Ticket Taker, so 
-
         
         	-Programming
         	
