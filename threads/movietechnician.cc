@@ -6,7 +6,8 @@ MovieTechnician::MovieTechnician(int id) : Employee(id, "MovieTechnician"){
 
 }
 void MovieTechnician::WaitManager(){
-
+    
+    printf("DEBUG:MT wait manager to start movie\n");
     sStartMovie->P();
     printf("DEBUG:MT has been told to start movie\n");
 
