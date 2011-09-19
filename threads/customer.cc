@@ -267,6 +267,7 @@ void Customer::checkTickets() {
     if (clerk->getIsBusy() && !stopTicketTaken) {
         clerk->condition[0]->Wait(lCheckTickets);
     }
+    lCheckTickets->Release();
     // if stop ticket taken
     lTicketTaken->Acquire();
     if (stopTicketTaken) {
@@ -277,11 +278,11 @@ void Customer::checkTickets() {
         cTicketTaken->Wait(lTicketTaken);
         printf("Customer [%d] in Group [%d] is leaving the lobby.\n",  customerId, groupId);
         lTicketTaken->Release();
-        lCheckTickets->Release();
         checkTickets();
         return;
     }
     lTicketTaken->Release();
+    lCheckTickets->Acquire();
 
     printf("Customer [%d] in Group [%d] is walking up to TicketTaker[%d] to give [%d] tickets.\n",customerId,groupId,lineIndex, ticketReceipt[groupId]);
     // interact with TicketTaker 
