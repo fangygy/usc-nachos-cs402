@@ -634,7 +634,12 @@ d. collect money after all customers leave
             HeadCustomer [8] of group [2] has told the group to proceed.
 
 6. Discussions:
-        
+    
+    The output result matches the movie theater requirements and the program 
+
+can run successfully without crash and stuck when the customer number is 
+
+small. 
          
 7. Miscellaneous: 
         
