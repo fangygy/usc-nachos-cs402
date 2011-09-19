@@ -58,6 +58,7 @@ DEBUG(char flag, char *format, ...)
 	va_list ap;
 	// You will get an unused variable message here -- ignore it.
 	va_start(ap, format);
+        printf("\tdebug flag %c, %s line %u : ", flag, __FILE__, __LINE__);
 	vfprintf(stdout, format, ap);
 	va_end(ap);
 	fflush(stdout);
