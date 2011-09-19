@@ -44,18 +44,19 @@ void TicketTaker::checkTickets() {
         lCheckTickets->Release();
         // wait customer to signal
         condition[1]->Wait(lock);
+        lock->Release();
         // if break ? race condition 
         lCheckTickets->Acquire();
         if (getIsBreak()) {
             setIsBusy(false);
             lCheckTickets->Release();
-            lock->Release();
             continue;
         } else {
             setIsBusy(true);
         }
         lCheckTickets->Release();
 
+        lock->Acquire();
         //get tickets sum
         printf("TicketTaker [%d] has received [%d] tickets.\n",getId(), getTicketSum());
 
@@ -83,7 +84,7 @@ void TicketTaker::checkTickets() {
         }
         ticketTaken += getTicketSum();
         totalTicketTaken += getTicketSum();
-        printf("TicketTaker [%d] is allowing the group into the theater. The number of tickets taken is [%d].",getId(), ticketTaken);
+        printf("TicketTaker [%d] is allowing the group into the theater. The number of tickets taken is [%d].\n",getId(), ticketTaken);
         lTicketTaken->Release();
         // should just let in, not tell customers seats number 
         // better not to enforce seats number, which needs more variables to state

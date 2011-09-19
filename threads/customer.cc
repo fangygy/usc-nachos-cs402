@@ -129,7 +129,9 @@ void Customer::buyTickets() {
     //printTCStatus();
     //printf("============================\n");
     // interact with TicketClerk
+    printf("\t%s DEBUG error 1\n", currentThread->getName());
     clerk->lock->Acquire();
+    printf("\t%s DEBUG error 2\n", currentThread->getName());
     if (!clerk->getIsBreak()) {
         clerk->setIsBusy(true);
         lBuyTickets->Release(); 

@@ -86,7 +86,7 @@ void test1() {
     }
     printf("Number of TicketClerks = [%d]\n",MAX_TC);
     // create Customer
-    groupSum = rand()%MAX_GROUP + 1;
+    groupSum = rand()%10 + 1;//MIN_GROUP + MIN_GROUP;
     nextCustomerNumber = 0; 
     for (int i = 0;i < groupSum; ++i) {
         int groupSize = rand()%MAX_GROUPSIZE+1;
@@ -151,10 +151,11 @@ void test1() {
 }
 void Problem2() {
     init();
-    char name[MAX_VAR];
+    char* name;
     Thread * t; 
     // create Manager 
     for (int i = 0;i < MAX_MR; ++i) {
+        name = new char[MAX_VAR];
         sprintf(name, "Thread_Manager_%d", i);
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)mr_new, i);

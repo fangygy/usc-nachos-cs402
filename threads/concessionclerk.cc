@@ -63,18 +63,18 @@ void ConcessionClerk::sellFood() {
         // wait customer or manager to signal
         condition[1]->Wait(lock);
         // if break 
+        lock->Release();
+        lBuyFood->Acquire();
         if (getIsBreak()) {
             setIsBusy(false);
-            lock->Release();
+            lBuyFood->Release();
             continue;
         } else {
             setIsBusy(true);
         }
-
-       
-
-
-
+        lBuyFood->Release();
+        lock->Acquire();
+ 
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
         // tell customers food price 
