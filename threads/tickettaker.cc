@@ -9,12 +9,17 @@ void TicketTaker::checkTickets() {
 
     while(true) {
         // stop ticket check
+         printf("DEBUGG:checkticket\n");
         lTicketTaken->Acquire();
         if (stopTicketTaken == true) {
+            
             // wait for manager to broadcast
             cTicketTaken->Wait(lTicketTaken);
+           
+            
         }
         lTicketTaken->Release();
+    
             
         lCheckTickets->Acquire();
         if (getIsBreak()) {

@@ -210,6 +210,8 @@ class Customer {
      // for customer to decide if want to go bathroom
     bool answerForBathroom();
     void waitLeaveTheater();
+    int getGroupId(); 
+    int getId();   
      
 
 };

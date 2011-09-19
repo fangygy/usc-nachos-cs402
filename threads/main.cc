@@ -65,7 +65,7 @@ extern void ThreadTest(void), Copy(char *unixFile, char *nachosFile);
 extern void Print(char *file), PerformanceTest(void);
 extern void StartProcess(char *file), ConsoleTest(char *in, char *out);
 extern void MailTest(int networkID);
-extern void TestCase_P2_1();
+extern void TestCase_P2_1(),TestCase_P2_2(),TestCase_P2_3(),TestCase_P2_4(),TestCase_P2_5(),TestCase_P2_6();
 
 //----------------------------------------------------------------------
 // main
@@ -103,8 +103,19 @@ main(int argc, char **argv)
             TestSuite();
         if (!strcmp(*argv, "-P2"))               // Problem 2: for part 2
             Problem2();
-        if (!strcmp(*argv, "-T1"))               // Problem 2: for part 2 test case T1
+        if (!strcmp(*argv, "-TC1"))               // Problem 2: for part 2 test case T1
             TestCase_P2_1();
+        if (!strcmp(*argv, "-TC2"))               // Problem 2: for part 2 test case T2
+            TestCase_P2_2();
+        if (!strcmp(*argv, "-TC3"))               // Problem 2: for part 2 test case T3
+            TestCase_P2_3();
+        if (!strcmp(*argv, "-TC4"))               // Problem 2: for part 2 test case T4
+            TestCase_P2_4();
+        if (!strcmp(*argv, "-TC5"))               // Problem 2: for part 2 test case T5
+            TestCase_P2_5();
+        if (!strcmp(*argv, "-TC6"))               // Problem 2: for part 2 test case T6
+            TestCase_P2_6();
+
 #endif
 #ifdef USER_PROGRAM
         if (!strcmp(*argv, "-x")) {        	// run a user program

@@ -38,6 +38,7 @@ void Customer::action() {
 //        waitGroup();
 //       DEBUG('z', "\tGroup [%d] finish waitGroup after finish buy food.\n", groupId);
         DEBUG('z', "\tGroup [%d] start check tickets.\n", groupId);
+        
         checkTickets();
         DEBUG('z', "\tGroup [%d] finish check tickets.\n", groupId);
         proceed(groupSeat);
@@ -46,18 +47,21 @@ void Customer::action() {
 //        DEBUG('z', "\tGroup [%d] finish waitGroup after finish check tickets.\n", groupId);
         DEBUG('z', "\tGroup [%d] start take seat.\n", groupId);
         arrangeSeats();
+
         DEBUG('z', "\tGroup [%d] finish take seat.\n", groupId);
         watchMovie();
         proceed(groupLeaveRoom);
         prtLeaveRoomMsg();
         checkBathroom();
+        
         proceed(groupLeaveTheater);
         leaveTheater(); 
     } else {
         // regular customer
         waitTickets();
-        waitFood();
+        waitFood();  
         waitCheck();
+           
         waitSeats();
         watchMovie();
         waitLeaveRoom();
@@ -267,7 +271,10 @@ void Customer::checkTickets() {
     }
     lCheckTickets->Release();
     // if stop ticket taken
+
+      
     lTicketTaken->Acquire();
+    
     if (stopTicketTaken) {
         // TODO: ask all group to goto lobby
         printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.\n", customerId, groupId, lineIndex); 
@@ -280,6 +287,8 @@ void Customer::checkTickets() {
         return;
     }
     lTicketTaken->Release();
+
+    
     lCheckTickets->Acquire();
 
     printf("Customer [%d] in Group [%d] is walking up to TicketTaker[%d] to give [%d] tickets.\n",customerId,groupId,lineIndex, ticketReceipt[groupId]);
@@ -299,14 +308,15 @@ void Customer::checkTickets() {
             // TODO: ask all group to go back lobby
             lCheckTickets->Acquire();
             clerk->lock->Release();
-            lTicketTaken->Release();
+            lCheckTickets->Release();
             // leave the waiting line
             clerk->subWaitingSize();
             printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.", customerId, groupId, lineIndex);
             printf("Customer [%d] in Group [%d] is in the lobby.\n", customerId, groupId);
             cTicketTaken->Wait(lTicketTaken);
             printf("Customer [%d] in Group [%d] is leaving the lobby.\n",  customerId, groupId);
-            lCheckTickets->Release();
+            
+            lTicketTaken->Release();
             checkTickets();
             return;
         }
@@ -529,8 +539,6 @@ void Customer::watchMovie(){
     cMT_CR_Check->Signal(lStartMovie);
     lStartMovie->Release();
     printf("Customer [%d] in group [%d] is sitting in a theater room seat.\n",customerId,groupId);
-
-    
  
     //watching movie and wait Movie Techinician to wake them up
     sMT_CR_Stop->P();
@@ -574,7 +582,6 @@ void Customer::checkBathroom(){
     	}else{
         	 printf("Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
     	}
-
        
         
     for (int i = 1;i < groupBathroomSum[groupId]; ++i) {
@@ -639,4 +646,13 @@ void Customer::proceed(bool *flag) {
     // monitor variables
     flag[groupId] = true;
     lGroup[groupId]->Release();
+}
+int Customer::getGroupId(){
+
+    return   groupId;
+}
+int Customer::getId(){
+
+    return   customerId;
+
 }
