@@ -16,9 +16,9 @@ void MovieTechnician::WaitManager(){
 
 void MovieTechnician::checkSeated(){
     int i=0;
-   
+    lStartMovie->Acquire();    
     for(i=0;i<ticketTaken;i++){  
-        lStartMovie->Acquire();       
+          
         sMT_CR_Check->V();
         cMT_CR_Check->Wait(lStartMovie);
     }
@@ -46,9 +46,10 @@ void MovieTechnician::infoCustomer(){
     int i=0;
 
     //TODO: 
+  lStopMovie->Acquire();
    for(i=0;i< MAX_SEAT;i++){
         if(seatState[i]==true){
-            lStopMovie->Acquire();
+            
             sMT_CR_Stop->V();
             cMT_CR_Stop->Wait(lStopMovie);
             seatState[i]=false; //reset seat state
