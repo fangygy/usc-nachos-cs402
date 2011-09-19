@@ -1,9 +1,9 @@
 Write-up for project 1: Fall 2011 
 Date:09/26/2011 
 Group: 50: 
-             Name:               E-mail:               USC ID: 
+             Name:                      E-mail:                     USC ID: 
              NingChong,Chen      ningchoc@usc.edu      5042823533
-             Fang-Yi,Chu 
+             Fang-Yi,Chu            fangyic@usc.edu        4907964131
              Chien-Ming,Liao     chienmin@usc.edu      5148768361 
 
 1. Requirements: 
@@ -470,64 +470,80 @@ d. collect money after all customers leave
             Customer [40] in Group [15] is getting in TicketClerk line [0]
 
             
-	##TEST CASE 2##
-	
-       How to run:
-           
-       Test result:
+    	##TEST CASE 2##
+    	    Managers only read one from one Clerk's total money received, at a time.
+
+           How to run: nachos -rs 10 -TC2 | egrep "Manager collected|Total money"
+               
+           Test result:
+                Manager collected [36.00] from TicketClerk[0].
+                Manager collected [96.00] from TicketClerk[1].
+                Manager collected [60.00] from TicketClerk[2].
+                Manager collected [12.00] from TicketClerk[3].
+                Manager collected [24.00] from TicketClerk[4].
+                Manager collected [44.00] from ConcessionClerk[0].
+                Manager collected [41.00] from ConcessionClerk[1].
+                Manager collected [17.00] from ConcessionClerk[2].
+                Manager collected [14.00] from ConcessionClerk[3].
+                Manager collected [0.00] from ConcessionClerk[4].
+                Total money made by office = [344.00]
             
-	##TEST CASE 3##
-	
-       How to run:
-           
-       Test result:
-            a.
-            Customer [0] in Group [0] is walking up to TicketClerk[0] to buy [1] tickets
-            Customer [3] in Group [1] is walking up to TicketClerk[1] to buy [3] tickets
-            Customer [8] in Group [2] is walking up to TicketClerk[2] to buy [5] tickets
-            Customer [9] in Group [3] is walking up to TicketClerk[3] to buy [1] tickets
-            Customer [11] in Group [4] is walking up to TicketClerk[4] to buy [2] tickets
-            Customer [0] in Group [0] is leaving TicketClerk[0]
-            Customer [3] in Group [1] is leaving TicketClerk[1]
-            Customer [9] in Group [3] is leaving TicketClerk[3]
-            Customer [13] in Group [5] is walking up to TicketClerk[0] to buy [2] tickets
-            Customer [8] in Group [2] is leaving TicketClerk[2]
-            Customer [11] in Group [4] is leaving TicketClerk[4]
-            Customer [18] in Group [6] is walking up to TicketClerk[1] to buy [5] tickets
-            Customer [18] in Group [6] is leaving TicketClerk[1]
-            Customer [13] in Group [5] is leaving TicketClerk[0]
+	    	##TEST CASE 3##
+    	    Customers do not leave a Clerk, or TicketTaker, until they are told to do so. Clerks and TicketTakers do not start with another Customer until they know the current Customer has left. customer until they know that the last Customer has left their area
 
-            b. 
-            Customer [0] in Group [0] is walking up to ConcessionClerk[0] to buy [1] popcorn and [1] soda.
-            Customer [9] in Group [3] is walking up to ConcessionClerk[1] to buy [0] popcorn and [1] soda.
-            Customer [3] in Group [1] is walking up to ConcessionClerk[2] to buy [1] popcorn and [3] soda.
-            Customer [11] in Group [4] is walking up to ConcessionClerk[3] to buy [2] popcorn and [1] soda.
-            Customer [0] in Group [0] is leaving ConcessionClerk[0]
-            Customer [9] in Group [3] is leaving ConcessionClerk[1]
-            Customer [13] in Group [5] is walking up to ConcessionClerk[0] to buy [0] popcorn and [2] soda.
-            Customer [3] in Group [1] is leaving ConcessionClerk[2]
-            Customer [11] in Group [4] is leaving ConcessionClerk[3]
-            Customer [8] in Group [2] is walking up to ConcessionClerk[1] to buy [5] popcorn and [3] soda.
-            Customer [13] in Group [5] is leaving ConcessionClerk[0]
-            Customer [18] in Group [6] is walking up to ConcessionClerk[0] to buy [3] popcorn and [3] soda.
-            Customer [8] in Group [2] is leaving ConcessionClerk[1]
-            Customer [18] in Group [6] is leaving ConcessionClerk[0]
+           How to run: 
+		a. nachos -rs 10 -TC3 | egrep "is walking up to TicketClerk|is leaving 	  		TicketClerk"
+                       b. nachos -rs 10 -TC3 | egrep "is walking up to ConcessionClerk|is leaving 			ConcessionClerk"
+                       c. nachos -rs 10 -TC3 | egrep "is walking up to TicketTaker|is leaving TicketTaker"
 
-            c. 
-            Customer [0] in Group [0] is walking up to TicketTaker[0] to give [1] tickets.
-            Customer [0] in Group [0] is leaving TicketTaker[0]
-            Customer [9] in Group [3] is walking up to TicketTaker[1] to give [1] tickets.
-            Customer [11] in Group [4] is walking up to TicketTaker[0] to give [2] tickets.
-            Customer [9] in Group [3] is leaving TicketTaker[1]
-            Customer [11] in Group [4] is leaving TicketTaker[0]
-            Customer [3] in Group [1] is walking up to TicketTaker[2] to give [3] tickets.
-            Customer [3] in Group [1] is leaving TicketTaker[2]
-            Customer [13] in Group [5] is walking up to TicketTaker[0] to give [2] tickets.
-            Customer [13] in Group [5] is leaving TicketTaker[0]
-            Customer [8] in Group [2] is walking up to TicketTaker[1] to give [5] tickets.
-            Customer [8] in Group [2] is leaving TicketTaker[1]
-            Customer [18] in Group [6] is walking up to TicketTaker[0] to give [5] tickets.
-            Customer [18] in Group [6] is leaving TicketTaker[0]
+           Test result:
+                a.
+                Customer [0] in Group [0] is walking up to TicketClerk[0] to buy [1] tickets
+                Customer [3] in Group [1] is walking up to TicketClerk[1] to buy [3] tickets
+                Customer [8] in Group [2] is walking up to TicketClerk[2] to buy [5] tickets
+                Customer [9] in Group [3] is walking up to TicketClerk[3] to buy [1] tickets
+                Customer [11] in Group [4] is walking up to TicketClerk[4] to buy [2] tickets
+                Customer [0] in Group [0] is leaving TicketClerk[0]
+                Customer [3] in Group [1] is leaving TicketClerk[1]
+                Customer [9] in Group [3] is leaving TicketClerk[3]
+                Customer [13] in Group [5] is walking up to TicketClerk[0] to buy [2] tickets
+                Customer [8] in Group [2] is leaving TicketClerk[2]
+                Customer [11] in Group [4] is leaving TicketClerk[4]
+                Customer [18] in Group [6] is walking up to TicketClerk[1] to buy [5] tickets
+                Customer [18] in Group [6] is leaving TicketClerk[1]
+                Customer [13] in Group [5] is leaving TicketClerk[0]
+
+                b. 
+                Customer [0] in Group [0] is walking up to ConcessionClerk[0] to buy [1] popcorn and 	    [1] soda.
+                Customer [9] in Group [3] is walking up to ConcessionClerk[1] to buy [0] popcorn and 	    [1] soda.
+                Customer [3] in Group [1] is walking up to ConcessionClerk[2] to buy [1] popcorn and 	    [3] soda.
+                Customer [11] in Group [4] is walking up to ConcessionClerk[3] to buy [2] popcorn 	    and [1] soda.
+                Customer [0] in Group [0] is leaving ConcessionClerk[0]
+                Customer [9] in Group [3] is leaving ConcessionClerk[1]
+                Customer [13] in Group [5] is walking up to ConcessionClerk[0] to buy [0] popcorn 	    and [2] soda.
+                Customer [3] in Group [1] is leaving ConcessionClerk[2]
+                Customer [11] in Group [4] is leaving ConcessionClerk[3]
+                Customer [8] in Group [2] is walking up to ConcessionClerk[1] to buy [5] popcorn and 	    [3] soda.
+                Customer [13] in Group [5] is leaving ConcessionClerk[0]
+                Customer [18] in Group [6] is walking up to ConcessionClerk[0] to buy [3] popcorn    	    and [3] soda.
+	   Customer [8] in Group [2] is leaving ConcessionClerk[1]
+                Customer [18] in Group [6] is leaving ConcessionClerk[0]
+
+                c. 
+                Customer [0] in Group [0] is walking up to TicketTaker[0] to give [1] tickets.
+                Customer [0] in Group [0] is leaving TicketTaker[0]
+                Customer [9] in Group [3] is walking up to TicketTaker[1] to give [1] tickets.
+                Customer [11] in Group [4] is walking up to TicketTaker[0] to give [2] tickets.
+                Customer [9] in Group [3] is leaving TicketTaker[1]
+                Customer [11] in Group [4] is leaving TicketTaker[0]
+                Customer [3] in Group [1] is walking up to TicketTaker[2] to give [3] tickets.
+                Customer [3] in Group [1] is leaving TicketTaker[2]
+                Customer [13] in Group [5] is walking up to TicketTaker[0] to give [2] tickets.
+                Customer [13] in Group [5] is leaving TicketTaker[0]
+                Customer [8] in Group [2] is walking up to TicketTaker[1] to give [5] tickets.
+                Customer [8] in Group [2] is leaving TicketTaker[1]
+                Customer [18] in Group [6] is walking up to TicketTaker[0] to give [5] tickets.
+                Customer [18] in Group [6] is leaving TicketTaker[0]
 
 	##TEST CASE 4##
 	    Managers get Clerks off their break when lines get too long
