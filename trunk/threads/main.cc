@@ -65,6 +65,7 @@ extern void ThreadTest(void), Copy(char *unixFile, char *nachosFile);
 extern void Print(char *file), PerformanceTest(void);
 extern void StartProcess(char *file), ConsoleTest(char *in, char *out);
 extern void MailTest(int networkID);
+extern void TestCase_P2_1();
 
 //----------------------------------------------------------------------
 // main
@@ -102,6 +103,8 @@ main(int argc, char **argv)
             TestSuite();
         if (!strcmp(*argv, "-P2"))               // Problem 2: for part 2
             Problem2();
+        if (!strcmp(*argv, "-T1"))               // Problem 2: for part 2 test case T1
+            TestCase_P2_1();
 #endif
 #ifdef USER_PROGRAM
         if (!strcmp(*argv, "-x")) {        	// run a user program

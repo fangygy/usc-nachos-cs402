@@ -66,6 +66,8 @@ void  MovieTechnician::infoManager(){
     lIsMovieOver->Acquire();
     bIsMovieOver=true;    
     lIsMovieOver->Release();
+
+    WaitManager();
      
   
 

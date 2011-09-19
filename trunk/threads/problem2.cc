@@ -182,15 +182,17 @@ void Problem2() {
 
 void cr_new_t1(int arg) {
     
-   /* CustomerData *customerData = (CustomerData *) arg; 
+    CustomerData *customerData = (CustomerData *) arg; 
     
-    cr[customerData->customerNumber]->getin();
 
- 
+
     int lineIndex = -1;
+    lBuyTickets->Acquire();
     while (lineIndex == -1) {
-        lineIndex = cr[customerData->customerNumber]->getInLine(lBuyTicket, cNoConcessionClerk, MAX_CC, noConcessionClerk, (Employee**)cc);
-    }*/
+        lineIndex = cr[customerData->customerNumber]->getInLine(lBuyTickets, cNoTicketClerk, MAX_TC, noTicketClerk, (Employee**)tc);        
+    }
+ 
+    lBuyTickets->Release();
    /* buyTickets();
     proceed(groupTicket);
     if (countFood()) {
@@ -241,7 +243,7 @@ void cr_tb_new_t1(int arg) {
     
     CustomerData *customerData = (CustomerData *) arg; 
     
-    cr[customerData->customerNumber]->action();
+    //cr[customerData->customerNumber]->action();
     
 }
 
@@ -250,7 +252,7 @@ void cr_tb_new_t1(int arg) {
 
 void TestCase_P2_1(){
 
-    init();
+   init();
    char *name;
     Thread * t; 
     // create Manager 
@@ -304,7 +306,7 @@ void TestCase_P2_1(){
     customerLeft = nextCustomerNumber;
     printf("Number of Groups = [%d]\n",groupSum);
     // create ConcessionClerk 
-    for (int i = 0;i < MAX_CC; ++i) {
+  /*  for (int i = 0;i < MAX_CC; ++i) {
         name = new char[MAX_VAR];
         sprintf(name, "Thread_ConcessionClerk_%d", i);
         // ? in thread or here
@@ -334,7 +336,7 @@ void TestCase_P2_1(){
         t->Fork((VoidFunctionPtr)mt_new, i);
     }
      
-
+  */
 }
 
 
