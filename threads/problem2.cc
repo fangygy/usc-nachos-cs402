@@ -181,10 +181,15 @@ void Problem2() {
 
 void cr_new_t1(int arg) {
     
-    CustomerData *customerData = (CustomerData *) arg; 
+   /* CustomerData *customerData = (CustomerData *) arg; 
     
-    //cr[customerData->customerNumber]->action();
+    cr[customerData->customerNumber]->getin();
 
+ 
+    int lineIndex = -1;
+    while (lineIndex == -1) {
+        lineIndex = cr[customerData->customerNumber]->getInLine(lBuyTicket, cNoConcessionClerk, MAX_CC, noConcessionClerk, (Employee**)cc);
+    }*/
    /* buyTickets();
     proceed(groupTicket);
     if (countFood()) {
@@ -244,19 +249,17 @@ void cr_tb_new_t1(int arg) {
 
 void TestCase_P2_1(){
 
-   /* init();
-    char name[MAX_VAR];
+    init();
+   char *name;
     Thread * t; 
     // create Manager 
     for (int i = 0;i < MAX_MR; ++i) {
-        sprintf(name, "Thread_Manager_%d", i);
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_Manager_%d", i);        
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)mr_new, i);
     }
 
-    
-    //char *name;
-   // Thread *t;
 
     // create TicketClerk
     for (int i = 0;i < MAX_TC; ++i) {
@@ -331,7 +334,6 @@ void TestCase_P2_1(){
     }
      
 
-*/
 }
 
 

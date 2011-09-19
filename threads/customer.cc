@@ -365,10 +365,10 @@ void Customer::arrangeSeats() {
     getSeats(groupSize);
     seatPos=SeatLocation[0];	
     printf("Customer [%d] in Group [%d] has found the following seat: row [%d] and seat [%d]\n",customerId,groupId,(seatPos/MAX_ROW),seatPos%MAX_COL);   
-
+    lGroup[groupId]->Acquire();
     seatState[SeatLocation[0]]=true;
     for(i=1;i< groupSize;i++){
-        lGroup[groupId]->Acquire();
+        
         seatPos=SeatLocation[i];
         //groupArrangeSeat[groupId]=true;	
         sWaitSeat[groupId]->V();        
