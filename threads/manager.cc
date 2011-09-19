@@ -38,6 +38,12 @@ void Manager::collectMoney() {
     }
     printf("Total money made by office = [%.2f]\n", totalAmount);
     lAmount->Release();
+    lTicketTaken->Acquire();
+    printf("Total tickets sold by office = [%d]\n", totalTicketSold);
+    lTicketTaken->Release();
+    lTicketSold->Acquire();
+    printf("Total tickets taken by office = [%d]\n", totalTicketTaken);
+    lTicketSold->Release();
 }
 // ask MT to startMovie
 void Manager::startMovie() {
