@@ -448,7 +448,7 @@ g. check tickets
     lTicketTaken->Release();
     // if the ticket taker is available
     clerk->lock->Acquire();
-\    if (!clerk->getIsBreak() ) {
+    if (!clerk->getIsBreak() ) {
         clerk->setIsBusy(true);
         lCheckTickets->Release();
         clerk->setGroupId(groupId);
@@ -531,5 +531,42 @@ m. proceed with group after bathroom
 n. leave theater
        
 5.      Testing: 
-6.      Discussions: 
+        -Part I
+	     The test cases are already provided, and it will run all together at once.
+
+         How to run:
+            To run test case 1, use "nachos -T" as the command.
+
+         Test Output:
+	        Five tests will start one by one. The threads will try to acquire locks and use CVs.
+
+
+        - Part II
+	      
+    	##TEST CASE 1##
+    	
+           How to run:
+               
+           Test result:
+                
+    	##TEST CASE 2##
+    	
+           How to run:
+               
+           Test result:
+                
+    	##TEST CASE 3##
+    	
+           How to run:
+               
+           Test result:
+                
+6.      Discussions:
+         
 7.      Miscellaneous: 
+        
+        	-Programming
+        	
+            -Compiling
+            
+           	-Testing & Debugging
