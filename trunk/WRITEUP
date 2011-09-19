@@ -116,22 +116,92 @@ h.
 				void Condition::Signal(Lock* conditionLock)
 				void Condition::Broadcast(Lock* conditionLock)
 				
-    Part2:
- 	   Files Added:
-         employee.cc
-       
- 	   Files Modified:
-         consessionclerk.cc
-         customer.cc
-         manger.cc
-         movietechnician.cc
-         movietheater.cc
-         ticketclerk.cc
-         tickettaker.cc
-         
+     Part2:
+       Files Added:
+          employee.cc
+          consessionclerk.cc
+          customer.cc
+          manger.cc
+          movietechnician.cc
+          ticketclerk.cc
+          tickettaker.cc
+       Files Modified:
+          movietheater.cc
+          movietheater.h
+          
+       Data Structure Modified:
+       -in movietheater.h
+       extern Lock *lBuyTickets;  //Lock to get in line of buyTickets
+       extern Lock *lBuyFood;  //Lock to get in line of buyFood
+       extern Lock *lCheckTickets;  //Lock to get in line of checkTickets
+       extern Lock *lStartMovie;  //Lock to get seats and startMovie
+       extern Lock *lStopMovie; //stop Movie
+       extern Lock *lFindSeats;
+       extern Lock *lGroup[MAX_GROUP];  //Lock for group to act mutex
+       extern Lock *lTicketSold;  // Lock for ticket sold
+       extern Lock *lTicketTaken;  // lock for ticket taken
+       extern Lock *lAmount;  // lock for money collect    
+       extern Lock *lCustomerLeft;  // lock for leave sum
+       extern Semaphore *sGroup[MAX_GROUP];  //semaphore to make group act together
+       extern Semaphore *sGroupFood[MAX_GROUP];  //semaphore to make sure everyone choose if need food
+       extern Semaphore *sGroupBathroom[MAX_GROUP];  //semaphore to make sure everyone choose if need food
+       extern Condition *cGroup[MAX_GROUP];  //Condition to make group act together
+       extern Condition *cGroupFood[MAX_GROUP];  //Condition for ticketbuyer to ask for if need food
+       //extern Condition *cGroupBathroom[MAX_GROUP];  //Condition for ticketbuyer to ask for if need bathroom
+       extern Condition *cTicketTaken;  // Condition for ticketTaker and customer to know start ticket taken 
+       extern int groupFoodSum[MAX_GROUP][2];  // order of group for food
+       extern int groupBathroomSum[MAX_GROUP];  // order of group for food
+       extern int ticketReceipt[MAX_GROUP];  // order of group for tickets
+       extern int ticketTaken;  // ticket taken num
+       extern bool stopTicketTaken;  // monitor variable for stop ticketTaken
+       extern bool groupTicket[MAX_GROUP];  // monitor variable for if buyTickets done
+       extern bool groupAskForFood[MAX_GROUP];  // monitor variable for if ask for food
+       extern bool groupAskForBathroom[MAX_GROUP];  // monitor variable for if ask for food
+       extern bool groupFood[MAX_GROUP];  // monitor variable for if buyFood done
+       extern bool groupSeat[MAX_GROUP];  // monitor variable for if get seats
+       extern bool groupLeaveRoom[MAX_GROUP];
+       extern bool groupLeaveTheater[MAX_GROUP];
+       extern bool bIsMovieOver;  //monitor variable for Movies State
+       extern Lock *lIsMovieOver;
+       extern bool seatState[MAX_SEAT];
+       extern Semaphore *sSeat[MAX_SEAT];  //semaphore to Seat
+       extern int ticketTaken;
+       extern int totalTicketTaken;
+       extern int totalTicketSold;
+       extern double totalAmount;
+       extern double ticketClerkAmount[MAX_TC];
+       extern double concessionClerkAmount[MAX_CC];
+       extern int seatPos;
+
+       extern bool noTicketClerk;
+       extern bool noConcessionClerk;
+       extern bool noTicketTaker;
+       extern Condition *cNoTicketClerk;
+       extern Condition *cNoConcessionClerk;
+       extern Condition *cNoTicketTaker;
+       extern Semaphore *sNoTicketClerk;
+       extern Semaphore *sNoConcessionClerk;
+       extern Semaphore *sNoTicketTaker;
+       extern Semaphore *sWaitSeat[MAX_GROUP];  //semaphore to Seat
+       extern int SeatLocation[MAX_GROUPSIZE];
+       extern Semaphore *sStartMovie; 
+       extern Semaphore *sMT_CR_Check;
+       extern Condition *cMT_CR_Check;
+       extern Semaphore *sStopMovie; 
+       extern Semaphore *sMT_CR_Stop;
+       extern Condition *cMT_CR_Stop;
+
        Function added & Modified:
-       -in customer.cc
+       -in movietheater.h
+       class Employee {}
+       class Customer {}
+       class TicketClerk : public Employee{}
+       class ConcessionClerk : public Employee{}
+       class TicketTaker : public Employee{}
+       class TicketTaker : public Employee{}
+       class Manager : public Employee{}
        
+       -in customer.cc
        //Constructor of the customer class
        Customer::Customer(int cId, int gId, int gSize, bool ticketBuyer)
        //destructor of the customer class
@@ -174,9 +244,302 @@ h.
        void Customer::waitLeaveRoom()
        //head customer notify all the group member to proceed to the next step
        void Customer::proceed(bool *flag)
+       
+       -employee.cc
+       //set the state of the employee to busy
+       void Employee::setIsBusy(bool busy)
+       //see if the employee is in busy state 
+       bool Employee::getIsBusy()
+       //let the employee to have a break 
+       void Employee::setIsBreak(bool isOff) 
+       //see if the employee is in a break
+       bool Employee::getIsBreak() 
+       //get the type of the employee 
+       char * Employee::getEmployeeType() 
+       //get the ID of the employee
+       int Employee::getId() 
+       //see which group the employee is in
+       int Employee::getGroupId() 
+       //set the group ID
+       void Employee::setGroupId(int gId) 
+       // generate an employee
+       Employee::Employee(int eId, char * type) 
+       // degenerate an employee
+       Employee::~Employee() {}
+       //get the waiting size of the employee
+       int Employee::getWaitingSize() 
+       //plus one on waiting list
+       void Employee::addWaitingSize()
+       //minus one on waiting list
+       void Employee::subWaitingSize()
+       
+       -in ticketclerk.cc
+       //create a ticket clerk        
+       TicketClerk::TicketClerk(int tcId) : Employee(tcId, "TicketClerk"){}
+       //caculate how much should the tickets cost 
+       void TicketClerk::setAmount(int sum) {}
+       //get the amount of money
+       double TicketClerk::getAmount() {}
+       //set the total amount of money for the tickets
+       void TicketClerk::setTicketSum(int sum) {}
+       //get the total amount of money for the tickets
+       int TicketClerk::getTicketSum() {}
+       //set the amount of payment
+       void TicketClerk::setPayment(double p) {}
+       //for ticket clerk tp sell tickets
+       void TicketClerk::sellTickets() {}
 
- 	
+       -in manager.cc
+       //order ticket taker to take tickets
+       //order movie technicion to play the movie
+       //collects money after all the customer leaves 
+       void Manager::work() {}
+       //manager collects the money from the ticketclerk and caculates its total
+       void Manager::collectMoney() {}      
+       // ask the movie technician to start a Movie
+       void Manager::startMovie() {}
+       // ask ticketTaker and customer to start
+       void Manager::startTicketTaken() {}
+       // rand ask an employee to break and sigal the waiting customer to change line
+       // if no clerk work and customers come, have to ask one to off break
+       void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count, bool noClerk, Condition *cNoClerk, Semaphore * sNoClerk) {}
 
+       -in movietechnician.cc       
+       //create a movietechnician
+       MovieTechnician::MovieTechnician(int id) : Employee(id, "MovieTechnician"){}
+       //start a movie if the manager told so
+       void MovieTechnician::WaitManager(){}
+       //check if all the customers in the theater is seated 
+       void MovieTechnician::checkSeated(){}
+       //star playing a movie and ends it after a period of time 
+       void MovieTechnician::playMovie(){}
+       //Movietechnician broadcast all the customers in the theater to leave
+       void MovieTechnician::infoCustomer(){}
+       //acknoledge the manger that the movie is over
+       void  MovieTechnician::infoManager(){}
+
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+Customer of TicketBuyer:
+a. enter theater with group
+   //create a customer and initialize it's value
+   Customer::Customer(int cId, int gId, int gSize, bool ticketBuyer)
+b. buy tickets
+   // get in which line
+   TicketClerk *clerk = tc[lineIndex];
+   // if busy wait for ticketClerk
+   if (clerk->getIsBusy()) {
+        clerk->condition[0]->Wait(lBuyTickets);
+   }
+   // start to interact with a TicketClerk
+    clerk->lock->Acquire();
+    if (!clerk->getIsBreak()) {
+        clerk->setIsBusy(true);
+        lBuyTickets->Release(); 
+        // tell clerk tickets sum
+        clerk->setGroupId(groupId);
+        clerk->setTicketSum(groupSize);
+        clerk->condition[1]->Signal(clerk->lock);
+
+        // wait for money amount
+        clerk->condition[1]->Wait(clerk->lock);
+        // ask ticket clerk for total price
+        double amount = clerk->getAmount();
+        // pay money 
+        clerk->setPayment(amount);
+        printf("Customer [%d] in Group [%d] in TicketClerk line [%d] is paying [%.2f] for tickets\n",customerId,groupId,lineIndex,amount);
+        
+        clerk->condition[1]->Signal(clerk->lock);
+
+        // wait to get tickets back
+        clerk->condition[1]->Wait(clerk->lock);
+        // finish and leave
+        clerk->condition[1]->Signal(clerk->lock);
+    }
+    // if the ticket clerk is on a break
+    else {
+    clerk->subWaitingSize();
+        // for race condition of waiting size
+        lBuyTickets->Release();
+        clerk->lock->Release();
+        buyTickets();     
+    }
+    clerk->lock->Release();
+    
+c. proceed with group after getting tickets
+
+d. count food requests
+   //head customer counts the amount of cokes and popcorns needed in the group
+   if (getIsTicketBuyer()) {
+        lGroup[groupId]->Acquire();
+        // if one of the member wants food
+        for (int i = 0;i < 2; ++i) {
+            groupFoodSum[groupId][i] += answerForFood(i);
+        }
+        // ask group member if they want food
+        cGroupFood[groupId]->Broadcast(lGroup[groupId]);
+        // set monitor variable true
+        groupAskForFood[groupId] = true;
+        lGroup[groupId]->Release();
+        //sGroupFood[groupId]->V();
+        // wait for all the customer answer for food
+        for (int i = 1;i < groupSize; ++i) {
+            sGroupFood[groupId]->P();
+        }
+e. buy food
+    //Customer getting in ConcessionClerk line
+    ConcessionClerk *clerk = cc[lineIndex];
+    if (clerk->getIsBusy()) {
+        clerk->condition[0]->Wait(lBuyFood);
+    }
+    //Customer walking up to ConcessionClerk to buy popcorn and sodas.
+    clerk->lock->Acquire();
+    if (!clerk->getIsBreak()) {
+        clerk->setIsBusy(true);
+        lBuyFood->Release();
+ 
+        clerk->setGroupId(groupId);
+    // tell clerk popcorn sum and soda sum
+    for (int i = 0;i < 2; ++i) {
+            clerk->setFood(i, groupFoodSum[groupId][i]);
+            clerk->condition[1]->Signal(clerk->lock);
+            // wait for acknowledgement and amount
+            clerk->condition[1]->Wait(clerk->lock);
+        }
+    // give money
+        clerk->setPayment(amount);
+        clerk->condition[1]->Signal(clerk->lock);
+        //wait for clerk to acknowledge money 
+        clerk->condition[1]->Wait(clerk->lock);
+        // customer leave, get next customer
+        clerk->condition[1]->Signal(clerk->lock);
+    } else {
+    // if the concession clerk is on break
+        clerk->subWaitingSize();
+    // for race condition of waiting size
+        lBuyFood->Release();
+        clerk->lock->Release();
+        buyFood();
+    }
+    
+f. proceed with group after getting food
+
+g. check tickets
+    //Customer gets in a TicketTaker line
+    lCheckTickets->Acquire();
+    int lineIndex = -1;
+    while (lineIndex == -1) {
+        lineIndex = getInLine(lCheckTickets, cNoTicketTaker, MAX_TT, noTicketTaker, (Employee**)tt);
+    }
+    TicketTaker *clerk = tt[lineIndex];
+    // if the ticket taker is not avaliable
+    lTicketTaken->Acquire();
+    if (stopTicketTaken) {
+    // all customer should be waiting in the lobby
+        clerk->subWaitingSize();
+        cTicketTaken->Wait(lTicketTaken);
+        lTicketTaken->Release();
+        lCheckTickets->Release();
+        checkTickets();
+    }
+    lTicketTaken->Release();
+    // if the ticket taker is available
+    clerk->lock->Acquire();
+\    if (!clerk->getIsBreak() ) {
+        clerk->setIsBusy(true);
+        lCheckTickets->Release();
+        clerk->setGroupId(groupId);
+        // give ticket receipt to the ticket taker 
+        clerk->setTicketSum(ticketReceipt[groupId]);
+        clerk->condition[1]->Signal(clerk->lock);
+        clerk->condition[1]->Wait(clerk->lock);
+        lTicketTaken->Acquire();
+h. proceed with group after allowed into theater room
+i. arrange seats
+    lFindSeats->Acquire();
+    // Head customer get a seat for him/herself         
+    getSeats(groupSize);
+    seatPos=SeatLocation[0];	
+    seatState[SeatLocation[0]]=true;
+    for(i=1;i< groupSize;i++){
+        lGroup[groupId]->Acquire();
+        seatPos=SeatLocation[i];	
+        sWaitSeat[groupId]->V();        
+        cGroup[groupId]->Wait(lGroup[groupId]);
+        seatState[seatPos]=true;
+    }
+    lFindSeats->Release();      
+    
+j. sit in the theater room
+    //assumption:customer always choose seat from the beginning of a row
+    for(i=0;i<MAX_ROW;i++){
+        consecutive=0;
+        for(j=0;j<MAX_COL;j++){
+            if(seatState[j+i*MAX_COL]==false){
+                consecutive++;         
+            }
+        }
+        SeatAvailable[i]=consecutive; 
+    }
+    //Search for the first time if any consecutive seats
+    for(i=0;i<MAX_ROW;i++){  
+        if(SeatAvailable[i]>=Size){
+            for(j=0;j<Size;j++){
+                SeatLocation[j]=(MAX_COL-SeatAvailable[i]+j)+i*MAX_COL;               
+                bFind=true;
+            }
+            SeatAvailable[i]=0;
+        }
+    }
+    if(bFind==false){
+        for(i=0;i<MAX_ROW;i++){  
+            if(SeatAvailable[i]!=0){
+                  for(j=0;j<SeatAvailable[i];j++){
+                        SeatLocation[RequestSeat]=(MAX_COL-SeatAvailable[i])+i*MAX_COL; 
+                        RequestSeat++;          
+                  }
+                  SeatAvailable[i]=0;
+            }
+            if(RequestSeat==Size-1){
+                break;
+            }
+        }   
+    }
+k. proceed with group after movie over
+
+l. go bathroom or wait in lobby
+    lGroup[groupId]->Acquire();
+    //head customer ask if the members needs to go to the bathroom
+    if (!groupAskForBathroom[groupId]) {
+        cGroup[groupId]->Wait(lGroup[groupId]);
+    }
+    if(answerForBathroom()){
+         groupBathroomSum[groupId]++;
+         sGroupBathroom[groupId]->V();
+         //customer goes to the bathroom and go back to lobby afterwords 
+         goBathroom();  
+         sGroupBathroom[groupId]->V();
+    }else{
+    //the member doesn't want to go to the bathroom
+         sGroupBathroom[groupId]->V();   
+    }
+    lGroup[groupId]->Release();
+m. proceed with group after bathroom
+n. leave theater
+       
 5.      Testing: 
 6.      Discussions: 
 7.      Miscellaneous: 
