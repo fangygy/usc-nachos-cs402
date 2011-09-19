@@ -61,6 +61,7 @@ void Manager::startMovie() {
 void Manager::startTicketTaken() {
     lIsMovieOver->Acquire();
     if (bIsMovieOver == true) {
+       
         bIsMovieOver = false;
         lTicketTaken->Acquire();
         // set false
@@ -68,6 +69,7 @@ void Manager::startTicketTaken() {
         ticketTaken = 0;
         // ask customer and ticket clert to start ticket taken
         cTicketTaken->Broadcast(lTicketTaken);
+        
         lTicketTaken->Release();
     }
     lIsMovieOver->Release();
