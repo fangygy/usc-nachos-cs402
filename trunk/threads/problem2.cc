@@ -73,6 +73,7 @@ void mr_new(int i) {
     //printf("%s: new Manager %d\n", currentThread->getName(), i);
     //mr[i] = new Manager(i);
     test1();
+    mr[0]->work();
 }
 
 
@@ -152,7 +153,6 @@ void test1() {
         t->Fork((VoidFunctionPtr)mt_new, i);
     }
      
-    mr[0]->work();
 }
 void Problem2() {
     init();
@@ -282,20 +282,34 @@ void TestCase_P2_3(){
 
    
 }
+
+void mr_t4() {
+    while (true) {
+        mr[0]->randToBreak(lBuyTickets, (Employee**)tc, MAX_TC, noTicketClerk, cNoTicketClerk, sNoTicketClerk);
+        for (int i = 0;i < 10; ++i) {
+            currentThread->Yield();
+        }
+    }
+}
 void TestCase_P2_4(){
 
-   init();
-   char *name;
+    init();
+    char *name;
     Thread * t; 
+
+    // set ticketClerk on break
+    for (int i = 1; i < MAX_TC; ++i) {
+        tc[i]->setIsBreak(true);
+    }
+
     // create Manager 
-    
     for (int i = 0;i < MAX_MR; ++i) {
         name = new char[MAX_VAR];
         sprintf(name, "Thread_Manager_%d", i);
         t = new Thread(name);
-        t->Fork((VoidFunctionPtr)mr_new, i);
+        t->Fork((VoidFunctionPtr)mr_t4, i);
     }
-
+    test1();
    
 }
 void TestCase_P2_5(){

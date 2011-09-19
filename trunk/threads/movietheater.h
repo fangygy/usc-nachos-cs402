@@ -289,7 +289,7 @@ class MovieTechnician : public Employee{
 };
 extern MovieTechnician * mt[MAX_MT];
 class Manager : public Employee{
-  private:
+  public:
     void randToBreak(Lock * lockWaiting, Employee ** clerk, int count,  bool noClerk, Condition *cNoClerk, Semaphore * sNoClerk);
     // ask ticketTaker and customer to start
     void startTicketTaken();
@@ -297,7 +297,6 @@ class Manager : public Employee{
     void startMovie();
     // collect money from clerk
     void collectMoney();
-  public:
     void work();
     Manager(int mrId);
 };
