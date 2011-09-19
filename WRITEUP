@@ -6,7 +6,7 @@ Group: 50:
              Fang-Yi,Chu 
              Chien-Ming,Liao     chienmin@usc.edu      5148768361 
 
-1.      Requirements: 
+1. Requirements: 
 Part1: 
      To achieve synchronization among threads by implementing semaphores(which is already provided), locks, and condition variables. 
 Part2: 
@@ -16,23 +16,45 @@ TicketClerk - TicketClerks sell movie tickets to Customers.
 ConcessionClerk - ConcessionClerks sell food to Customers. 
 TicketTaker - TicketTakers take movie tickets that Customers have purchased from a TicketClerk, and they also remind the Customer the number of the theater that their movie is being shown in. 
 MovieTechnician - MovieTechnicians start and stop movies in each theater . 
-Manager - Managers keep the theater running by making sure the various employees are doing their job. Managers also collect money from cash registers every so often. 
-2.      Assumptions: 
+Manager - Managers keep the theater running by making sure the various employees are doing their job. Managers also collect money from cash registers every so often.
+2. Assumptions: 
 Customer:
 a. customers get into the movie theater with their group and ticketbuyers will interact with clerk after entering theater.
 b. if no clerks on service, customers cannot find a line and they need to wait in the lobby until the manager signal them
 c. if clerk is break, customers in the same line have to go back to re-line.
 d. customers tell ticketbuyer what food they want in one response.
-e. 
-3.      Design: 
+e. customers tell ticketbuyer is
+f. 
+g. 
+h. 
+i. 
+j. 
+3. Design: 
 Customer of TicketBuyer:
 a. enter theater with group
 b. buy tickets
+    find the shortest line and then get in line. if not find, wait in the lobby and set noClerk variables until the manager broadcast them.
+    if ticketClerk is busy then wait for ticketClerk signal, else go to signal free ticketClerk.
+    if ticketClerk is on break then go back find line, else interact with ticketClerk.
+    interact: tell clerk tickets sum, wait for money amount, and then pay money, wait to get tickets back, finish and leave.
 c. proceed with group after getting tickets
+    wait customers get gather, and broadcast customers.
 d. count food requests
+    ticketbuyer ask customer for food, and then customer response
 e. buy food
+    find line.
+    if concession clerk is busy then wait for clerk signal, else go to signal free clerk.
+    if concession clerk is on break then go back find line, else interact with clerk.
+    interact: tell clerk popcorn sum and soda sum, wait for acknowledgement and amount, and then pay money, wait to get food back, finish and leave.
 f. proceed with group after getting food
 g. check tickets
+    find line.
+    if ticket taker is busy then wait for clerk signal, else go to signal free clerk.
+    if ticket taker is on break then go back find line, else interact with clerk.
+    if ticket taker stops taking tickets, go to lobby and wait manager to broadcast.
+    then interact with ticket taker, give ticket receipt.
+    if ticket taker stop taking ticket for theater is full, go to lobby and wait for broadcast.
+    else wait ticket taker to allow to get into room.
 h. proceed with group after allowed into theater room
 i. arrange seats
 j. sit in the theater room
@@ -53,7 +75,7 @@ h. go bathroom or wait in lobby
 i. proceed with group after bathroom
 j. leave theater
 
-Manager:
+Manager: do while, and yield every loop
 a. check and break clerk (TicketClerk, ConcessionClerk, TicketTaker)
 b. start movie and stop ticket taken
 c. start ticket taken
@@ -71,16 +93,26 @@ c. give money to manager
 
 TicketTaker:
 a. check Tickets
+    if stop check ticket, wait for manager to broadcast
+    if on break, wait for manager signal
+    if customer on waiting line, ask customer to proceed,
+    then wait customer to signal,
+    get tickets sum from customer,
+    if too much tickets, stop taking tickets. first to ask the customer on service to wait on lobby, and broadcast every one in line to go lobby.
+    else allow customer to in, and not to enforce seats number.
 b. stop working if manager asks
 c. stop checking if no more place
 
 MovieTechnician:
 a. start movie
+    wait Manager to signal, then check the seated and then start movie.
 b. check if customer all seated
 
 Manager:
 a. check and break clerk (TicketClerk, ConcessionClerk, TicketTaker)
 b. start movie and stop ticket taken
+    if ticket taker stop taking tickets or ticket sold equals ticket taken which is not zero.
+    signal MovieTechnician to start movie.
 c. start ticket taken
 d. collect money after all customers leave
 
@@ -95,15 +127,15 @@ d. collect money after all customers leave
 
  	    Data structure modified:
            class Lock{
-           bool isUsed;    // false: lock unused; true: lock used
-           Thread *ownerThread; // the thread that is being processed right now 
-           List *waitingQueue;    // threads waiting to acquire lock
-           }
-           
+               bool isUsed;    // false: lock unused; true: lock used
+               Thread *ownerThread; // the thread that is being processed right now 
+               List *waitingQueue;    // threads waiting to acquire lock
+             }
+               
            class Condition{
-           Lock *waitingLock; // the lock which is waited by the queue
-           List *waitingQueue;// the waiting queue for the condition variable. 
-           }
+               Lock *waitingLock; // the lock which is waited by the queue
+               List *waitingQueue;// the waiting queue for the condition variable. 
+             }
            
            Function Modified:
            -Synch.cc
@@ -356,14 +388,14 @@ d. collect money after all customers leave
        //get the number of tickets taken
        int TicketTaker::getTicketSum() 
        
-5.      Testing: 
-        -Part I
-	     The test cases are already provided, and it will run all together at once.
+5. Testing: 
+    -Part I
+     The test cases are already provided, and it will run all together at once.
 
-         How to run:
-            To run test case 1, use "nachos -T" as the command.
+     How to run:
+        To run test case 1, use "nachos -T" as the command.
 
-         Test Output:
+     Test Output:
             Starting Test 1
             t1_t1: Acquired Lock t1_l1, waiting for t3
             t1_t2: trying to acquire lock t1_l1
@@ -413,185 +445,185 @@ d. collect money after all customers leave
 
 
 
-        - Part II
-	      
-    	##TEST CASE 1##
-    	
-           How to run:
-               
-           Test result:
-                Customer [0] in Group [0] is getting in TicketClerk line [0]
-                Customer [3] in Group [1] is getting in TicketClerk line [1]
-                Customer [8] in Group [2] is getting in TicketClerk line [2]
-                Customer [11] in Group [3] is getting in TicketClerk line [3]
-                Customer [13] in Group [4] is getting in TicketClerk line [4]
-                Customer [15] in Group [5] is getting in TicketClerk line [0]
-                Customer [17] in Group [6] is getting in TicketClerk line [1]
-                Customer [24] in Group [8] is getting in TicketClerk line [2]
-                Customer [22] in Group [7] is getting in TicketClerk line [3]
-                Customer [29] in Group [9] is getting in TicketClerk line [4]
-                Customer [31] in Group [11] is getting in TicketClerk line [0]
-                Customer [35] in Group [12] is getting in TicketClerk line [1]
-                Customer [37] in Group [13] is getting in TicketClerk line [2]
-                Customer [39] in Group [14] is getting in TicketClerk line [3]
-                Customer [30] in Group [10] is getting in TicketClerk line [4]
-                Customer [40] in Group [15] is getting in TicketClerk line [0]
+    - Part II
+      
+	##TEST CASE 1##
+	
+       How to run:
+           
+       Test result:
+            Customer [0] in Group [0] is getting in TicketClerk line [0]
+            Customer [3] in Group [1] is getting in TicketClerk line [1]
+            Customer [8] in Group [2] is getting in TicketClerk line [2]
+            Customer [11] in Group [3] is getting in TicketClerk line [3]
+            Customer [13] in Group [4] is getting in TicketClerk line [4]
+            Customer [15] in Group [5] is getting in TicketClerk line [0]
+            Customer [17] in Group [6] is getting in TicketClerk line [1]
+            Customer [24] in Group [8] is getting in TicketClerk line [2]
+            Customer [22] in Group [7] is getting in TicketClerk line [3]
+            Customer [29] in Group [9] is getting in TicketClerk line [4]
+            Customer [31] in Group [11] is getting in TicketClerk line [0]
+            Customer [35] in Group [12] is getting in TicketClerk line [1]
+            Customer [37] in Group [13] is getting in TicketClerk line [2]
+            Customer [39] in Group [14] is getting in TicketClerk line [3]
+            Customer [30] in Group [10] is getting in TicketClerk line [4]
+            Customer [40] in Group [15] is getting in TicketClerk line [0]
 
-                
-    	##TEST CASE 2##
-    	
-           How to run:
-               
-           Test result:
-                
-    	##TEST CASE 3##
-    	
-           How to run:
-               
-           Test result:
-                a.
-                Customer [0] in Group [0] is walking up to TicketClerk[0] to buy [1] tickets
-                Customer [3] in Group [1] is walking up to TicketClerk[1] to buy [3] tickets
-                Customer [8] in Group [2] is walking up to TicketClerk[2] to buy [5] tickets
-                Customer [9] in Group [3] is walking up to TicketClerk[3] to buy [1] tickets
-                Customer [11] in Group [4] is walking up to TicketClerk[4] to buy [2] tickets
-                Customer [0] in Group [0] is leaving TicketClerk[0]
-                Customer [3] in Group [1] is leaving TicketClerk[1]
-                Customer [9] in Group [3] is leaving TicketClerk[3]
-                Customer [13] in Group [5] is walking up to TicketClerk[0] to buy [2] tickets
-                Customer [8] in Group [2] is leaving TicketClerk[2]
-                Customer [11] in Group [4] is leaving TicketClerk[4]
-                Customer [18] in Group [6] is walking up to TicketClerk[1] to buy [5] tickets
-                Customer [18] in Group [6] is leaving TicketClerk[1]
-                Customer [13] in Group [5] is leaving TicketClerk[0]
+            
+	##TEST CASE 2##
+	
+       How to run:
+           
+       Test result:
+            
+	##TEST CASE 3##
+	
+       How to run:
+           
+       Test result:
+            a.
+            Customer [0] in Group [0] is walking up to TicketClerk[0] to buy [1] tickets
+            Customer [3] in Group [1] is walking up to TicketClerk[1] to buy [3] tickets
+            Customer [8] in Group [2] is walking up to TicketClerk[2] to buy [5] tickets
+            Customer [9] in Group [3] is walking up to TicketClerk[3] to buy [1] tickets
+            Customer [11] in Group [4] is walking up to TicketClerk[4] to buy [2] tickets
+            Customer [0] in Group [0] is leaving TicketClerk[0]
+            Customer [3] in Group [1] is leaving TicketClerk[1]
+            Customer [9] in Group [3] is leaving TicketClerk[3]
+            Customer [13] in Group [5] is walking up to TicketClerk[0] to buy [2] tickets
+            Customer [8] in Group [2] is leaving TicketClerk[2]
+            Customer [11] in Group [4] is leaving TicketClerk[4]
+            Customer [18] in Group [6] is walking up to TicketClerk[1] to buy [5] tickets
+            Customer [18] in Group [6] is leaving TicketClerk[1]
+            Customer [13] in Group [5] is leaving TicketClerk[0]
 
-                b. 
-                Customer [0] in Group [0] is walking up to ConcessionClerk[0] to buy [1] popcorn and [1] soda.
-                Customer [9] in Group [3] is walking up to ConcessionClerk[1] to buy [0] popcorn and [1] soda.
-                Customer [3] in Group [1] is walking up to ConcessionClerk[2] to buy [1] popcorn and [3] soda.
-                Customer [11] in Group [4] is walking up to ConcessionClerk[3] to buy [2] popcorn and [1] soda.
-                Customer [0] in Group [0] is leaving ConcessionClerk[0]
-                Customer [9] in Group [3] is leaving ConcessionClerk[1]
-                Customer [13] in Group [5] is walking up to ConcessionClerk[0] to buy [0] popcorn and [2] soda.
-                Customer [3] in Group [1] is leaving ConcessionClerk[2]
-                Customer [11] in Group [4] is leaving ConcessionClerk[3]
-                Customer [8] in Group [2] is walking up to ConcessionClerk[1] to buy [5] popcorn and [3] soda.
-                Customer [13] in Group [5] is leaving ConcessionClerk[0]
-                Customer [18] in Group [6] is walking up to ConcessionClerk[0] to buy [3] popcorn and [3] soda.
-                Customer [8] in Group [2] is leaving ConcessionClerk[1]
-                Customer [18] in Group [6] is leaving ConcessionClerk[0]
+            b. 
+            Customer [0] in Group [0] is walking up to ConcessionClerk[0] to buy [1] popcorn and [1] soda.
+            Customer [9] in Group [3] is walking up to ConcessionClerk[1] to buy [0] popcorn and [1] soda.
+            Customer [3] in Group [1] is walking up to ConcessionClerk[2] to buy [1] popcorn and [3] soda.
+            Customer [11] in Group [4] is walking up to ConcessionClerk[3] to buy [2] popcorn and [1] soda.
+            Customer [0] in Group [0] is leaving ConcessionClerk[0]
+            Customer [9] in Group [3] is leaving ConcessionClerk[1]
+            Customer [13] in Group [5] is walking up to ConcessionClerk[0] to buy [0] popcorn and [2] soda.
+            Customer [3] in Group [1] is leaving ConcessionClerk[2]
+            Customer [11] in Group [4] is leaving ConcessionClerk[3]
+            Customer [8] in Group [2] is walking up to ConcessionClerk[1] to buy [5] popcorn and [3] soda.
+            Customer [13] in Group [5] is leaving ConcessionClerk[0]
+            Customer [18] in Group [6] is walking up to ConcessionClerk[0] to buy [3] popcorn and [3] soda.
+            Customer [8] in Group [2] is leaving ConcessionClerk[1]
+            Customer [18] in Group [6] is leaving ConcessionClerk[0]
 
-                c. 
-                Customer [0] in Group [0] is walking up to TicketTaker[0] to give [1] tickets.
-                Customer [0] in Group [0] is leaving TicketTaker[0]
-                Customer [9] in Group [3] is walking up to TicketTaker[1] to give [1] tickets.
-                Customer [11] in Group [4] is walking up to TicketTaker[0] to give [2] tickets.
-                Customer [9] in Group [3] is leaving TicketTaker[1]
-                Customer [11] in Group [4] is leaving TicketTaker[0]
-                Customer [3] in Group [1] is walking up to TicketTaker[2] to give [3] tickets.
-                Customer [3] in Group [1] is leaving TicketTaker[2]
-                Customer [13] in Group [5] is walking up to TicketTaker[0] to give [2] tickets.
-                Customer [13] in Group [5] is leaving TicketTaker[0]
-                Customer [8] in Group [2] is walking up to TicketTaker[1] to give [5] tickets.
-                Customer [8] in Group [2] is leaving TicketTaker[1]
-                Customer [18] in Group [6] is walking up to TicketTaker[0] to give [5] tickets.
-                Customer [18] in Group [6] is leaving TicketTaker[0]
+            c. 
+            Customer [0] in Group [0] is walking up to TicketTaker[0] to give [1] tickets.
+            Customer [0] in Group [0] is leaving TicketTaker[0]
+            Customer [9] in Group [3] is walking up to TicketTaker[1] to give [1] tickets.
+            Customer [11] in Group [4] is walking up to TicketTaker[0] to give [2] tickets.
+            Customer [9] in Group [3] is leaving TicketTaker[1]
+            Customer [11] in Group [4] is leaving TicketTaker[0]
+            Customer [3] in Group [1] is walking up to TicketTaker[2] to give [3] tickets.
+            Customer [3] in Group [1] is leaving TicketTaker[2]
+            Customer [13] in Group [5] is walking up to TicketTaker[0] to give [2] tickets.
+            Customer [13] in Group [5] is leaving TicketTaker[0]
+            Customer [8] in Group [2] is walking up to TicketTaker[1] to give [5] tickets.
+            Customer [8] in Group [2] is leaving TicketTaker[1]
+            Customer [18] in Group [6] is walking up to TicketTaker[0] to give [5] tickets.
+            Customer [18] in Group [6] is leaving TicketTaker[0]
 
-    	##TEST CASE 4##
-    	    Managers get Clerks off their break when lines get too long
+	##TEST CASE 4##
+	    Managers get Clerks off their break when lines get too long
 
-           We init with 5 clerk but only 1 on work. So 
-           How to run: nachos -rs 10 -TC4 | egrep "TicketClerk.*break|getting in TicketClerk"
+       We init with 5 clerk but only 1 on work. So 
+       How to run: nachos -rs 10 -TC4 | egrep "TicketClerk.*break|getting in TicketClerk"
 
-           Test result:
-                TicketClerk [1] is going on break.
-                TicketClerk [2] is going on break.
-                TicketClerk [4] is going on break.
-                Customer [0] in Group [0] is getting in TicketClerk line [0]
-                Customer [3] in Group [1] is getting in TicketClerk line [0]
-                Customer [8] in Group [2] is getting in TicketClerk line [0]
-                TicketClerk [3] is going on break.
-                Customer [10] in Group [3] is getting in TicketClerk line [0]
-                Customer [12] in Group [4] is getting in TicketClerk line [0]
-                Customer [17] in Group [5] is getting in TicketClerk line [0]
-                Customer [22] in Group [6] is getting in TicketClerk line [0]
-                TicketClerk [1] is coming off break.
-                Manager has told TicketClerk [1] to go on break.
-                Manager has told TicketClerk [0] to go on break.
+       Test result:
+            TicketClerk [1] is going on break.
+            TicketClerk [2] is going on break.
+            TicketClerk [4] is going on break.
+            Customer [0] in Group [0] is getting in TicketClerk line [0]
+            Customer [3] in Group [1] is getting in TicketClerk line [0]
+            Customer [8] in Group [2] is getting in TicketClerk line [0]
+            TicketClerk [3] is going on break.
+            Customer [10] in Group [3] is getting in TicketClerk line [0]
+            Customer [12] in Group [4] is getting in TicketClerk line [0]
+            Customer [17] in Group [5] is getting in TicketClerk line [0]
+            Customer [22] in Group [6] is getting in TicketClerk line [0]
+            TicketClerk [1] is coming off break.
+            Manager has told TicketClerk [1] to go on break.
+            Manager has told TicketClerk [0] to go on break.
 
 
-    	##TEST CASE 5##
-    	    Total sales never suffers from a race condition
+	##TEST CASE 5##
+	    Total sales never suffers from a race condition
 
-           How to run: nachos -rs 10 -TC5 | egrep "Number of Customer|Total tickets"
+       How to run: nachos -rs 10 -TC5 | egrep "Number of Customer|Total tickets"
 
-           Test result: 
-                Number of Customers = [19]
-                Total tickets sold by office = [19]
-                Total tickets taken by office = [19]
-                
-    	##TEST CASE 6##
-    	    Customer groups always move together through the theater. This requires explicit synchronization that you implement.
+       Test result: 
+            Number of Customers = [19]
+            Total tickets sold by office = [19]
+            Total tickets taken by office = [19]
+            
+	##TEST CASE 6##
+	    Customer groups always move together through the theater. This requires explicit synchronization that you implement.
 
-           How to run: nachos -rs 10 -TC6 | egrep "group \[1\]" | egrep "HeadCustomer"
-                       nachos -rs 10 -TC6 | egrep "group \[2\]" | egrep "HeadCustomer"
-           Test result:
+       How to run: nachos -rs 10 -TC6 | egrep "group \[1\]" | egrep "HeadCustomer"
+                   nachos -rs 10 -TC6 | egrep "group \[2\]" | egrep "HeadCustomer"
+       Test result:
 
-                Customer [1] of group [1] is waiting for the HeadCustomer.
-                Customer [2] of group [1] is waiting for the HeadCustomer.
-                HeadCustomer [3] of group [1] has told the group to proceed.
-                Customer [1] of group [1] has been told by the HeadCustomer to proceed.
-                Customer [1] of group [1] is waiting for the HeadCustomer.
-                Customer [2] of group [1] has been told by the HeadCustomer to proceed.
-                Customer [2] of group [1] is waiting for the HeadCustomer.
-                HeadCustomer [3] of group [1] has told the group to proceed.
-                Customer [1] of group [1] has been told by the HeadCustomer to proceed.
-                Customer [1] of group [1] is waiting for the HeadCustomer.
-                Customer [2] of group [1] has been told by the HeadCustomer to proceed.
-                Customer [2] of group [1] is waiting for the HeadCustomer.
-                HeadCustomer [3] of group [1] has told the group to proceed.
-                Customer [1] of group [1] has been told by the HeadCustomer to proceed.
-                Customer [2] of group [1] has been told by the HeadCustomer to proceed.
-                HeadCustomer [3] of group [1] has told the group to proceed.
-                HeadCustomer [3] of group [1] has told the group to proceed.
+            Customer [1] of group [1] is waiting for the HeadCustomer.
+            Customer [2] of group [1] is waiting for the HeadCustomer.
+            HeadCustomer [3] of group [1] has told the group to proceed.
+            Customer [1] of group [1] has been told by the HeadCustomer to proceed.
+            Customer [1] of group [1] is waiting for the HeadCustomer.
+            Customer [2] of group [1] has been told by the HeadCustomer to proceed.
+            Customer [2] of group [1] is waiting for the HeadCustomer.
+            HeadCustomer [3] of group [1] has told the group to proceed.
+            Customer [1] of group [1] has been told by the HeadCustomer to proceed.
+            Customer [1] of group [1] is waiting for the HeadCustomer.
+            Customer [2] of group [1] has been told by the HeadCustomer to proceed.
+            Customer [2] of group [1] is waiting for the HeadCustomer.
+            HeadCustomer [3] of group [1] has told the group to proceed.
+            Customer [1] of group [1] has been told by the HeadCustomer to proceed.
+            Customer [2] of group [1] has been told by the HeadCustomer to proceed.
+            HeadCustomer [3] of group [1] has told the group to proceed.
+            HeadCustomer [3] of group [1] has told the group to proceed.
 
-                Customer [5] of group [2] is waiting for the HeadCustomer.
-                Customer [6] of group [2] is waiting for the HeadCustomer.
-                Customer [7] of group [2] is waiting for the HeadCustomer.
-                Customer [4] of group [2] is waiting for the HeadCustomer.
-                HeadCustomer [8] of group [2] has told the group to proceed.
-                Customer [5] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [6] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [7] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [4] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [5] of group [2] is waiting for the HeadCustomer.
-                Customer [7] of group [2] is waiting for the HeadCustomer.
-                Customer [6] of group [2] is waiting for the HeadCustomer.
-                Customer [4] of group [2] is waiting for the HeadCustomer.
-                HeadCustomer [8] of group [2] has told the group to proceed.
-                Customer [5] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [5] of group [2] is waiting for the HeadCustomer.
-                Customer [7] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [7] of group [2] is waiting for the HeadCustomer.
-                Customer [6] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [4] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [6] of group [2] is waiting for the HeadCustomer.
-                Customer [4] of group [2] is waiting for the HeadCustomer.
-                HeadCustomer [8] of group [2] has told the group to proceed.
-                Customer [5] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [7] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [6] of group [2] has been told by the HeadCustomer to proceed.
-                Customer [4] of group [2] has been told by the HeadCustomer to proceed.
-                HeadCustomer [8] of group [2] has told the group to proceed.
-                HeadCustomer [8] of group [2] has told the group to proceed.
+            Customer [5] of group [2] is waiting for the HeadCustomer.
+            Customer [6] of group [2] is waiting for the HeadCustomer.
+            Customer [7] of group [2] is waiting for the HeadCustomer.
+            Customer [4] of group [2] is waiting for the HeadCustomer.
+            HeadCustomer [8] of group [2] has told the group to proceed.
+            Customer [5] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [6] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [7] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [4] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [5] of group [2] is waiting for the HeadCustomer.
+            Customer [7] of group [2] is waiting for the HeadCustomer.
+            Customer [6] of group [2] is waiting for the HeadCustomer.
+            Customer [4] of group [2] is waiting for the HeadCustomer.
+            HeadCustomer [8] of group [2] has told the group to proceed.
+            Customer [5] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [5] of group [2] is waiting for the HeadCustomer.
+            Customer [7] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [7] of group [2] is waiting for the HeadCustomer.
+            Customer [6] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [4] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [6] of group [2] is waiting for the HeadCustomer.
+            Customer [4] of group [2] is waiting for the HeadCustomer.
+            HeadCustomer [8] of group [2] has told the group to proceed.
+            Customer [5] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [7] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [6] of group [2] has been told by the HeadCustomer to proceed.
+            Customer [4] of group [2] has been told by the HeadCustomer to proceed.
+            HeadCustomer [8] of group [2] has told the group to proceed.
+            HeadCustomer [8] of group [2] has told the group to proceed.
 
-6.      Discussions:
+6. Discussions:
         
          
-7.      Miscellaneous: 
+7. Miscellaneous: 
         
-        	-Programming
-        	
-            -Compiling
-            
-           	-Testing & Debugging
+	-Programming
+	
+    -Compiling
+    
+   	-Testing & Debugging
