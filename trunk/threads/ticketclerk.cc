@@ -53,13 +53,17 @@ void TicketClerk::sellTickets() {
         // wait customer to signal
         condition[1]->Wait(lock);
         // if break 
+        lock->Release();
+        lBuyTickets->Acquire();
         if (getIsBreak()) {
             setIsBusy(false);
-            lock->Release();
+            lBuyTickets->Release();
             continue;
         } else {
             setIsBusy(true);
         }
+        lBuyTickets->Release();
+        lock->Acquire();
         // get tickets sum 
         int ticketSum = getTicketSum(); 
         // tell customers amount
@@ -69,17 +73,18 @@ void TicketClerk::sellTickets() {
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
         // cal amount
-        lAmount->Acquire();
+        //lAmount->Acquire();
         ticketClerkAmount[getId()] += getAmount();
-        lAmount->Release();
+        //lAmount->Release();
         // get money, handout the tickets 
         ticketReceipt[getGroupId()] = ticketSum;
-        lTicketSold->Acquire();
+        //lTicketSold->Acquire();
         totalTicketSold += ticketSum;
-        lTicketSold->Release();
+        //lTicketSold->Release();
         condition[1]->Signal(lock);
         // customer leave, get next customer 
         condition[1]->Wait(lock);
+        DEBUG('z',"\tTicketClerk [%d] got the lock back\n", getId());
         lock->Release();
 
     }

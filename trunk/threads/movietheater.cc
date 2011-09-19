@@ -1,7 +1,7 @@
 #include "movietheater.h"
 
 // declare pointer
-Customer *cr[MIN_CR];
+Customer *cr[MAX_CR];
 TicketClerk *tc[MAX_TC];
 ConcessionClerk *cc[MAX_CC];
 TicketTaker * tt[MAX_TT];

@@ -13,6 +13,7 @@ void Manager::work() {
         }
         // if all customer leave, collect money
         lCustomerLeft->Acquire();
+    DEBUG('z',"\tlCustomerLeft: %d \n", customerLeft);
         if (customerLeft == 0) {
             collectMoney();
             lCustomerLeft->Release();
@@ -42,11 +43,13 @@ void Manager::collectMoney() {
 void Manager::startMovie() {
     lTicketTaken->Acquire();
     lTicketSold->Acquire();
-    if (stopTicketTaken || totalTicketTaken == totalTicketSold) {
+    DEBUG('z',"\ttotalTicketTaken: %d, totalTicketSold: %d\n", totalTicketTaken, totalTicketSold);
+    if (stopTicketTaken || (totalTicketTaken == totalTicketSold && ticketTaken != 0)) {
         stopTicketTaken = true;
         sStartMovie->V();
     }
     lTicketTaken->Release();
+    lTicketSold->Release();
 }
 // ask ticketTaker and customer to start
 void Manager::startTicketTaken() {

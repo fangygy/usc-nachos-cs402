@@ -5,13 +5,15 @@
 #include "system.h"
 #include "synch.h"
 
+#define MAX_CR 1000
 #define MIN_CR 40  // Customers
 #define MAX_TC 5  // TicketClerks
 #define MAX_CC 5  // ConcessionClerks
 #define MAX_TT 3  // TicketTakers
 #define MAX_MT 1  // MovieTechnician
 #define MAX_MR 1  // Manager
-#define MAX_GROUP 10  // Group
+#define MAX_GROUP 20  // Group
+#define MIN_GROUP 10  // Group
 #define MAX_GROUPSIZE 5  // groupsize
 
 #define MAX_VAR 200
@@ -211,7 +213,7 @@ class Customer {
      
 
 };
-extern Customer *cr[MIN_CR]; 
+extern Customer *cr[MAX_CR]; 
 
 class TicketClerk : public Employee{
   private:
