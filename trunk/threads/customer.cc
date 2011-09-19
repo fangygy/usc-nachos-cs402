@@ -129,9 +129,7 @@ void Customer::buyTickets() {
     //printTCStatus();
     //printf("============================\n");
     // interact with TicketClerk
-    printf("\t%s DEBUG error 1\n", currentThread->getName());
     clerk->lock->Acquire();
-    printf("\t%s DEBUG error 2\n", currentThread->getName());
     if (!clerk->getIsBreak()) {
         clerk->setIsBusy(true);
         lBuyTickets->Release(); 
@@ -569,15 +567,14 @@ void Customer::checkBathroom(){
         }
 
         if(answerForBathroom()){
-        	 printf("DEBUG_O:Customer [%d] in Group [%d] is going to the bathroom.\n",customerId,groupId);
+        	 printf("Customer [%d] in Group [%d] is going to the bathroom.\n",customerId,groupId);
              //goBathroom(); 
-             printf("DEBUG_O:Customer [%d] in Group [%d] is leaving the bathroom.\n",customerId,groupId);
-             printf("DEBUG_O:Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
+             printf("Customer [%d] in Group [%d] is leaving the bathroom.\n",customerId,groupId);
+             printf("Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
     	}else{
-        	 printf("DEBUG_O:Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
+        	 printf("Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
     	}
 
-printf("DEBUG_O:CCustomer [%d] in Group [%d] , bathroom#[%d]\n",customerId,groupId,groupBathroomSum[groupId]);
        
         
     for (int i = 1;i < groupBathroomSum[groupId]; ++i) {
@@ -597,14 +594,14 @@ void Customer::waitBathroom(){
 
     if(answerForBathroom()){
          groupBathroomSum[groupId]++;
-         printf("DEBUG_O:Customer [%d] in Group [%d] is going to the bathroom.\n",customerId,groupId); 
+         printf("Customer [%d] in Group [%d] is going to the bathroom.\n",customerId,groupId); 
          //goBathroom(); 
          sGroupBathroom[groupId]->V();
-         printf("DEBUG_O:Customer [%d] in Group [%d] is leaving the bathroom.\n",customerId,groupId);
+         printf("Customer [%d] in Group [%d] is leaving the bathroom.\n",customerId,groupId);
          sGroupLeaveBathroom[groupId]->V();
-         printf("DEBUG_O:Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId);   
+         printf("Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId);   
     }else{
-         printf("DEBUG_O:Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
+         printf("Customer [%d] in Group [%d] is in the lobby.\n",customerId,groupId); 
 
         sGroupBathroom[groupId]->V();
     }
