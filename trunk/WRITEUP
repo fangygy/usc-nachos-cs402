@@ -70,17 +70,19 @@ b. stop working if manager asks
 c. give money to manager
 
 TicketTaker:
+a. check Tickets
+b. stop working if manager asks
+c. stop checking if no more place
 
+MovieTechnician:
+a. start movie
+b. check if customer all seated
 
 Manager:
 a. check and break clerk (TicketClerk, ConcessionClerk, TicketTaker)
 b. start movie and stop ticket taken
 c. start ticket taken
 d. collect money after all customers leave
-e.
-f.
-g.
-h.
 
 4.Implementation: 
      Part1:
@@ -173,15 +175,15 @@ h.
        extern double concessionClerkAmount[MAX_CC];
        extern int seatPos;
 
-       extern bool noTicketClerk;
-       extern bool noConcessionClerk;
-       extern bool noTicketTaker;
-       extern Condition *cNoTicketClerk;
-       extern Condition *cNoConcessionClerk;
-       extern Condition *cNoTicketTaker;
-       extern Semaphore *sNoTicketClerk;
-       extern Semaphore *sNoConcessionClerk;
-       extern Semaphore *sNoTicketTaker;
+       extern bool noTicketClerk;  // no clerk
+       extern bool noConcessionClerk;  // no clerk
+       extern bool noTicketTaker;  // no clerk
+       extern Condition *cNoTicketClerk;  // no clerk
+       extern Condition *cNoConcessionClerk;  // no clerk
+       extern Condition *cNoTicketTaker;  // no clerk
+       extern Semaphore *sNoTicketClerk;  // no clerk
+       extern Semaphore *sNoConcessionClerk;  // no clerk
+       extern Semaphore *sNoTicketTaker;  // no clerk
        extern Semaphore *sWaitSeat[MAX_GROUP];  //semaphore to Seat
        extern int SeatLocation[MAX_GROUPSIZE];
        extern Semaphore *sStartMovie; 
@@ -200,7 +202,7 @@ h.
        class TicketTaker : public Employee{}
        class TicketTaker : public Employee{}
        class Manager : public Employee{}
-       
+
        -in customer.cc
        //Constructor of the customer class
        Customer::Customer(int cId, int gId, int gSize, bool ticketBuyer)
@@ -318,18 +320,6 @@ h.
        //acknoledge the manger that the movie is over
        void  MovieTechnician::infoManager(){}
 
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
            
            
            

@@ -306,7 +306,7 @@ void Customer::checkTickets() {
             clerk->subWaitingSize();
             printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.", customerId, groupId, lineIndex);
             printf("Customer [%d] in Group [%d] is in the lobby.\n", customerId, groupId);
-            cTicketTaken->Wait(lCheckTickets);
+            cTicketTaken->Wait(lTicketTaken);
             printf("Customer [%d] in Group [%d] is leaving the lobby.\n",  customerId, groupId);
             lCheckTickets->Release();
             checkTickets();
