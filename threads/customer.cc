@@ -47,21 +47,18 @@ void Customer::action() {
 //        DEBUG('z', "\tGroup [%d] finish waitGroup after finish check tickets.\n", groupId);
         DEBUG('z', "\tGroup [%d] start take seat.\n", groupId);
         arrangeSeats();
-
         DEBUG('z', "\tGroup [%d] finish take seat.\n", groupId);
         watchMovie();
         proceed(groupLeaveRoom);
         prtLeaveRoomMsg();
         checkBathroom();
-        
         proceed(groupLeaveTheater);
         leaveTheater(); 
     } else {
         // regular customer
         waitTickets();
         waitFood();  
-        waitCheck();
-           
+        waitCheck();           
         waitSeats();
         watchMovie();
         waitLeaveRoom();
@@ -115,8 +112,7 @@ int Customer::getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk
 void Customer::buyTickets() {
 
     int lineIndex = -1;
-    //printf("Customer %d try to get in line\n",customerId);
-    //printTCStatus();
+
     lBuyTickets->Acquire();
     while (lineIndex == -1) {
         lineIndex = getInLine(lBuyTickets, cNoTicketClerk, MAX_TC, noTicketClerk, (Employee**)tc);        
@@ -378,14 +374,14 @@ void Customer::arrangeSeats() {
     printf("Customer [%d] in Group [%d] has found the following seat: row [%d] and seat [%d]\n",customerId,groupId,(seatPos/MAX_ROW),seatPos%MAX_COL);   
     lGroup[groupId]->Acquire();
     seatState[SeatLocation[0]]=true;
+
+    //Head customer arrange seats for group member
     for(i=1;i< groupSize;i++){
         
         seatPos=SeatLocation[i];
-        //groupArrangeSeat[groupId]=true;	
         sWaitSeat[groupId]->V();        
         cGroup[groupId]->Wait(lGroup[groupId]);
         seatState[seatPos]=true;
-        //groupArrangeSeat[groupId]=false;	
     }
     lGroup[groupId]->Release();
     lFindSeats->Release();      
@@ -423,6 +419,7 @@ int Customer::getSeats(int Size){
         }
     }
 
+     //Search for any available seats if no consecutive seats
     if(bFind==false){
         for(i=0;i<MAX_ROW;i++){  
             if(SeatAvailable[i]!=0){
@@ -488,46 +485,21 @@ void Customer::waitCheck() {
     }
     printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n", customerId, groupId);
    
-    //TODO:delete
-    /*
-     lStartMovie->Acquire();
-    // get seat number from ticketbuyer
-    //seatState[] = ture;
-    //seatNumber = 
-    sGroup[groupId]->V();
-    lStartMovie->Release();
-   */
-    // after get seat, semaphore
+ 
     lGroup[groupId]->Release();
 
 }
 void Customer::waitSeats() {
  
-    //if(!groupArrangeSeat[groupId]){
-        sWaitSeat[groupId]->P();
-   // }
+    
+    sWaitSeat[groupId]->P();
+  
     lGroup[groupId]->Acquire();
     printf("Customer [%d] in Group [%d] has found the following seat: row [%d] and seat [%d]\n",customerId,groupId,(seatPos/MAX_ROW),(seatPos%MAX_COL));   
     cGroup[groupId]->Signal(lGroup[groupId]);
     lGroup[groupId]->Release();
        
         
-     
-    //TODO:to delete
-//    printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n", customerId, groupId);
-    // take seat
-    /*lStartMovie->Acquire();
-    // get seat number from ticketbuyer
-    //seatState[] = ture;
-    //seatNumber = 
-    //sGroup[groupId]->V();
-    //lStartMovie->Release();
-
-    // after get seat, semaphore
-    sGroup[groupId]->V();
-    lGroup[groupId]->Release();
-
-  */
 }
 
 
