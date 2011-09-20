@@ -83,3 +83,12 @@ extern void DEBUG (char flag, char* format, ...);  	// Print debug message
 
 
 #endif // UTILITY_H
+
+#define DEBUGINFO(flag, format, var...)                                               \
+    if (DebugIsEnabled(flag)) {                                                       \
+        printf("\t DEBUGINFO flag %c, %s line %u : ", flag, __FILE__, __LINE__);      \
+        DEBUG(flag, format, ## var);                                                  \
+        printf("\n");                                                                 \
+    }                                                                         
+   
+

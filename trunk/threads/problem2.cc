@@ -120,7 +120,9 @@ void test1() {
         t->Fork((VoidFunctionPtr)cr_tb_new, int(customerData));
     }
     printf("Number of Customers = [%d]\n",nextCustomerNumber);
+    lCustomerLeft->Acquire();
     customerLeft = nextCustomerNumber;
+    lCustomerLeft->Acquire();
     printf("Number of Groups = [%d]\n",groupSum);
     // create ConcessionClerk 
     for (int i = 0;i < MAX_CC; ++i) {

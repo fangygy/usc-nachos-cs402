@@ -32,7 +32,7 @@ Employee::Employee(int eId, char * type) {
     id = eId;
     sprintf(employeeType, "%s", type);
     //strcpy(employeeType, type);
-    isBusy = false;
+    isBusy = true;
     isBreak = false;
     waitingSize = 0;
     char str[30];

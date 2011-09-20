@@ -8,7 +8,7 @@ void Manager::work() {
 //        randToBreak(lCheckTickets, (Employee**)tt, MAX_TT, noTicketTaker, cNoTicketTaker, sNoTicketTaker);
         startTicketTaken();
         startMovie();
-        for (int i = 0;i < 200; ++i) {
+        for (int i = 0;i < 300; ++i) {
             currentThread->Yield();
         }
         // if all customer leave, collect money
@@ -47,32 +47,51 @@ void Manager::collectMoney() {
 }
 // ask MT to startMovie
 void Manager::startMovie() {
-    lTicketTaken->Acquire();
-    lTicketSold->Acquire();
-    DEBUG('z',"\ttotalTicketTaken: %d, totalTicketSold: %d\n", totalTicketTaken, totalTicketSold);
-    if (stopTicketTaken || (totalTicketTaken == totalTicketSold && ticketTaken != 0)) {
-        stopTicketTaken = true;
-        sStartMovie->V();
+    lMovieState->Acquire();
+    if (movieState == 1) {
+        DEBUGINFO('c', "%s acquire lTicketTaken, lTicketTaken's owner : %s", getEmployeeType(), lTicketTaken->getOwnerThread() == NULL? "NULL": lTicketTaken->getOwnerThread()->getName());
+        lTicketTaken->Acquire();
+        DEBUGINFO('c', "%s acquire lTicketSold, lTicketSold's owner : %s", getEmployeeType(), lTicketSold->getOwnerThread() == NULL? "NULL": lTicketSold->getOwnerThread()->getName());
+        lTicketSold->Acquire();
+        DEBUG('z',"\ttotalTicketTaken: %d, totalTicketSold: %d\n", totalTicketTaken, totalTicketSold);
+        DEBUGINFO('c', "%s totalTicketTaken: %d, totalTicketSold: %d, ticketTaken: %d", getEmployeeType(), totalTicketTaken, totalTicketSold, ticketTaken);
+        if (stopTicketTaken || (totalTicketTaken == totalTicketSold && ticketTaken != 0)) {
+            DEBUGINFO('c', "%s totalTicketTaken: %d, totalTicketSold: %d, ticketTaken: %d", getEmployeeType(), totalTicketTaken, totalTicketSold, ticketTaken);
+            stopTicketTaken = true;
+            movieState = 2;
+            sStartMovie->V();
+        }
+        lTicketTaken->Release();
+        lTicketSold->Release();
     }
-    lTicketTaken->Release();
-    lTicketSold->Release();
+    lMovieState->Release();
+    
 }
 // ask ticketTaker and customer to start
 void Manager::startTicketTaken() {
-    lIsMovieOver->Acquire();
-    if (bIsMovieOver == true) {
-       
-        bIsMovieOver = false;
+    DEBUGINFO('c', "%s acquire lMovieState, lMovieState's owner : %s", getEmployeeType(), lMovieState->getOwnerThread() == NULL? "NULL": lMovieState->getOwnerThread()->getName());
+    lMovieState->Acquire();
+    DEBUGINFO('c', "%s finish acquire lMovieState, movieState: %d", getEmployeeType(), movieState);
+    if (movieState == 0) {
+        DEBUGINFO('c', "%s acquire lTicketTaken, lTicketTaken's owner : %s", getEmployeeType(), lTicketTaken->getOwnerThread() == NULL? "NULL": lTicketTaken->getOwnerThread()->getName());
         lTicketTaken->Acquire();
-        // set false
-        stopTicketTaken = false;
-        ticketTaken = 0;
-        // ask customer and ticket clert to start ticket taken
-        cTicketTaken->Broadcast(lTicketTaken);
-        
+        DEBUGINFO('c', "%s finish acquire lTicketTaken, stopTicketTaken: %d", getEmployeeType(), stopTicketTaken);
+        if (stopTicketTaken) {
+            
+            //bIsMovieOver = false;
+            DEBUGINFO('c', "%s acquire lTicketTaken, lTicketTaken's owner : %s", getEmployeeType(), lTicketTaken->getOwnerThread() == NULL? "NULL": lTicketTaken->getOwnerThread()->getName());
+            lTicketTaken->Acquire();
+            stopTicketTaken = false;
+            // set state to 1
+            movieState = 1;
+            ticketTaken = 0;
+            DEBUGINFO('c', "%s startTicketTaken", getEmployeeType() );
+            // ask customer and ticket clert to start ticket taken
+            cTicketTaken->Broadcast(lTicketTaken);
+        }
         lTicketTaken->Release();
     }
-    lIsMovieOver->Release();
+    lMovieState->Release();
 }
 // rand ask employee to break
 void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count, bool noClerk, Condition *cNoClerk, Semaphore * sNoClerk) {
