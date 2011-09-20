@@ -66,7 +66,7 @@ void ConcessionClerk::sellFood() {
         // if break 
         
         lBuyFood->Acquire();
-        if (getIsBreak()) {
+        if (getIsBreak() && !getIsBusy()) {
             setIsBusy(false);
             lock->Release();
             lBuyFood->Release();

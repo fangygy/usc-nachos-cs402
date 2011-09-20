@@ -1,0 +1,4 @@
+rm test3
+nachos -P2 -d c -rs 10 | egrep "DEBUGINFO|Number of Group" | cat > test3
+grep "Number of Customer" test3 
+grep "finish check Ticket" test3|wc -l

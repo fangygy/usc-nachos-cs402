@@ -1,0 +1,15 @@
+the thread of ticket taker is an infiniti loop of while 1
+step 1: check the conditions righ now, to know whether I could wait for the customers or not 
+a.if the manager want to break me, or there is a new line, or the manager have not said it is time to take tickets
+b. if there is any customers in the line, because I would be off or new line comes in, i need to ask all the customers in my line to choose shortes line again.
+c. if it is just because it is not time to take tickets, do nothing but wait
+c: set the state flag of the me
+d. wait for the condition changed, if changed goto step 1 to check again
+step 2: check if there are any one in my line, if there are wake them up
+step 3: wait for the customer come to take tickets and do business
+a. wait for the customer to wake me up
+b. waked up, right here we should check who wakes me up, because maybe it is the manger tells me to break off or ask anothe line to help me with so many customers, or the manager tell me it is not time to take tickets
+1: if break off or new line flag or not ready is true, go to step 1 to check and wait for condition changed	
+2. else it comes from the customer, let us do the business, get how many seats do they need
+3. check the avaiable seats number could meet their request or not, if could go to 4, otherwise to to 5
+4. book the seats and wake up the custoemr

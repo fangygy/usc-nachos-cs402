@@ -1,0 +1,2 @@
+group=$1
+grep -i "tickettaker \[$group\]"

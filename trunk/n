@@ -1,0 +1,6 @@
+if [ -n "$1" ]
+then
+  nachos -P2 -d c -rs $1 
+else 
+  nachos -P2 -d c -rs 10
+fi

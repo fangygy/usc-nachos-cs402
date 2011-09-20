@@ -55,7 +55,7 @@ void TicketClerk::sellTickets() {
         // if break 
         
         lBuyTickets->Acquire();
-        if (getIsBreak()) {
+        if (getIsBreak() && !getIsBusy()) {
             setIsBusy(false);
             lock->Release();
             lBuyTickets->Release();

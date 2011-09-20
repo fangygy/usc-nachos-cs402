@@ -1,0 +1,3 @@
+group=$1
+clerk=$2
+egrep -i "group \[$group\]|ticketclerk \[$clerk\]"
