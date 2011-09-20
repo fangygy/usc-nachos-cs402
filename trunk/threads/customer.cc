@@ -408,11 +408,12 @@ void Customer::arrangeSeats() {
     seatPos=SeatLocation[0];	
     printf("Customer [%d] in Group [%d] has found the following seat: row [%d] and seat [%d]\n",customerId,groupId,(seatPos/MAX_ROW),seatPos%MAX_COL);   
     lGroup[groupId]->Acquire();
+    DEBUGINFO('c', "Customer [%d] in Group [%d] arrange seat %d", customerId,groupId,SeatLocation[0]);
     seatState[SeatLocation[0]]=true;
 
     //Head customer arrange seats for group member
     for(i=1;i< groupSize;i++){
-        
+        DEBUGINFO('c', "Customer [%d] in Group [%d] arrange seat %d", customerId,groupId,SeatLocation[i]);
         seatPos=SeatLocation[i];
         sWaitSeat[groupId]->V();        
         cGroup[groupId]->Wait(lGroup[groupId]);
