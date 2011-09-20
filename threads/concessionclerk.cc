@@ -39,7 +39,7 @@ void ConcessionClerk::sellFood() {
             // wait for manager signal
             printf("%s [%d] is going on break.\n", getEmployeeType(), getId());
             lBuyFood->Release();
-            sNoTicketTaker->P();
+            sNoConcessionClerk->P();
             printf("%s [%d] is coming off break.\n", getEmployeeType(), getId());
             lBuyFood->Acquire();
             setIsBreak(false);
@@ -51,7 +51,7 @@ void ConcessionClerk::sellFood() {
         if (getWaitingSize() > 0) {
             setIsBusy(true);
             printf("ConcessionClerk [%d] has a line length [%d] and is signaling a customer.\n",getId(),getWaitingSize());
-            subWaitingSize();
+            //subWaitingSize();
             condition[0]->Signal(lBuyFood);
         } else {
             printf("ConcessionClerk [%d] has no one in line. I am available for a customer.\n",getId());
@@ -62,21 +62,23 @@ void ConcessionClerk::sellFood() {
         lBuyFood->Release();
         // wait customer or manager to signal
         condition[1]->Wait(lock);
+        DEBUGINFO('c', "%s [%d] wait customer or manager to signal > 0", getEmployeeType(), getId());
         // if break 
-        lock->Release();
+        
         lBuyFood->Acquire();
         if (getIsBreak()) {
             setIsBusy(false);
+            lock->Release();
             lBuyFood->Release();
             continue;
         } else {
             setIsBusy(true);
         }
         lBuyFood->Release();
-        lock->Acquire();
  
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
+        DEBUGINFO('c', "%s [%d] get money from group [%d]", getEmployeeType(), getId(), getGroupId());
         // tell customers food price 
         calAmount();
          printf("ConcessionClerk [%d] has an order for [%d] popcorn and [%d] soda. The cost is [%.2f].\n",getId(),getFood(FOOD_POPCORN),getFood (FOOD_SODA),getAmount());

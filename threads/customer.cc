@@ -28,44 +28,62 @@ void Customer::action() {
 //        DEBUG('z', "\tGroup [%d] start waitGroup after finish buy tickets.\n", groupId);
 //        waitGroup();
 //        DEBUG('z', "\tGroup [%d] finish waitGroup after finish buy tickets.\n", groupId);
+        DEBUGINFO('c', "Customer [%d] in group [%d] finish waitGroup after finish buy tickets", customerId, groupId);
         if (countFood()) {
-            DEBUG('z', "\tGroup [%d] start buy food.\n", groupId);
+            DEBUGINFO('c', "Customer [%d] in group [%d] start buy food", customerId, groupId);
             buyFood();
-            DEBUG('z', "\tGroup [%d] finish buy food.\n", groupId);
         }
+        DEBUGINFO('c', "Customer [%d] in group [%d] finish buy food", customerId, groupId);
         proceed(groupFood);
 //        DEBUG('z', "\tGroup [%d] start waitGroup after finish buy food.\n", groupId);
 //        waitGroup();
 //       DEBUG('z', "\tGroup [%d] finish waitGroup after finish buy food.\n", groupId);
-        DEBUG('z', "\tGroup [%d] start check tickets.\n", groupId);
+        DEBUGINFO('c', "Customer [%d] in group [%d] start check tickets.", customerId, groupId);
+        DEBUG('z', "\tGroup [%d] start \n", groupId);
         
         checkTickets();
+        DEBUGINFO('c', "Customer [%d] in group [%d] finish check Ticket", customerId, groupId);
         DEBUG('z', "\tGroup [%d] finish check tickets.\n", groupId);
         proceed(groupSeat);
 //        DEBUG('z', "\tGroup [%d] start waitGroup after finish check tickets.\n", groupId);
 //        waitGroup();
 //        DEBUG('z', "\tGroup [%d] finish waitGroup after finish check tickets.\n", groupId);
+        DEBUGINFO('c', "Customer [%d] in group [%d] start take seat", customerId, groupId);
         DEBUG('z', "\tGroup [%d] start take seat.\n", groupId);
         arrangeSeats();
+        DEBUGINFO('c', "Customer [%d] in group [%d] finish take seat", customerId, groupId);
         DEBUG('z', "\tGroup [%d] finish take seat.\n", groupId);
         watchMovie();
+        DEBUGINFO('c', "Customer [%d] in group [%d] finish watch Movie", customerId, groupId);
         proceed(groupLeaveRoom);
         prtLeaveRoomMsg();
+        DEBUGINFO('c', "Customer [%d] in group [%d] leave theater room", customerId, groupId);
         checkBathroom();
+        DEBUGINFO('c', "Customer [%d] in group [%d] leave bath room", customerId, groupId);
         proceed(groupLeaveTheater);
         leaveTheater(); 
+        DEBUGINFO('c', "Customer [%d] in group [%d] leave theater", customerId, groupId);
     } else {
         // regular customer
+        DEBUGINFO('c', "Customer [%d] in group [%d] waitTickets", customerId, groupId);
         waitTickets();
+        DEBUGINFO('c', "Customer [%d] in group [%d] waitFood", customerId, groupId);
         waitFood();  
-        waitCheck();           
+        DEBUGINFO('c', "Customer [%d] in group [%d] waitCheck", customerId, groupId);
+        waitCheck();   
+        DEBUGINFO('c', "Customer [%d] in group [%d] waitSeats", customerId, groupId);        
         waitSeats();
+        DEBUGINFO('c', "Customer [%d] in group [%d] watchMovie", customerId, groupId);
         watchMovie();
+        DEBUGINFO('c', "Customer [%d] in group [%d] waitLeaveRoom", customerId, groupId);
         waitLeaveRoom();
         prtLeaveRoomMsg();
+        DEBUGINFO('c', "Customer [%d] in group [%d] waitBathroom", customerId, groupId);
         waitBathroom();
+        DEBUGINFO('c', "Customer [%d] in group [%d] waitLeaveTheater", customerId, groupId);
         waitLeaveTheater();
         leaveTheater(); 
+        DEBUGINFO('c', "Customer [%d] in group [%d] leave theater", customerId, groupId);
     }
 }
 bool Customer::getIsTicketBuyer() {
@@ -76,7 +94,7 @@ int Customer::getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk
     int i, j;
     int lineIndex = -1;
     int lineLen = -1;
-    //lock->Acquire();
+    lock->Acquire();
 
     DEBUG('z', "\tGroup [%d] start find line\n", groupId);    
     for (i = 0;i < count; ++i) {
@@ -102,18 +120,17 @@ int Customer::getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk
         printf("Customer [%d] in Group [%d] is leaving the lobby.\n",  customerId, groupId);
     } else {
         DEBUG('z', "\tbusy%d\n", employee[lineIndex]->getIsBusy()?1:0);
-        if(employee[lineIndex]->getIsBusy()){        
-            employee[lineIndex]->addWaitingSize();
-        }
+        employee[lineIndex]->addWaitingSize();
     }
     DEBUG('z', "\t%dline%d\n", lineIndex, employee[lineIndex]->getWaitingSize());
+    DEBUGINFO('c', "\tCustomer [%d] in Group [%d] get in %s line [%d], length:%d\n", customerId, groupId, employee[lineIndex]->getEmployeeType(), lineIndex, employee[lineIndex]->getWaitingSize());
     return lineIndex; 
 }
 void Customer::buyTickets() {
 
     int lineIndex = -1;
 
-    lBuyTickets->Acquire();
+    //lBuyTickets->Acquire();
     while (lineIndex == -1) {
         lineIndex = getInLine(lBuyTickets, cNoTicketClerk, MAX_TC, noTicketClerk, (Employee**)tc);        
     }
@@ -130,6 +147,7 @@ void Customer::buyTickets() {
     //printf("============================\n");
     // interact with TicketClerk
     clerk->lock->Acquire();
+    clerk->subWaitingSize();
     if (!clerk->getIsBreak()) {
         clerk->setIsBusy(true);
         lBuyTickets->Release(); 
@@ -155,31 +173,35 @@ void Customer::buyTickets() {
         printf("Customer [%d] in Group [%d] is leaving TicketClerk[%d]\n",customerId,groupId,lineIndex);
     } else {
         printf("Customer [%d] in Group [%d] sees TicketClerk [%d] is on break.\n",customerId,groupId,lineIndex);
-        clerk->subWaitingSize();
         // for race condition of waiting size
+        //clerk->subWaitingSize();
         lBuyTickets->Release();
         clerk->lock->Release();
         buyTickets();
         return;
     }
     clerk->lock->Release();
+    DEBUGINFO('c', "Customer [%d] in group [%d] finish buy ticket from TicketClerk [%d]", customerId, groupId, lineIndex);
 }
 
 void Customer::buyFood() {
     int lineIndex = -1;
-    lBuyFood->Acquire();
+    //lBuyFood->Acquire();
     while (lineIndex == -1) {
         lineIndex = getInLine(lBuyFood, cNoConcessionClerk, MAX_CC, noConcessionClerk, (Employee**)cc);
     }
+    DEBUGINFO('c', "Customer [%d] in group [%d] get in ConcessionClerk [%d]", customerId, groupId, lineIndex);
     printf("Customer [%d] in Group [%d] is getting in ConcessionClerk line [%d]\n",customerId,groupId,lineIndex);
 
     ConcessionClerk *clerk = cc[lineIndex];
     if (clerk->getIsBusy()) {
         clerk->condition[0]->Wait(lBuyFood);
     }
+    DEBUGINFO('c', "Customer [%d] in group [%d] is walking up to ConcessionClerk [%d]", customerId, groupId, lineIndex);
     printf("Customer [%d] in Group [%d] is walking up to ConcessionClerk[%d] to buy [%d] popcorn and [%d] soda.\n",customerId,groupId,lineIndex,groupFoodSum[groupId][0],groupFoodSum[groupId][1]);
     // interact with ConcessionClerk 
     clerk->lock->Acquire();
+    clerk->subWaitingSize();
     if (!clerk->getIsBreak()) {
         clerk->setIsBusy(true);
         lBuyFood->Release();
@@ -187,6 +209,7 @@ void Customer::buyFood() {
         clerk->setGroupId(groupId);
         // tell clerk popcorn sum and soda sum
 
+        DEBUGINFO('c', "Customer [%d] in group [%d] interact with ConcessionClerk [%d]", customerId, groupId, lineIndex);
         for (int i = 0;i < 2; ++i) {
             clerk->setFood(i, groupFoodSum[groupId][i]);
             clerk->condition[1]->Signal(clerk->lock);
@@ -195,6 +218,7 @@ void Customer::buyFood() {
         }
 
  
+        DEBUGINFO('c', "Customer [%d] in group [%d] is paying to ConcessionClerk [%d]", customerId, groupId, lineIndex);
         // give money
         double amount = clerk->getAmount();
         clerk->setPayment(amount);
@@ -204,11 +228,14 @@ void Customer::buyFood() {
         clerk->condition[1]->Wait(clerk->lock);
         // customer leave, get next customer
         clerk->condition[1]->Signal(clerk->lock);
+
+        DEBUGINFO('c', "Customer [%d] in group [%d] is leaving ConcessionClerk [%d]", customerId, groupId, lineIndex);
         printf("Customer [%d] in Group [%d] is leaving ConcessionClerk[%d]\n",customerId,groupId,lineIndex);
 
     } else {
         printf("Customer [%d] in Group [%d] sees ConcessionClerk [%d] is on break.\n",customerId,groupId,lineIndex);
-        clerk->subWaitingSize();
+        DEBUGINFO('c', "Customer [%d] in group [%d] sees ConcessionClerk [%d] on break", customerId, groupId, lineIndex);
+        //clerk->subWaitingSize();
         // for race condition of waiting size
         lBuyFood->Release();
         clerk->lock->Release();
@@ -254,29 +281,32 @@ int Customer::answerForFood(int food) {
 }
 
 void Customer::checkTickets() {
-    lCheckTickets->Acquire();
     int lineIndex = -1;
     while (lineIndex == -1) {
         lineIndex = getInLine(lCheckTickets, cNoTicketTaker, MAX_TT, noTicketTaker, (Employee**)tt);
     }
+    
     printf("Customer [%d] in Group [%d] is getting in TicketTaker line [%d]\n",customerId,groupId,lineIndex);
     TicketTaker *clerk = tt[lineIndex];
+    DEBUGINFO('c', "Customer [%d] in group [%d] get in %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
     // ? race condition
-    if (clerk->getIsBusy() && !stopTicketTaken) {
+    if (clerk->getIsBusy()) {
+        DEBUGINFO('c', "Customer [%d] in group [%d] wait for TicketTaker [%d]", customerId, groupId, lineIndex);
         clerk->condition[0]->Wait(lCheckTickets);
+        
     }
-    lCheckTickets->Release();
-    // if stop ticket taken
 
-      
+    // if stop ticket taken
     lTicketTaken->Acquire();
-    
+    clerk->subWaitingSize();
     if (stopTicketTaken) {
+        DEBUGINFO('c', "Customer [%d] in group [%d] sees in TicketTaker line [%d] no longer taking tickets", customerId, groupId, lineIndex);
         // TODO: ask all group to goto lobby
-        printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.\n", customerId, groupId, lineIndex); 
-        clerk->subWaitingSize();
+        printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.\n", customerId, groupId, lineIndex);
         printf("Customer [%d] in Group [%d] is in the lobby.\n", customerId, groupId);
+        lCheckTickets->Release();
         cTicketTaken->Wait(lTicketTaken);
+        DEBUGINFO('c', "Customer [%d] in group [%d] leave lobby to TicketTaker", customerId, groupId);
         printf("Customer [%d] in Group [%d] is leaving the lobby.\n",  customerId, groupId);
         lTicketTaken->Release();
         checkTickets();
@@ -284,54 +314,59 @@ void Customer::checkTickets() {
     }
     lTicketTaken->Release();
 
-    
-    lCheckTickets->Acquire();
-
+    DEBUGINFO('c', "Customer [%d] in Group [%d] is walking up to %s [%d] to give [%d] tickets.\n",customerId,groupId, clerk->getEmployeeType(), lineIndex, ticketReceipt[groupId]);
     printf("Customer [%d] in Group [%d] is walking up to TicketTaker[%d] to give [%d] tickets.\n",customerId,groupId,lineIndex, ticketReceipt[groupId]);
     // interact with TicketTaker 
     clerk->lock->Acquire();
     if (!clerk->getIsBreak() ) {
+        DEBUGINFO('c', "Customer [%d] in group [%d] get lock with %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
         clerk->setIsBusy(true);
+        DEBUGINFO('c', "Customer [%d] in group [%d] wait %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
         lCheckTickets->Release();
+        DEBUGINFO('c', "Customer [%d] in group [%d] wait %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
         clerk->setGroupId(groupId);
+        DEBUGINFO('c', "Customer [%d] in group [%d] wait %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
         // give ticket receipt 
         clerk->setTicketSum(ticketReceipt[groupId]);
+        DEBUGINFO('c', "Customer [%d] in group [%d] wait %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
         clerk->condition[1]->Signal(clerk->lock);
-
+        DEBUGINFO('c', "Customer [%d] in group [%d] wait %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
         clerk->condition[1]->Wait(clerk->lock);
-        lTicketTaken->Acquire();
+        DEBUGINFO('c', "Customer [%d] in group [%d] get lock with %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
+        
         if (stopTicketTaken) {
             // TODO: ask all group to go back lobby
-            lCheckTickets->Acquire();
             clerk->lock->Release();
-            lCheckTickets->Release();
-            // leave the waiting line
-            clerk->subWaitingSize();
             printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.", customerId, groupId, lineIndex);
             printf("Customer [%d] in Group [%d] is in the lobby.\n", customerId, groupId);
+            DEBUGINFO('c', "Customer [%d] in group [%d] wait to retake ticket", customerId, groupId, lineIndex);
+            lTicketTaken->Acquire();
             cTicketTaken->Wait(lTicketTaken);
             printf("Customer [%d] in Group [%d] is leaving the lobby.\n",  customerId, groupId);
+            DEBUGINFO('c', "Customer [%d] in group [%d] get lock with ticket taker [%d]", customerId, groupId, lineIndex);
             
             lTicketTaken->Release();
             checkTickets();
             return;
         }
-        lTicketTaken->Release();
+        DEBUGINFO('c', "Customer [%d] in group [%d] is leaving %s [%d] get into room", customerId, groupId, clerk->getEmployeeType(), lineIndex);
         // get into room
         clerk->condition[1]->Signal(clerk->lock);
         printf("Customer [%d] in Group [%d] is leaving TicketTaker[%d]\n",customerId,groupId,lineIndex);
+DEBUGINFO('c', "Customer [%d] in group [%d] is leaving %s [%d] after get into room", customerId, groupId, clerk->getEmployeeType(), lineIndex);
     } else {
+        DEBUGINFO('c', "Customer [%d] in group [%d] sees TicketTaker [%d] is on break.", customerId, groupId, lineIndex);
         printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is on break.\n",customerId,groupId,lineIndex);
         lCheckTickets->Acquire();
-        clerk->subWaitingSize();
         // for race condition of waiting size
         lCheckTickets->Release();
         clerk->lock->Release();
         checkTickets();
         return;
     }
-
+DEBUGINFO('c', "Customer [%d] in group [%d] is leaving %s [%d] b get into room", customerId, groupId, clerk->getEmployeeType(), lineIndex);
     clerk->lock->Release();
+DEBUGINFO('c', "Customer [%d] in group [%d] is leaving %s [%d] c get into room", customerId, groupId, clerk->getEmployeeType(), lineIndex);
 }
 
 // rand for food
@@ -475,14 +510,16 @@ void Customer::waitFood() {
     lGroup[groupId]->Release();
 }
 void Customer::waitCheck() {
+    DEBUGINFO('c', "Customer [%d] in group [%d] wait check a", customerId, groupId);
     sGroup[groupId]->V();
     lGroup[groupId]->Acquire();
-
+    DEBUGINFO('c', "Customer [%d] in group [%d] wait check b", customerId, groupId);
     // TODO: wait in the lobby 
     printf("Customer [%d] of group [%d] is waiting for the HeadCustomer.\n",customerId,groupId);
     if (!groupSeat[groupId]) {
         cGroup[groupId]->Wait(lGroup[groupId]);
     }
+    DEBUGINFO('c', "Customer [%d] in group [%d] has been told by the HeadCustomer to proceed.", customerId, groupId);
     printf("Customer [%d] of group [%d] has been told by the HeadCustomer to proceed.\n", customerId, groupId);
    
  
@@ -504,20 +541,26 @@ void Customer::waitSeats() {
 
 
 void Customer::watchMovie(){
-   
+    DEBUGINFO('c', "Customer [%d] in group [%d] is waiting for sMT_CR_Chec P.", customerId, groupId);
     //Customers are checkd by Movie Techinician if they were seated
     sMT_CR_Check->P();
+    DEBUGINFO('c', "Customer [%d] in group [%d] is sitting in a theater room seat.", customerId, groupId);
     lStartMovie->Acquire();
+    DEBUGINFO('c', "Customer [%d] in group [%d] is sitting in a theater room seat.", customerId, groupId);
     cMT_CR_Check->Signal(lStartMovie);
+    DEBUGINFO('c', "Customer [%d] in group [%d] is sitting in a theater room seat.", customerId, groupId);
     lStartMovie->Release();
+    DEBUGINFO('c', "Customer [%d] in group [%d] is sitting in a theater room seat and wait for sMT_CR_Stop.", customerId, groupId);
     printf("Customer [%d] in group [%d] is sitting in a theater room seat.\n",customerId,groupId);
- 
+ DEBUGINFO('c', "%s P() %s value %d", currentThread->getName(), getName(), value);
     //watching movie and wait Movie Techinician to wake them up
     sMT_CR_Stop->P();
+    DEBUGINFO('c', "Customer [%d] in group [%d] acquire lStopMovie, lStopMovie's owner : %s", customerId,groupId, lStopMovie->getOwnerThread() == NULL? "NULL": lStopMovie->getOwnerThread()->getName());
     lStopMovie->Acquire();
+    DEBUGINFO('c', "Customer [%d] in group [%d] end acquire lStopMovie, lStopMovie's owner : %s", customerId,groupId, lStopMovie->getOwnerThread() == NULL? "NULL": lStopMovie->getOwnerThread()->getName());
     cMT_CR_Stop->Signal(lStopMovie);
     lStopMovie->Release();
- 
+    DEBUGINFO('c', "Customer [%d] in group [%d] is watching movie and wait up by Movie Techinician.", customerId, groupId);
 
 }
 void Customer::waitLeaveRoom(){
@@ -607,11 +650,13 @@ void Customer::waitLeaveTheater(){
 }
 
 void Customer::proceed(bool *flag) {
+    DEBUGINFO('c', "Customer [%d] in Group [%d] proceed to next.\n",customerId,groupId);
     for (int i = 1;i < groupSize; ++i) {
         sGroup[groupId]->P();
     }
-
+    DEBUGINFO('c', "Customer [%d] in Group [%d] proceed to next.\n",customerId,groupId);
     // tell group to go
+    DEBUGINFO('c', "Customer [%d] in Group [%d] acquire lGroup[%d], lGroup[]'s owner is %s ", customerId, groupId, groupId, lGroup[groupId]->getOwnerThread() == NULL? "NULL" : lGroup[groupId]->getOwnerThread()->getName());
     lGroup[groupId]->Acquire();
     cGroup[groupId]->Broadcast(lGroup[groupId]);
     printf("HeadCustomer [%d] of group [%d] has told the group to proceed.\n", customerId, groupId);

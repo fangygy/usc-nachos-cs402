@@ -16,7 +16,7 @@ Lock *lStopMovie = new Lock("Lock_StopMovie");
 Lock *lFindSeats = new Lock("Lock_FindSeat");
 Lock *lTicketSold = new Lock("Lock_TicketSold");
 Lock *lTicketTaken = new Lock("Lock_TicketTaken");
-Lock *lIsMovieOver = new Lock("Lock_IsMovieOver");
+Lock *lMovieState = new Lock("Lock_lMovieState");
 Lock *lAmount = new Lock("Lock_Amount"); 
 Lock *lCustomerLeft = new Lock("Lock_CustomerLeft");
 Semaphore *sGroup[MAX_GROUP];
@@ -44,7 +44,7 @@ bool groupLeaveRoom[MAX_GROUP];
 bool groupLeaveTheater[MAX_GROUP];
 bool groupLeaveBathRoom[MAX_GROUP];
 extern bool groupLeaveTheater[MAX_GROUP];
-bool bIsMovieOver;  //monitor variable for Movies State
+int movieState;  //monitor variable for Movies State, 0: over, 1: not start, 2: start
 int seatPos=-1;
 bool seatState[MAX_SEAT];
 Semaphore *sWaitSeat[MAX_GROUP]; 

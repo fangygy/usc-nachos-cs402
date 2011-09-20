@@ -65,7 +65,7 @@ void
 Semaphore::P()
 {
     IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
-    
+    DEBUGINFO('c', "%s P() %s value %d", currentThread->getName(), getName(), value);    
     while (value == 0) { 			// semaphore not available
 	queue->Append((void *)currentThread);	// so go to sleep
 	currentThread->Sleep();
@@ -94,6 +94,7 @@ Semaphore::V()
     if (thread != NULL)	   // make thread ready, consuming the V immediately
 	scheduler->ReadyToRun(thread);
     value++;
+    DEBUGINFO('c', "%s V() %s value %d", currentThread->getName(), getName(), value);
     (void) interrupt->SetLevel(oldLevel);
 }
 
@@ -154,6 +155,10 @@ void Lock::Release() {
     #endif
 }
 
+Thread* Lock::getOwnerThread() {
+    return ownerThread;
+}
+
 #ifdef CHANGED
 bool Lock::isHeldByCurrentThread() {
     return (ownerThread != NULL && ownerThread == currentThread);
@@ -174,7 +179,7 @@ void Condition::Wait(Lock* conditionLock) {
 
     // check if the conditionLock is NULL and is held by currentThread
     if (conditionLock == NULL || !conditionLock->isHeldByCurrentThread()) {
-        //printf("You do not have a lock\n");
+        DEBUGINFO('c', "ERROR: You do not have a lock\n");
         (void) interrupt->SetLevel(oldLevel);
         return;
     }
@@ -184,7 +189,7 @@ void Condition::Wait(Lock* conditionLock) {
     }
     // if waitingLock is not conditionLock, should return for wrong lock
     if (waitingLock != conditionLock) {
-        //printf("Wrong lock for waiting.\n");
+        DEBUGINFO('c', "ERROR: Wrong lock for waiting.\n");
         (void) interrupt->SetLevel(oldLevel);
         return;
     }
@@ -206,7 +211,7 @@ void Condition::Signal(Lock* conditionLock) {
     
     // check if the conditionLock is NULL and is held by currentThread
     if (conditionLock == NULL || !conditionLock->isHeldByCurrentThread()) {
-        //printf("You do not have a lock to signal other\n");
+        DEBUGINFO('c', "ERROR: You do not have a lock to signal other\n");
         (void) interrupt->SetLevel(oldLevel);
         return;
     }
@@ -218,7 +223,7 @@ void Condition::Signal(Lock* conditionLock) {
         return;
     }
     if (waitingLock != conditionLock) {
-       // printf("Pass the wrong lock.\n");
+        DEBUGINFO('c', "ERROR: Pass the wrong lock.\n");
         (void) interrupt->SetLevel(oldLevel);
         return;
     }

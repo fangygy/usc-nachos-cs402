@@ -72,8 +72,8 @@ extern bool groupArrangeSeat[MAX_GROUP];  // monitor variable for if get seats
 extern bool groupLeaveRoom[MAX_GROUP];
 extern bool groupLeaveTheater[MAX_GROUP];
 
-extern bool bIsMovieOver;  //monitor variable for Movies State
-extern Lock *lIsMovieOver;
+extern int movieState;  //monitor variable for Movies State, 0: over, 1: not start, 2: start
+extern Lock *lMovieState;
 extern bool seatState[MAX_SEAT];
 extern Semaphore *sSeat[MAX_SEAT];  //semaphore to Seat
 extern int ticketTaken;
