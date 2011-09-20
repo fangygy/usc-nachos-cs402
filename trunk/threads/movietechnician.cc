@@ -19,6 +19,9 @@ void MovieTechnician::checkSeated(){
     lTicketTaken->Acquire();
     DEBUGINFO('c', "%s acquire lStartMovie, lStartMovie's owner : %s", getEmployeeType(), lStartMovie->getOwnerThread() == NULL? "NULL": lStartMovie->getOwnerThread()->getName());
     lStartMovie->Acquire();    
+
+DEBUGINFO('c', "tickettaken %d\n", ticketTaken);
+
     for(i=0;i<ticketTaken;i++){  
           
         sMT_CR_Check->V();
