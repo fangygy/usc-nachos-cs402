@@ -71,7 +71,7 @@ void Customer::action() {
         waitFood();  
         DEBUGINFO('c', "Customer [%d] in group [%d] waitCheck", customerId, groupId);
         waitCheck();   
-        DEBUGINFO('c', "Customer [%d] in group [%d] waitSeats", customerId, groupId);        
+        DEBUGINFO('c', "Customer [%d] in group [%d] waitSeats", customerId, groupId); 
         waitSeats();
         DEBUGINFO('c', "Customer [%d] in group [%d] watchMovie", customerId, groupId);
         watchMovie();
@@ -403,10 +403,16 @@ void Customer::arrangeSeats() {
 
     int i=0;
     // Head customer get seat for self
-         
+    
+   
+   
+      DEBUGINFO('c', "SeatAvailable group size[%d]\n",groupSize);
+
+
+     
     getSeats(groupSize);
     seatPos=SeatLocation[0];	
-    printf("Customer [%d] in Group [%d] has found the following seat: row [%d] and seat [%d]\n",customerId,groupId,(seatPos/MAX_ROW),seatPos%MAX_COL);   
+    printf("Customer [%d] in Group [%d] has found the following seat: row [%d] and seat [%d]\n",customerId,groupId,(seatPos/MAX_ROW),seatPos%MAX_COL);  
     lGroup[groupId]->Acquire();
     DEBUGINFO('c', "Customer [%d] in Group [%d] arrange seat %d", customerId,groupId,SeatLocation[0]);
     seatState[SeatLocation[0]]=true;
@@ -450,27 +456,23 @@ int Customer::getSeats(int Size){
                 SeatLocation[j]=(MAX_COL-SeatAvailable[i]+j)+i*MAX_COL;               
                 bFind=true;
             }
-            SeatAvailable[i]=0;
+            SeatAvailable[i]=SeatAvailable[i]-Size;
             break;
         }
     }
-
-     //Search for any available seats if no consecutive seats
     if(bFind==false){
-        for(i=0;i<MAX_ROW;i++){  
-            if(SeatAvailable[i]!=0){
-                  for(j=0;j<SeatAvailable[i];j++){
+        for(i=0;i<MAX_ROW;i++){ 
+                while(SeatAvailable[i]!=0&& RequestSeat<Size){
                         SeatLocation[RequestSeat]=(MAX_COL-SeatAvailable[i])+i*MAX_COL; 
-                        RequestSeat++;          
+                        DEBUGINFO('c', "SeatAvailable RequestSeat[%d][%d][%d]",i, SeatAvailable[i],RequestSeat); 
+                        RequestSeat++;   
+                        SeatAvailable[i]--;     
                   }
-                  SeatAvailable[i]=0;
-            }
-            if(RequestSeat==Size-1){
-                break;
-            }
-        }   
+        }
+            
     }
 
+   
   
     return 1;
 }
@@ -553,7 +555,7 @@ void Customer::watchMovie(){
     lStartMovie->Release();
     DEBUGINFO('c', "Customer [%d] in group [%d] is sitting in a theater room seat and wait for sMT_CR_Stop.", customerId, groupId);
     printf("Customer [%d] in group [%d] is sitting in a theater room seat.\n",customerId,groupId);
- DEBUGINFO('c', "%s P() %s value %d", currentThread->getName(), getName(), value);
+ //DEBUGINFO('c', "%s P() %s value %d", currentThread->getName(), getName(), value);
     //watching movie and wait Movie Techinician to wake them up
     sMT_CR_Stop->P();
     DEBUGINFO('c', "Customer [%d] in group [%d] acquire lStopMovie, lStopMovie's owner : %s", customerId,groupId, lStopMovie->getOwnerThread() == NULL? "NULL": lStopMovie->getOwnerThread()->getName());
