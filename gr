@@ -1,0 +1,6 @@
+if [ -n "$1" ]
+then
+  grep -i "group \[$1\]"
+else
+  grep -i "group"
+fi

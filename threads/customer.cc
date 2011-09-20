@@ -90,7 +90,7 @@ bool Customer::getIsTicketBuyer() {
     return isTicketBuyer;
 }
 
-int Customer::getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk, Employee** employee ) {
+int Customer::getInLine(Lock *lock, Condition *cNoClerk, int count, bool & noClerk, Employee** employee ) {
     int i, j;
     int lineIndex = -1;
     int lineLen = -1;
@@ -114,6 +114,7 @@ int Customer::getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk
     // if no service
     if (lineIndex == -1) {
         // need to wait until the manager signal them
+        DEBUGINFO('c', "Customer [%d] in Group [%d] find noClerk %s, should wake up someone", customerId, groupId, employee[0]->getEmployeeType());
         noClerk = true;
         printf("Customer [%d] in Group [%d] is in the lobby.\n", customerId, groupId);
         cNoClerk->Wait(lock);
@@ -123,7 +124,7 @@ int Customer::getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk
         employee[lineIndex]->addWaitingSize();
     }
     DEBUG('z', "\t%dline%d\n", lineIndex, employee[lineIndex]->getWaitingSize());
-    DEBUGINFO('c', "\tCustomer [%d] in Group [%d] get in %s line [%d], length:%d\n", customerId, groupId, employee[lineIndex]->getEmployeeType(), lineIndex, employee[lineIndex]->getWaitingSize());
+    DEBUGINFO('c', "\tCustomer [%d] in Group [%d] get in %s line [%d], length:%d, busy:%d\n", customerId, groupId, employee[lineIndex]->getEmployeeType(), lineIndex, employee[lineIndex]->getWaitingSize(), employee[lineIndex]->getIsBusy()?1:0);
     return lineIndex; 
 }
 void Customer::buyTickets() {
@@ -134,9 +135,11 @@ void Customer::buyTickets() {
     while (lineIndex == -1) {
         lineIndex = getInLine(lBuyTickets, cNoTicketClerk, MAX_TC, noTicketClerk, (Employee**)tc);        
     }
+    
     // get in which line
     printf("Customer [%d] in Group [%d] is getting in TicketClerk line [%d]\n",customerId,groupId,lineIndex);
     TicketClerk *clerk = tc[lineIndex];
+    DEBUGINFO('c', "Customer [%d] in Group [%d] get in %s line [%d], length:%d, busy:%d\n", customerId, groupId, clerk->getEmployeeType(), lineIndex, clerk->getWaitingSize(), clerk->getIsBusy()?1:0);
     // if busy wait for ticketClerk
     if (clerk->getIsBusy()) {
         clerk->condition[0]->Wait(lBuyTickets);
@@ -555,7 +558,7 @@ void Customer::watchMovie(){
     lStartMovie->Release();
     DEBUGINFO('c', "Customer [%d] in group [%d] is sitting in a theater room seat and wait for sMT_CR_Stop.", customerId, groupId);
     printf("Customer [%d] in group [%d] is sitting in a theater room seat.\n",customerId,groupId);
- //DEBUGINFO('c', "%s P() %s value %d", currentThread->getName(), getName(), value);
+
     //watching movie and wait Movie Techinician to wake them up
     sMT_CR_Stop->P();
     DEBUGINFO('c', "Customer [%d] in group [%d] acquire lStopMovie, lStopMovie's owner : %s", customerId,groupId, lStopMovie->getOwnerThread() == NULL? "NULL": lStopMovie->getOwnerThread()->getName());

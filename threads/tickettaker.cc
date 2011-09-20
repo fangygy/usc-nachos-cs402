@@ -54,7 +54,7 @@ void TicketTaker::checkTickets() {
             setIsBusy(false);
         }
         lock->Acquire();
-        DEBUGINFO('c', "%s [%d] get work lock and wait for customer or manager", getEmployeeType(), getId());
+        DEBUGINFO('c', "%s [%d] get work lock and wait for customer or manager, busy: %d", getEmployeeType(), getId(), getIsBusy()?1:0);
         // on service
         lCheckTickets->Release();
         // wait customer to signal
@@ -63,7 +63,7 @@ void TicketTaker::checkTickets() {
         // if break ? race condition 
         lCheckTickets->Acquire();
         DEBUGINFO('c', "%s [%d] get line lock", getEmployeeType(), getId());
-        if (getIsBreak()) {
+        if (getIsBreak() && !getIsBusy()) {
             DEBUGINFO('c', "%s [%d] get on break", getEmployeeType(), getId());
             setIsBusy(false);
             lock->Release();
@@ -88,7 +88,7 @@ void TicketTaker::checkTickets() {
         // if too much, has to stop
         // ? if there is another ticketTaker on process, still not stop him
         DEBUGINFO('c', "%s [%d] check ticket sum, ticket num: %d, all ticket: %d", getEmployeeType(), getId(), getTicketSum(), ticketTaken);
-        if (ticketTaken + getTicketSum() > 25) {
+        if (stopTicketTaken || ticketTaken + getTicketSum() > 25) {
             DEBUGINFO('c', "%s [%d] get too much ticket and not to let in", getEmployeeType(), getId());
             stopTicketTaken = true;
             printf("TicketTaker [%d] is not allowing the group into the theater. The number of taken tickets is [%d] and the group size is [%d].\n", getId(), ticketTaken, getTicketSum());

@@ -1,0 +1,4 @@
+rm test1
+nachos -P2 -d c -rs 10 | egrep "DEBUGINFO|Number of Group" | cat > test1
+grep "Number of Customer" test1
+grep "finish buy tickets" test1 | wc -l

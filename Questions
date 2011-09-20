@@ -1,0 +1,13 @@
+? when stop to take ticket, how to break
+
+what state is the clerk when they are first init? and after one customer leave? if not busy, then how should customer signal them?
+
+if clerk find customer in line, will signal him. but not sub line size. customer sub line size.
+
+clerk is busy as long as there is someone in line. only if there is no one in line. and init as busy, so clerk have to check customer first.
+
+
+deadlock: tickettaker
+79:  lTicketTaken->Acquire();
+
+sStartMovie->V() many times?

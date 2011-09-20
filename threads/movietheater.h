@@ -199,7 +199,7 @@ class Customer {
     // for ticketBuyer to check group is ready to leave
     void leaveTheater();
     // find and get in the line
-    int getInLine(Lock *lock, Condition *cNoClerk, int count, bool noClerk, Employee** employee);
+    int getInLine(Lock *lock, Condition *cNoClerk, int count, bool & noClerk, Employee** employee);
     // watch movies when all customer seated
     void watchMovie();
     void prtLeaveRoomMsg();
