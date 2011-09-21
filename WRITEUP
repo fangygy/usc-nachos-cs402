@@ -23,6 +23,23 @@ a. customers get into the movie theater with their group and ticketbuyers will i
 b. if no clerks on service, customers cannot find a line and they need to wait in the lobby until the manager signal them
 c. if clerk is break, customers in the same line have to go back to re-line.
 d. customers tell ticketbuyer what food they want in one response.
+
+manager:
+a. if clerk is work with some customer, manager will let him first finish his job and then break him.
+b. manager check the ticket taken, ticket sold and ticket taker's status to make decision if start movie.
+c. after movie over, manager have to let ticket taker get to work
+
+ticket clerk:
+a. inited on busy.
+
+concession clerk:
+a. inited on busy.
+b. get food sum twice, and hand out food once.
+
+ticket taker:
+a. inited on busy.
+b. if one taker stop take ticket, others should stop too.
+c. if find that room is full, then ask customer on serve and waiting line to go back to lobby and wait with customer for the manager to broadcast.
  
 3. Design: 
 Customer of TicketBuyer:
@@ -78,11 +95,13 @@ d. collect money after all customers leave
 
 TicketClerk:
 a. sell tickets
+    if have customer, then set busy and signal the customer, else set not busy. Then wait customer or manager to signal, if break by manager, should get away. else get tickets sum and tell customers amount, get money and hand out ticket. after customer leave, get next customer 
 b. stop working if manager asks
 c. give money to manager
 
 ConcessionClerk:
 a. sell food
+    if have customer, then set busy and signal the customer, else set not busy. Then wait customer or manager to signal, if break by manager, should get away. else get food sum and tell customers amount, get money and hand out food. after customer leave, get next customer 
 b. stop working if manager asks
 c. give money to manager
 
