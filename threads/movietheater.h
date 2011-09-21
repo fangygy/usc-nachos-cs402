@@ -5,7 +5,7 @@
 #include "system.h"
 #include "synch.h"
 
-#define MAX_CR 1000
+#define MAX_CR 120
 #define MIN_CR 50  // Customers
 #define MAX_TC 5  // TicketClerks
 #define MAX_CC 5  // ConcessionClerks
