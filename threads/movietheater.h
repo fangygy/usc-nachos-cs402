@@ -25,19 +25,19 @@
 #define RATE_SODA 0.75  // chance to buy Soda
 #define RATE_BATHROOM 0.25  // chance to go bathroom
 
-#define PRICE_TICKET 12.00
-#define PRICE_SODA 4.00
-#define PRICE_POPCORN 5.00
-
+#define PRICE_TICKET 12.00  //ticket price
+#define PRICE_SODA 4.00     //soda price
+#define PRICE_POPCORN 5.00  //popcorn price
+ 
 #define FOOD_POPCORN 0
 #define FOOD_SODA    1 
 
-#define MOVIE_PERIOD_BASE  200
+#define MOVIE_PERIOD_BASE  200  
 #define MOVIE_PERIOD_VAR  100
 
-#define MAX_SEAT   25
-#define MAX_ROW    5
-#define MAX_COL    5
+#define MAX_SEAT   25  // capacity of theater room
+#define MAX_ROW    5   // theater room max row
+#define MAX_COL    5  // theater room max col
 
 extern Lock *lBuyTickets;  //Lock to get in line of buyTickets
 extern Lock *lBuyFood;  //Lock to get in line of buyFood
@@ -95,23 +95,23 @@ extern Semaphore *sNoTicketTaker; //semaphore for no ticket taker
 
 
 extern Semaphore *sWaitSeat[MAX_GROUP];  //semaphore to Seat
-extern int SeatLocation[MAX_GROUPSIZE];
-extern Semaphore *sStartMovie; 
-extern Semaphore *sMT_CR_Check;
-extern Condition *cMT_CR_Check;
+extern int SeatLocation[MAX_GROUPSIZE]; //variable to record seats number
+extern Semaphore *sStartMovie;  //semaphore to start movie
+extern Semaphore *sMT_CR_Check; //semaphore for movies technician to check customer
+extern Condition *cMT_CR_Check;  //condition variable for movies technician to check customer
 
-extern Semaphore *sStopMovie; 
-extern Semaphore *sMT_CR_Stop;
-extern Condition *cMT_CR_Stop;
+extern Semaphore *sStopMovie;  //semaphore to stop movie
+extern Semaphore *sMT_CR_Stop; //semaphore for movies technician to wake customer up
+extern Condition *cMT_CR_Stop;  //condition variable for movies technician to wake customer up
 
-extern int nextCustomerNumber;
-extern int groupSum;
-extern int customerLeft;
-extern int tcNumber,ccNumber,ttNumber,crNumber;
+extern int nextCustomerNumber;  //variable to record total customer number
+extern int groupSum;  //variable to record total group number
+extern int customerLeft;  //variable to record  customer left in the theater 
+extern int tcNumber,ccNumber,ttNumber,crNumber; //for user to input clerk number
 
 class Employee {
   private:
-    bool isBusy;
+    bool isBusy; 
     bool isBreak;
     int id;
     // group on service
@@ -161,7 +161,6 @@ class Customer {
     bool getIsTicketBuyer();
     // for ticketBuyer to buy tickets from ticketClerk
     void buyTickets();
-
     // for ticketBuyer to buy food from ConcessionClerk
     void buyFood();
     // for ticketBuyer to count Food
@@ -191,7 +190,6 @@ class Customer {
     void waitLeaveRoom(); 
     // ticketbuyer tell customer to proceed
     void proceed(bool * flag);
-    void setSeatNumber(int seatNum);
 
     // for customer to go bathroom
     void goBathroom();
@@ -208,7 +206,9 @@ class Customer {
     void waitBathroom();
      // for customer to decide if want to go bathroom
     bool answerForBathroom();
+     // for regular customer to wait for head customer to leave movie theather
     void waitLeaveTheater();
+    // get customer group id
     int getGroupId(); 
     int getId();   
      
@@ -226,8 +226,11 @@ class TicketClerk : public Employee{
     double payment;
   public:
     TicketClerk(int tcId);
+    //ticket clerk sell ticket and interact with headcustomer
     void sellTickets();
+    //for customer to tell ticket clerk ticket number
     void setTicketSum(int sum);
+    //for clerk to get ticket number from each head customer 
     int getTicketSum();
     // put amount in the variable
     void setAmount(int amount);
@@ -246,12 +249,15 @@ class ConcessionClerk : public Employee{
     double amount;
     // customer pay
     double payment;
+    //concession clerk calculate money
     void calAmount();
   public:
     ConcessionClerk(int ccId);
+     //concession clerk sell food and interact with head customer
     void sellFood();
     // customer tell cc sum for each food
     void setFood(int pos, int sum);
+    //for concession clerk to get food request
     int getFood(int pos);
     // amount for the food
     void setAmount(double amount);
@@ -268,6 +274,7 @@ class TicketTaker : public Employee{
     int ticketSum; 
   public:
     TicketTaker(int ttId);
+    //for ticket taker to take ticket and control the number in theater room
     void checkTickets(); 
     void setTicketSum(int sum);
     int getTicketSum();
@@ -276,12 +283,17 @@ extern TicketTaker * tt[MAX_TT];
 
 class MovieTechnician : public Employee{
   private:
+    //check if all customer seated
     void  checkSeated();
   public:
     MovieTechnician(int mtId);
+    //wait for manager to start movie
     void WaitManager();
+    //play movie for customer
     void playMovie();
+    //wake customer up after movie is over
     void infoCustomer();
+    //tell manager movie is over
     void infoManager();
     
 };

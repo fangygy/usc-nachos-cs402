@@ -5,6 +5,7 @@ Lock foodLineLock("foodLineLock");
 
 ConcessionClerk::ConcessionClerk(int ccId) : Employee(ccId, "ConcessionClerk") {
 }
+ //concession clerk calculate money
 void ConcessionClerk::calAmount() {
     amount = food[FOOD_POPCORN]*PRICE_POPCORN +food[FOOD_SODA]*PRICE_SODA;
 }
@@ -21,31 +22,28 @@ void ConcessionClerk::setPayment(double p) {
 double ConcessionClerk::getPayment() {
     return payment;
 }
+ // customer tell cc sum for each food
 void ConcessionClerk::setFood(int pos, int sum) {
     food[pos] = sum;
 }
+//for concession clerk to get food request
 int ConcessionClerk::getFood(int pos){
 
    return food[pos];
 
 }
-
-
-
+ //concession clerk sell food and interact with head customer
 void ConcessionClerk::sellFood() {
     while(true) {
         lBuyFood->Acquire();
         if (getIsBreak()) {
-            // wait for manager signal
+            //if clerk is on break,wait for manager signal
             printf("%s [%d] is going on break.\n", getEmployeeType(), getId());
             lBuyFood->Release();
             sNoConcessionClerk->P();
             printf("%s [%d] is coming off break.\n", getEmployeeType(), getId());
             lBuyFood->Acquire();
             setIsBreak(false);
-
-//            printf("ConcessionClerk [%d] is going on break.\n",getId());
-//            continue;
         }
         // if have customer, then set busy and signal the customer, else set free
         if (getWaitingSize() > 0) {
@@ -63,8 +61,9 @@ void ConcessionClerk::sellFood() {
         // wait customer or manager to signal
         condition[1]->Wait(lock);
         DEBUGINFO('c', "%s [%d] wait customer or manager to signal > 0", getEmployeeType(), getId());
-        // if break 
-        
+
+
+        // if break         
         lBuyFood->Acquire();
         if (getIsBreak() && !getIsBusy()) {
             setIsBusy(false);
@@ -84,13 +83,12 @@ void ConcessionClerk::sellFood() {
          printf("ConcessionClerk [%d] has an order for [%d] popcorn and [%d] soda. The cost is [%.2f].\n",getId(),getFood(FOOD_POPCORN),getFood (FOOD_SODA),getAmount());
         
         condition[1]->Signal(lock);
-        // wait for customer go pay
+        // wait for customer pay
         condition[1]->Wait(lock);
         // amount
         lAmount->Acquire();
         concessionClerkAmount[getId()] += getAmount();
         lAmount->Release();
-
         // get money, handout the food
         condition[1]->Signal(lock);
         printf("ConcessionClerk [%d] has been paid for the order.\n",getId());
