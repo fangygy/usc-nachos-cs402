@@ -11,6 +11,7 @@ struct CustomerData {
 };
 
 void test1();
+bool test_case();
 void TestCase_P2_1();
 void TestCase_P2_2();
 void TestCase_P2_3();
@@ -74,12 +75,245 @@ void mr_new(int i) {
     //mr[i] = new Manager(i);
     test1();
     mr[0]->work();
+    
+}
+void mr_new_testcase(int i) {
+    //printf("start mr_new\n");
+    //printf("%s: new Manager %d\n", currentThread->getName(), i);
+    //mr[i] = new Manager(i);
+    if(test_case()){
+        mr[0]->work();
+    }
+}
+bool test_case(){
+
+    printf ("Enter [ticket clerk] [concession clerk] [ticket taker] and [max customer] number:");
+    scanf ("%d %d %d %d",&tcNumber,&ccNumber,&ttNumber,&crNumber);
+    if(tcNumber>MAX_TC||tcNumber<=0){
+        printf ("ticket clerk number should be between 0 and 5\n");
+        return false; 
+    }   
+    //printf ("Enter your concession clerk number: ");
+    //scanf ("%d",&ccNumber);
+    if(ccNumber>MAX_CC||ccNumber<=0){
+        printf ("Concession clerk number should be between 0 and 5\n");
+        return false; 
+    }   
+   // printf ("Enter your ticket taker number: ");
+   // scanf ("%d",&ttNumber);
+    if(ttNumber>MAX_TT||ttNumber<=0){
+        printf ("Ticket taker number should be between 0 and 3\n");
+        return false; 
+    }  
+   // printf ("Enter your max customer number: ");
+   // scanf ("%d",&groupSum);
+    if(crNumber>MAX_CR_NUMBER){
+        printf ("Customer should be less than 100\n");
+        return false; 
+    } 
+   
+    
+    printf("Number of TicketClerks = [%d]\n",tcNumber);
+    printf("Number of ConcessionClerks = [%d]\n",ccNumber); 
+    printf("Number of TicketTakers = [%d]\n",ttNumber);
+
+
+
+
+     init();
+   char *name;
+    Thread * t; 
+
+
+    // create TicketClerk
+    for (int i = 0;i < tcNumber; ++i) {
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_TicketClerk_%d", i); 
+        // ? in thread or hear ?
+//        tc[i] = new TicketClerk(i);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)tc_new, i);
+    }
+
+
+
+
+  // create Customer
+    //groupSum = rand()%10 + 10;//MIN_GROUP + MIN_GROUP;
+    groupSum=0;
+    nextCustomerNumber = 0; 
+   for (int i = 0;i < MAX_GP_NUMBER; ++i) {
+        int groupSize = rand()%MAX_GROUPSIZE+1;
+        for (int j = 0;j < groupSize - 1; ++j) {
+            name = new char[MAX_VAR];
+            sprintf(name, "Thread_Customer_%d", nextCustomerNumber);
+            CustomerData *customerData = new CustomerData;
+            customerData->customerNumber = nextCustomerNumber++;
+            customerData->groupNumber = i;
+            customerData->groupSize = groupSize;
+            // ? in thread or here
+            cr[customerData->customerNumber] = new Customer(customerData->customerNumber, customerData->groupNumber, customerData->groupSize, false);
+            t = new Thread(name);
+            t->Fork((VoidFunctionPtr)cr_new, int(customerData));
+        }
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_Head_Customer_%d", nextCustomerNumber);
+        CustomerData *customerData = new CustomerData;
+        customerData->customerNumber = nextCustomerNumber++;
+        customerData->groupNumber = i;
+        customerData->groupSize = groupSize;
+        // ? in thread or here
+        cr[customerData->customerNumber] = new Customer(customerData->customerNumber, customerData->groupNumber, customerData->groupSize, true);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)cr_tb_new, int(customerData));
+        groupSum++;
+        if (nextCustomerNumber >= crNumber && nextCustomerNumber >= MIN_CR) break;
+        
+    }
+    printf("Number of Groups = [%d]\n",groupSum);
+    printf("Number of Customers = [%d]\n",nextCustomerNumber);
+
+    lCustomerLeft->Acquire();
+    customerLeft = nextCustomerNumber;
+    lCustomerLeft->Acquire();
+    
+    // create ConcessionClerk 
+    for (int i = 0;i < ccNumber; ++i) {
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_ConcessionClerk_%d", i);
+        // ? in thread or here
+//        cc[i] = new ConcessionClerk(i);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)cc_new, i);
+    }
+    
+    // create TicketTaker 
+    for (int i = 0;i < ttNumber; ++i) {
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_TicketTaker_%d", i);
+        // ? in thread or here
+//        tt[i] = new TicketTaker(i);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)tt_new, i);
+    }
+    
+
+    // create MovieTechnician 
+    for (int i = 0;i < MAX_MT; ++i) {
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_MovieTechnician_%d", i);
+        // ? in thread or here
+//        mt[i] = new MovieTechnician(i);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)mt_new, i);
+    }
+
+
 }
 
-
 void test1() {
+
+    tcNumber= MAX_TC;
+    ccNumber= MAX_CC;
+    ttNumber= MAX_TT;
+   
+
+
+   
+    printf("Number of TicketClerks = [%d]\n",tcNumber);
+    printf("Number of ConcessionClerks = [%d]\n",ccNumber); 
+    printf("Number of TicketTakers = [%d]\n",ttNumber);
+    
+
+
     char *name;
     Thread *t;
+
+    // create TicketClerk
+    for (int i = 0;i < tcNumber; ++i) {
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_TicketClerk_%d", i); 
+        // ? in thread or hear ?
+//        tc[i] = new TicketClerk(i);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)tc_new, i);
+    }
+    
+    // create Customer
+    groupSum = rand()%10 + 10;//MIN_GROUP + MIN_GROUP;
+    nextCustomerNumber = 0; 
+   for (int i = 0;i < groupSum; ++i) {
+        int groupSize = rand()%MAX_GROUPSIZE+1;
+        for (int j = 0;j < groupSize - 1; ++j) {
+            name = new char[MAX_VAR];
+            sprintf(name, "Thread_Customer_%d", nextCustomerNumber);
+            CustomerData *customerData = new CustomerData;
+            customerData->customerNumber = nextCustomerNumber++;
+            customerData->groupNumber = i;
+            customerData->groupSize = groupSize;
+            // ? in thread or here
+            cr[customerData->customerNumber] = new Customer(customerData->customerNumber, customerData->groupNumber, customerData->groupSize, false);
+            t = new Thread(name);
+            t->Fork((VoidFunctionPtr)cr_new, int(customerData));
+        }
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_Head_Customer_%d", nextCustomerNumber);
+        CustomerData *customerData = new CustomerData;
+        customerData->customerNumber = nextCustomerNumber++;
+        customerData->groupNumber = i;
+        customerData->groupSize = groupSize;
+        // ? in thread or here
+        cr[customerData->customerNumber] = new Customer(customerData->customerNumber, customerData->groupNumber, customerData->groupSize, true);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)cr_tb_new, int(customerData));
+        
+    }
+    printf("Number of Groups = [%d]\n",groupSum);
+    printf("Number of Customers = [%d]\n",nextCustomerNumber);
+
+    lCustomerLeft->Acquire();
+    customerLeft = nextCustomerNumber;
+    lCustomerLeft->Acquire();
+    
+    // create ConcessionClerk 
+    for (int i = 0;i < ccNumber; ++i) {
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_ConcessionClerk_%d", i);
+        // ? in thread or here
+//        cc[i] = new ConcessionClerk(i);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)cc_new, i);
+    }
+    
+    // create TicketTaker 
+    for (int i = 0;i < ttNumber; ++i) {
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_TicketTaker_%d", i);
+        // ? in thread or here
+//        tt[i] = new TicketTaker(i);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)tt_new, i);
+    }
+    
+
+    // create MovieTechnician 
+    for (int i = 0;i < MAX_MT; ++i) {
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_MovieTechnician_%d", i);
+        // ? in thread or here
+//        mt[i] = new MovieTechnician(i);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)mt_new, i);
+    }
+     
+}
+/*void test1() {
+    char *name;
+    Thread *t;
+      tcNumber= MAX_TC;
+    ccNumber= MAX_CC;
+    ttNumber= MAX_TT; 
+
 
     // create TicketClerk
     for (int i = 0;i < MAX_TC; ++i) {
@@ -155,7 +389,7 @@ void test1() {
         t->Fork((VoidFunctionPtr)mt_new, i);
     }
      
-}
+}*/
 void Problem2() {
     init();
     char* name;
@@ -169,21 +403,6 @@ void Problem2() {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-//*****************************************************************************************
-//
-//  Test case 1 
-//
-//**********************************************************************************
 
 
 
@@ -203,6 +422,12 @@ void cr_tb_new_t1(int arg) {
 
 
 
+//    * Customers always take the shortest line, but no 2 customers ever choose the same shortest line at the same time
+//    * Managers only read one from one Clerk's total money received, at a time.
+//    * Customers do not leave a Clerk, or TicketTaker, until they are told to do so. Clerks and TicketTakers do not start with another Customer until they know the current Customer has left. customer until they know that the last Customer has left their area
+//    * Managers get Clerks off their break when lines get too long
+//    * Total sales never suffers from a race condition
+//    * Customer groups always move together through the theater. This requires explicit synchronization that you implement.
 
 void TestCase_P2_1(){
 
@@ -210,8 +435,29 @@ void TestCase_P2_1(){
    char *name;
     Thread * t; 
 
+   
+    // create Manager 
+    
+    for (int i = 0;i < MAX_MR; ++i) {
+        name = new char[MAX_VAR];
+        sprintf(name, "Thread_Manager_%d", i);
+        t = new Thread(name);
+        t->Fork((VoidFunctionPtr)mr_new_testcase, i);
+    }
+ 
+
+
+
+
+
+
+
+
+
+
+
     // create TicketClerk
-    for (int i = 0;i < MAX_TC; ++i) {
+    /*for (int i = 0;i < MAX_TC; ++i) {
         name = new char[MAX_VAR];
         sprintf(name, "Thread_TicketClerk_%d", i); 
         t = new Thread(name);
@@ -219,9 +465,9 @@ void TestCase_P2_1(){
     }
     printf("Number of TicketClerks = [%d]\n",MAX_TC);
     // create Customer
-    groupSum = rand()%MAX_GROUP + 1;
+    //groupSum = rand()%MAX_GROUP + 1;
     nextCustomerNumber = 0; 
-    for (int i = 0;i < groupSum; ++i) {
+    for (int i = 0;i < MAX_GROUP; ++i) {
         int groupSize = rand()%MAX_GROUPSIZE+1;
         for (int j = 0;j < groupSize - 1; ++j) {
             name = new char[MAX_VAR];
@@ -243,10 +489,11 @@ void TestCase_P2_1(){
         cr[customerData->customerNumber] = new Customer(customerData->customerNumber, customerData->groupNumber, customerData->groupSize, true);
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)cr_tb_new_t1, int(customerData));
+        //if (nextCustomerNumber >= cin && nextCustomerNumber >= 50) break;
     }
     printf("Number of Customers = [%d]\n",nextCustomerNumber);
     customerLeft = nextCustomerNumber;
-    printf("Number of Groups = [%d]\n",groupSum);
+    printf("Number of Groups = [%d]\n",groupSum); */
    
 }
 

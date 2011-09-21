@@ -6,15 +6,18 @@
 #include "synch.h"
 
 #define MAX_CR 1000
-#define MIN_CR 40  // Customers
+#define MIN_CR 50  // Customers
 #define MAX_TC 5  // TicketClerks
 #define MAX_CC 5  // ConcessionClerks
 #define MAX_TT 3  // TicketTakers
 #define MAX_MT 1  // MovieTechnician
 #define MAX_MR 1  // Manager
-#define MAX_GROUP 20  // Group
+#define MAX_GROUP 100  // Group
 #define MIN_GROUP 10  // Group
 #define MAX_GROUPSIZE 5  // groupsize
+
+#define MAX_CR_NUMBER 100  // Group
+#define MAX_GP_NUMBER 100  // Group
 
 #define MAX_VAR 200
 
@@ -39,23 +42,21 @@
 extern Lock *lBuyTickets;  //Lock to get in line of buyTickets
 extern Lock *lBuyFood;  //Lock to get in line of buyFood
 extern Lock *lCheckTickets;  //Lock to get in line of checkTickets
-extern Lock *lStartMovie;  //Lock to get seats and startMovie
-extern Lock *lStopMovie; //stop Movie
-extern Lock *lFindSeats;
+extern Lock *lStartMovie;  //Lock to start Movie
+extern Lock *lStopMovie; //Lock to stop Movie
+extern Lock *lFindSeats; //Lock to find seats
 extern Lock *lGroup[MAX_GROUP];  //Lock for group to act mutexnn
+extern Lock *lBathroomNum[MAX_GROUP];//Lock for group to count go bathroom number
 extern Lock *lTicketSold;  // Lock for ticket sold
 extern Lock *lTicketTaken;  // lock for ticket taken
 extern Lock *lAmount;  // lock for money collect
 extern Lock *lCustomerLeft;  // lock for leave sum
-
 extern Semaphore *sGroup[MAX_GROUP];  //semaphore to make group act together
 extern Semaphore *sGroupFood[MAX_GROUP];  //semaphore to make sure everyone choose if need food
 extern Semaphore *sGroupBathroom[MAX_GROUP];  //semaphore to make sure everyone choose if need food
 extern Semaphore *sGroupLeaveBathroom[MAX_GROUP];  //semaphore to make sure everyone choose if need Bathroom
 extern Condition *cGroup[MAX_GROUP];  //Condition to make group act together
-extern Condition *cLeaveBathroomGroup[MAX_GROUP];  //Condition to make group act together
 extern Condition *cGroupFood[MAX_GROUP];  //Condition for ticketbuyer to ask for if need food
-//extern Condition *cGroupBathroom[MAX_GROUP];  //Condition for ticketbuyer to ask for if need bathroom
 extern Condition *cTicketTaken;  // Condition for ticketTaker and customer to know start ticket taken 
 
 extern int groupFoodSum[MAX_GROUP][2];  // order of group for food
@@ -66,34 +67,31 @@ extern bool stopTicketTaken;  // monitor variable for stop ticketTaken
 extern bool stopTicketTakenArr[MAX_TT];
 extern bool groupTicket[MAX_GROUP];  // monitor variable for if buyTickets done
 extern bool groupAskForFood[MAX_GROUP];  // monitor variable for if ask for food
-extern bool groupAskForBathroom[MAX_GROUP];  // monitor variable for if ask for food
+extern bool groupAskForBathroom[MAX_GROUP];  // monitor variable for if ask for bathroom
 extern bool groupFood[MAX_GROUP];  // monitor variable for if buyFood done
 extern bool groupSeat[MAX_GROUP];  // monitor variable for if get seats
-extern bool groupArrangeSeat[MAX_GROUP];  // monitor variable for if get seats
-extern bool groupLeaveRoom[MAX_GROUP];
-extern bool groupLeaveTheater[MAX_GROUP];
-
+extern bool groupLeaveRoom[MAX_GROUP]; // monitor variable for if leave theater room
+extern bool groupLeaveTheater[MAX_GROUP]; // monitor variable for if leave theater
 extern int movieState;  //monitor variable for Movies State, 0: over, 1: not start, 2: start
-extern Lock *lMovieState;
-extern bool seatState[MAX_SEAT];
+extern Lock *lMovieState; //lock for movie state
+extern bool seatState[MAX_SEAT]; //seat state
 extern Semaphore *sSeat[MAX_SEAT];  //semaphore to Seat
-extern int ticketTaken;
-extern int totalTicketTaken;
-extern int totalTicketSold;
-extern double totalAmount;
-extern double ticketClerkAmount[MAX_TC];
-extern double concessionClerkAmount[MAX_CC];
-extern int seatPos;
-
-extern bool noTicketClerk;
-extern bool noConcessionClerk;
-extern bool noTicketTaker;
-extern Condition *cNoTicketClerk;
-extern Condition *cNoConcessionClerk;
-extern Condition *cNoTicketTaker;
-extern Semaphore *sNoTicketClerk;
-extern Semaphore *sNoConcessionClerk;
-extern Semaphore *sNoTicketTaker;
+extern int ticketTaken; //ticket number taken by ticket taker
+extern int totalTicketTaken; //total ticket number taken by ticket taker
+extern int totalTicketSold; //total sold ticket number
+extern double totalAmount;  //total money collected by manager
+extern double ticketClerkAmount[MAX_TC]; //money collected by ticket clerk
+extern double concessionClerkAmount[MAX_CC]; //money collected by concession clerk
+extern int seatPos; // arranged seat position
+extern bool noTicketClerk; //monitor variable for no ticket clerk
+extern bool noConcessionClerk; //monitor variable for no concession clerk
+extern bool noTicketTaker;  //monitor variable for no ticket taker 
+extern Condition *cNoTicketClerk; //conditional variable for no ticket clerk
+extern Condition *cNoConcessionClerk; //conditional variable for no ticket clerk
+extern Condition *cNoTicketTaker; //conditional variable for no ticket taker
+extern Semaphore *sNoTicketClerk; //semaphore for no ticket clerk
+extern Semaphore *sNoConcessionClerk; //semaphore for no concession clerk
+extern Semaphore *sNoTicketTaker; //semaphore for no ticket taker
 
 
 extern Semaphore *sWaitSeat[MAX_GROUP];  //semaphore to Seat
@@ -109,6 +107,7 @@ extern Condition *cMT_CR_Stop;
 extern int nextCustomerNumber;
 extern int groupSum;
 extern int customerLeft;
+extern int tcNumber,ccNumber,ttNumber,crNumber;
 
 class Employee {
   private:
@@ -152,7 +151,6 @@ class Customer {
     int groupSize;   //Only head customers need this value
     // how to find groupmate
     //    Customer * customers;   //Only head customers need this value
-    void printTCStatus();
     int seatNumber;
   public:
     // customerId, groupId, isTicketBuyer
@@ -248,7 +246,6 @@ class ConcessionClerk : public Employee{
     double amount;
     // customer pay
     double payment;
-    void printStatus();
     void calAmount();
   public:
     ConcessionClerk(int ccId);
