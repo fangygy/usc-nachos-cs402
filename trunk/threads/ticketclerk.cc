@@ -4,6 +4,7 @@
 TicketClerk::TicketClerk(int tcId) : Employee(tcId, "TicketClerk") {
     //printf("construct ticket clerk %d\n", tcId);
 }
+
 void TicketClerk::setAmount(int sum) {
     amount = sum*(PRICE_TICKET);
 }
@@ -23,12 +24,12 @@ int TicketClerk::getTicketSum() {
 void TicketClerk::setPayment(double p) {
     payment = p;
 }
-
+ //ticket clerk sell ticket and interact with headcustomer
 void TicketClerk::sellTickets() {
     while(true) {
         lBuyTickets->Acquire();
         if (getIsBreak()) {
-            // wait for manager signal
+          //if clerk is on break,wait for manager signal
             printf("%s [%d] is going on break.\n", getEmployeeType(), getId());
             lBuyTickets->Release();
             sNoTicketClerk->P();
@@ -36,7 +37,7 @@ void TicketClerk::sellTickets() {
             lBuyTickets->Acquire();
             setIsBreak(false);
         }
-
+        // if have customer, then set busy and signal the customer, else set free
         if (getWaitingSize() > 0) {
             setIsBusy(true);
             printf("TicketClerk [%d] has a line length [%d] and is signaling a customer\n",getId(),getWaitingSize());
@@ -47,6 +48,7 @@ void TicketClerk::sellTickets() {
             setIsBusy(false);
         }
       
+        //sell ticket:interact with customer
         lock->Acquire();
         // on service
         lBuyTickets->Release();
