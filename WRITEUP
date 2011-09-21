@@ -576,7 +576,7 @@ d. collect money after all customers leave
 
     We use lock, semaphore, and condition variable function in part 1 to implentment part 2 movie theater simulation. In clerk and customer functions, there are monitors which include lock,condition variable, and monitor variable to ensure no race condition happened among customers and clerks. 
 Locks in functions are desinged to guarantee the accuracy of variable in critcal setion that is : variables will not be read and written at the same time.
-For example, each time there is only one head customer can get in line or arrange seats for their group members. And condition variables are design to guarantee particular procedure will occur in order, such as clerk and customer interaction. Moreover,our simulation output results match the movie theater requirements and the program can run successfully with very little chance of crash and stuck.
+For example, each time there is only one head customer can get in line or arrange seats for their group members. And condition variables are design to guarantee particular procedure will occur in order, such as clerk and customer interaction. Moreover,our simulation output results match the movie theater requirements and the program can run successfully with customers entering, watching movie and leaving movie theater.
 
 7. Miscellaneous: 
         
