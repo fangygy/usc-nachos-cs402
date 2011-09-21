@@ -23,9 +23,9 @@ Semaphore *sGroup[MAX_GROUP];
 Condition *cGroup[MAX_GROUP];
 Condition *cGroupFood[MAX_GROUP];
 Condition *cLeaveBathroomGroup[MAX_GROUP]; 
-//Condition *cGroupBathroom[MAX_GROUP]; 
 Condition *cTicketTaken = new Condition("Condition_TicketTaken");
-Lock *lGroup[MAX_GROUP]; 
+Lock *lGroup[MAX_GROUP];
+Lock *lBathroomNum[MAX_GROUP]; 
 int groupFoodSum[MAX_GROUP][2];
 int groupBathroomSum[MAX_GROUP];
 int ticketReceipt[MAX_GROUP];
@@ -40,7 +40,6 @@ bool groupAskForFood[MAX_GROUP];
 bool groupAskForBathroom[MAX_GROUP];
 bool groupFood[MAX_GROUP];
 bool groupSeat[MAX_GROUP];
-bool groupArrangeSeat[MAX_GROUP];
 bool groupLeaveRoom[MAX_GROUP];
 bool groupLeaveTheater[MAX_GROUP];
 bool groupLeaveBathRoom[MAX_GROUP];
@@ -75,9 +74,10 @@ double totalAmount;
 double ticketClerkAmount[MAX_TC];
 double concessionClerkAmount[MAX_CC];
 int customerLeft = -1;
-
+int tcNumber=-1,ccNumber=-1,ttNumber=-1,crNumber=-1;
 
 void init() {
+    //initial all value
     memset(groupFoodSum, 0, sizeof(groupFoodSum));
     memset(ticketReceipt, 0, sizeof(ticketReceipt));
     memset(groupTicket, 0, sizeof(groupTicket));
@@ -88,13 +88,12 @@ void init() {
     memset(groupAskForBathroom, 0, sizeof(groupAskForBathroom));
     memset(groupBathroomSum, 0, sizeof(groupBathroomSum));
     memset(groupLeaveTheater, 0, sizeof(groupLeaveTheater));
-    memset(groupArrangeSeat, 0, sizeof(groupArrangeSeat));
-    
 
-  
+ 
   
     mr[0] = new Manager(0);
     int i;
+    //initial
     for (i = 0;i < MAX_GROUP; ++i) {
         sGroup[i] = new Semaphore("Semaphore_Group", 0);
         sGroupFood[i] = new Semaphore("Semaphore_GroupFood", 0);
@@ -103,30 +102,30 @@ void init() {
         sGroupLeaveBathroom[i] = new Semaphore("Semaphore_GroupLeaveBathroom", 0);
         cGroup[i] = new Condition("Condition_Group");
         cGroupFood[i] = new Condition("Condition_GroupFood");
-        cLeaveBathroomGroup[i] = new Condition("Condition_LeaveBathroomGroup");
         lGroup[i] = new Lock("Lock_Group");
+        lBathroomNum[i]= new Lock("Lock_BathroomNumber");
         sWaitSeat[i]= new Semaphore("Semaphore_WaitSeat", 0); 
 
     }
-
+     //initial seat state
     for(i=0;i<MAX_SEAT;i++){
          seatState[i]=false;  
     }
 
-
+    //new ticket clerk
     for (i = 0;i < MAX_TC; ++i) {
         tc[i] = new TicketClerk(i);
     }
-
+    //new concession clerk
     for (i = 0;i < MAX_CC; ++i) {
         cc[i] = new ConcessionClerk(i);
     }
-
+    //new ticket taker
     for (i = 0;i < MAX_TT; ++i) {
         stopTicketTakenArr[i] = false;
         tt[i] = new TicketTaker(i);
     }
-
+    //new movie technician
     for (i = 0;i < MAX_MT; ++i) {
         mt[i] = new MovieTechnician(i);
     }

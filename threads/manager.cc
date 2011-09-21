@@ -26,13 +26,13 @@ void Manager::work() {
 void Manager::collectMoney() {
     lAmount->Acquire();
     int i;
-    for (i = 0;i < MAX_TC; ++i) {
+    for (i = 0;i < tcNumber; ++i) {
         totalAmount += ticketClerkAmount[i];
         printf("Manager collected [%.2f] from TicketClerk[%d].\n", ticketClerkAmount[i], i);
         ticketClerkAmount[i] = 0;
     }
 
-    for (i = 0;i < MAX_CC; ++i) {
+    for (i = 0;i < ccNumber; ++i) {
         totalAmount += concessionClerkAmount[i];
         printf("Manager collected [%.2f] from ConcessionClerk[%d].\n", concessionClerkAmount[i], i);
         concessionClerkAmount[i] = 0;
@@ -79,7 +79,6 @@ void Manager::startTicketTaken() {
         DEBUGINFO('c', "%s finish acquire lTicketTaken, stopTicketTaken: %d", getEmployeeType(), stopTicketTaken?1:0);
         if (stopTicketTaken) {
             
-            //bIsMovieOver = false;
             DEBUGINFO('c', "%s acquire lTicketTaken, lTicketTaken's owner : %s", getEmployeeType(), lTicketTaken->getOwnerThread() == NULL? "NULL": lTicketTaken->getOwnerThread()->getName());
             stopTicketTaken = false;
             // set state to 1
