@@ -298,7 +298,7 @@ void Customer::checkTickets() {
         clerk->condition[0]->Wait(lCheckTickets);
         
     }
-
+    DEBUGINFO('c', "Customer [%d] in group [%d] acquire lTicketTaken with %s [%d], lTicketTaken's owner is: %s", customerId, groupId, clerk->getEmployeeType(), lineIndex, lTicketTaken->getOwnerThread()==NULL?"NULL":lTicketTaken->getOwnerThread()->getName());
     // if stop ticket taken
     lTicketTaken->Acquire();
     clerk->subWaitingSize();
@@ -307,7 +307,10 @@ void Customer::checkTickets() {
         // TODO: ask all group to goto lobby
         printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.\n", customerId, groupId, lineIndex);
         printf("Customer [%d] in Group [%d] is in the lobby.\n", customerId, groupId);
+        clerk->lock->Acquire();
         lCheckTickets->Release();
+        clerk->condition[1]->Signal(clerk->lock);
+        clerk->lock->Release();
         cTicketTaken->Wait(lTicketTaken);
         DEBUGINFO('c', "Customer [%d] in group [%d] leave lobby to TicketTaker", customerId, groupId);
         printf("Customer [%d] in Group [%d] is leaving the lobby.\n",  customerId, groupId);
@@ -337,14 +340,17 @@ void Customer::checkTickets() {
         clerk->condition[1]->Wait(clerk->lock);
         DEBUGINFO('c', "Customer [%d] in group [%d] get lock with %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
         
-        if (stopTicketTaken) {
+//        lTicketTaken->Acquire();
+        if (stopTicketTakenArr[lineIndex]) {
             // TODO: ask all group to go back lobby
             clerk->lock->Release();
             printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.", customerId, groupId, lineIndex);
             printf("Customer [%d] in Group [%d] is in the lobby.\n", customerId, groupId);
             DEBUGINFO('c', "Customer [%d] in group [%d] wait to retake ticket", customerId, groupId, lineIndex);
             lTicketTaken->Acquire();
-            cTicketTaken->Wait(lTicketTaken);
+            if (stopTicketTaken) {
+                cTicketTaken->Wait(lTicketTaken);
+            }
             printf("Customer [%d] in Group [%d] is leaving the lobby.\n",  customerId, groupId);
             DEBUGINFO('c', "Customer [%d] in group [%d] get lock with ticket taker [%d]", customerId, groupId, lineIndex);
             

@@ -30,7 +30,8 @@ int groupFoodSum[MAX_GROUP][2];
 int groupBathroomSum[MAX_GROUP];
 int ticketReceipt[MAX_GROUP];
 int ticketTaken = 0;
-bool stopTicketTaken = false;
+bool stopTicketTaken = false;  // all stop
+bool stopTicketTakenArr[MAX_TT];  // each tt stop
 Semaphore *sGroupFood[MAX_GROUP];
 Semaphore *sGroupBathroom[MAX_GROUP];
 Semaphore *sGroupLeaveBathroom[MAX_GROUP]; 
@@ -122,6 +123,7 @@ void init() {
     }
 
     for (i = 0;i < MAX_TT; ++i) {
+        stopTicketTakenArr[i] = false;
         tt[i] = new TicketTaker(i);
     }
 

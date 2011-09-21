@@ -81,7 +81,6 @@ void Manager::startTicketTaken() {
             
             //bIsMovieOver = false;
             DEBUGINFO('c', "%s acquire lTicketTaken, lTicketTaken's owner : %s", getEmployeeType(), lTicketTaken->getOwnerThread() == NULL? "NULL": lTicketTaken->getOwnerThread()->getName());
-            lTicketTaken->Acquire();
             stopTicketTaken = false;
             // set state to 1
             movieState = 1;
