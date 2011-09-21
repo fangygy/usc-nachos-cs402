@@ -63,6 +63,7 @@ extern int groupBathroomSum[MAX_GROUP];  // order of group for food
 extern int ticketReceipt[MAX_GROUP];  // order of group for tickets
 extern int ticketTaken;  // ticket taken num
 extern bool stopTicketTaken;  // monitor variable for stop ticketTaken
+extern bool stopTicketTakenArr[MAX_TT];
 extern bool groupTicket[MAX_GROUP];  // monitor variable for if buyTickets done
 extern bool groupAskForFood[MAX_GROUP];  // monitor variable for if ask for food
 extern bool groupAskForBathroom[MAX_GROUP];  // monitor variable for if ask for food
