@@ -92,7 +92,7 @@ void test1() {
     }
     printf("Number of TicketClerks = [%d]\n",MAX_TC);
     // create Customer
-    groupSum = rand()%10 + 10;//MIN_GROUP + MIN_GROUP;
+    groupSum = rand()%5 + 10;//MIN_GROUP + MIN_GROUP;
     nextCustomerNumber = 0; 
     for (int i = 0;i < groupSum; ++i) {
         int groupSize = rand()%MAX_GROUPSIZE+1;
