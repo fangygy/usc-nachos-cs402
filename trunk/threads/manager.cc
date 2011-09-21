@@ -3,13 +3,13 @@
 
 void Manager::work() {
     while (true) {
-//        randToBreak(lBuyTickets, (Employee**)tc, MAX_TC, noTicketClerk, cNoTicketClerk, sNoTicketClerk);
-//        randToBreak(lBuyFood, (Employee**)cc, MAX_CC, noConcessionClerk, cNoConcessionClerk, sNoConcessionClerk);
+        randToBreak(lBuyTickets, (Employee**)tc, tcNumber, noTicketClerk, cNoTicketClerk, sNoTicketClerk);
+//        randToBreak(lBuyFood, (Employee**)cc, ccNumber, noConcessionClerk, cNoConcessionClerk, sNoConcessionClerk);
         DEBUGINFO('c', "%s check noTicketTaker: %d", getEmployeeType(), noTicketTaker?1:0 );
-//        randToBreak(lCheckTickets, (Employee**)tt, MAX_TT, noTicketTaker, cNoTicketTaker, sNoTicketTaker);
+//        randToBreak(lCheckTickets, (Employee**)tt, ttNumber, noTicketTaker, cNoTicketTaker, sNoTicketTaker);
         startTicketTaken();
         startMovie();
-        for (int i = 0;i < 300; ++i) {
+        for (int i = 0;i < 10; ++i) {
             currentThread->Yield();
         }
         // if all customer leave, collect money

@@ -348,11 +348,14 @@ void Customer::checkTickets() {
         //ask all group to goto lobby
         printf("Customer [%d] in Group [%d] sees TicketTaker [%d] is no longer taking tickets. Going to the lobby.\n", customerId, groupId, lineIndex);
         printf("Customer [%d] in Group [%d] is in the lobby.\n", customerId, groupId);
-        clerk->lock->Acquire();
         lCheckTickets->Release();
+        lTicketTaken->Release();
+        clerk->lock->Acquire();
         //if restart take ticket, they will wake customer up and the customer will get in line again
         clerk->condition[1]->Signal(clerk->lock);
         clerk->lock->Release();
+        lTicketTaken->Acquire();
+        DEBUGINFO('c', "Customer [%d] in group [%d] wait TicketTaken", customerId, groupId);
         cTicketTaken->Wait(lTicketTaken);
         DEBUGINFO('c', "Customer [%d] in group [%d] leave lobby to TicketTaker", customerId, groupId);
         printf("Customer [%d] in Group [%d] is leaving the lobby.\n",  customerId, groupId);

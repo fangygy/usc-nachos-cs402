@@ -9,20 +9,22 @@ void TicketTaker::checkTickets() {
 
     while(true) {
         // stop ticket check
-        lCheckTickets->Acquire();
+//        lCheckTickets->Acquire();
         lTicketTaken->Acquire();
         if (stopTicketTaken == true) {
             lock->Acquire();
             stopTicketTakenArr[getId()] = true;
             lock->Release();
             DEBUGINFO('c', "%s [%d] stop taking ticket at start", getEmployeeType(), getId());
-            //lCheckTickets->Acquire();
+            lTicketTaken->Release();
+            lCheckTickets->Acquire();
             // broadcast the waiting list
             condition[0]->Broadcast(lCheckTickets);
             DEBUGINFO('c', "%s [%d] set not busy", getEmployeeType(), getId());
 //            setIsBusy(false);
             lCheckTickets->Release();
             // wait for manager to broadcast
+            lTicketTaken->Acquire();
             cTicketTaken->Wait(lTicketTaken);
             DEBUGINFO('c', "%s [%d] get start taking ticket from stop", getEmployeeType(), getId());
         }
@@ -89,6 +91,7 @@ void TicketTaker::checkTickets() {
 
         DEBUGINFO('c', "%s [%d] acquire lTicketTaken, lTicketTaken's owner is %s ", getEmployeeType(), getId(), lTicketTaken->getOwnerThread() == NULL? "NULL" : lTicketTaken->getOwnerThread()->getName());
         // if stopped
+        lock->Release();
         lTicketTaken->Acquire();
 //        if (stopTicketTaken) {
 //            lTicketTaken->Release();
@@ -96,6 +99,7 @@ void TicketTaker::checkTickets() {
 //        }
         // if too much, has to stop
         // ? if there is another ticketTaker on process, still not stop him
+        lock->Acquire();
         DEBUGINFO('c', "%s [%d] check ticket sum, ticket num: %d, all ticket: %d", getEmployeeType(), getId(), getTicketSum(), ticketTaken);
         if (stopTicketTaken || ticketTaken + getTicketSum() > 25) {
             DEBUGINFO('c', "%s [%d] get too much ticket and not to let in", getEmployeeType(), getId());

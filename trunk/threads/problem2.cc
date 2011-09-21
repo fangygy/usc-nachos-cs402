@@ -11,13 +11,9 @@ struct CustomerData {
 };
 
 void test1();
-bool test_case();
-void TestCase_P2_1();
-void TestCase_P2_2();
-void TestCase_P2_3();
-void TestCase_P2_4();
-void TestCase_P2_5();
-void TestCase_P2_6();
+bool test_case(int i);
+void TestCase_P2(int i);
+void createClerk();
 
 void tc_new(int i) {
     //printf("start tc_new\n");
@@ -77,50 +73,107 @@ void mr_new(int i) {
     mr[0]->work();
     
 }
-void mr_new_testcase(int i) {
-    //printf("start mr_new\n");
-    //printf("%s: new Manager %d\n", currentThread->getName(), i);
-    //mr[i] = new Manager(i);
-    if(test_case()){
+void testcase(int i) {
+    if(test_case(i)){
         mr[0]->work();
     }
 }
-bool test_case(){
+//    * Customers always take the shortest line, but no 2 customers ever choose the same shortest line at the same time
+//    * Managers only read one from one Clerk's total money received, at a time.
+//    * Customers do not leave a Clerk, or TicketTaker, until they are told to do so. Clerks and TicketTakers do not start with another Customer until they know the current Customer has left. customer until they know that the last Customer has left their area
+//    * Managers get Clerks off their break when lines get too long
+//    * Total sales never suffers from a race condition
+//    * Customer groups always move together through the theater. This requires explicit synchronization that you implement.
+bool test_case(int i){
+    init();
+    printf ("Please enter [ticket clerk (1 to 5)] [concession clerk(1 to 5)] [ticket taker( 1 to 3)] and [MAX customer( 1 to 100)] number.\n");
 
-    printf ("Enter [ticket clerk] [concession clerk] [ticket taker] and [max customer] number:");
-    scanf ("%d %d %d %d",&tcNumber,&ccNumber,&ttNumber,&crNumber);
-    if(tcNumber>MAX_TC||tcNumber<=0){
-        printf ("ticket clerk number should be between 0 and 5\n");
-        return false; 
-    }   
-    //printf ("Enter your concession clerk number: ");
-    //scanf ("%d",&ccNumber);
-    if(ccNumber>MAX_CC||ccNumber<=0){
-        printf ("Concession clerk number should be between 0 and 5\n");
-        return false; 
-    }   
-   // printf ("Enter your ticket taker number: ");
-   // scanf ("%d",&ttNumber);
-    if(ttNumber>MAX_TT||ttNumber<=0){
-        printf ("Ticket taker number should be between 0 and 3\n");
-        return false; 
-    }  
-   // printf ("Enter your max customer number: ");
-   // scanf ("%d",&groupSum);
-    if(crNumber>MAX_CR_NUMBER){
-        printf ("Customer should be less than 100\n");
-        return false; 
-    } 
-   
+    if (i == 1) {
+        printf(" Press <ENTER> to use default data: 2 2 2 20\n");
+        printf(" Test1: Customers always take the shortest line, but no 2 customers ever choose the same shortest line at the same time.\n");
+        printf(" Result for default data: customers will wait in different line by turns.\n");
+        tcNumber = 2;
+        ccNumber = 2;
+        ttNumber = 2;
+        crNumber = 20;
+    } else if (i == 2) {
+        printf(" Press <ENTER> to use default data: 4 4 2 30\n");
+        printf(" Test2: Managers only read one from one Clerk's total money received, at a time.\n");
+        printf(" Result for default data: total money equals to the sum of all the clerk.\n");
+        tcNumber = 4;
+        ccNumber = 4;
+        ttNumber = 2;
+        crNumber = 30;
+    } else if (i == 3) {
+        printf(" Press <ENTER> to use default data: 1 1 1 10\n");
+        printf(" Test3: Customers do not leave a Clerk, or TicketTaker, until they are told to do so. Clerks and TicketTakers do not start with another Customer until they know the current Customer has left. customer until they know that the last Customer has left their area.\n");
+        printf(" Result for default data: output as the test description.\n");
+        tcNumber = 1;
+        ccNumber = 1;
+        ttNumber = 1;
+        crNumber = 10;
+    } else if (i == 4) {
+        printf(" Press <ENTER> to use default data: 2 1 1 30\n");
+        printf(" Test4: Managers get Clerks off their break when lines get too long.\n");
+        printf(" Result for default data: init one ticket clerk on break, manager will wait him up when lines get more than 5.\n");
+        tc[0]->setIsBreak(true);
+        tcNumber = 2;
+        ccNumber = 1;
+        ttNumber = 1;
+        crNumber = 30;
+    } else if (i == 5) {
+        printf(" Press <ENTER> to use default data: 5 5 3 40\n");
+        printf(" Test5: Total sales never suffers from a race condition.\n");
+        printf(" Result for default data: ticket clerk sales equals to sum(customer)*12, concession clerk sales equals to sum(soda)*4+sum(popcorn)*5. Total sales equals to clerk sales sum.\n");
+        tcNumber = 5;
+        ccNumber = 5;
+        ttNumber = 3;
+        crNumber = 40;
+    } else if (i == 6) {
+        printf(" Press <ENTER> to use default data: 2 2 2 20\n");
+        printf(" Test6: Customer groups always move together through the theater. This requires explicit synchronization that you implement.\n");
+        printf(" Result for default data: customers will wait headcustomer to gather and proceed in group.\n");
+        tcNumber = 2;
+        ccNumber = 2;
+        ttNumber = 2;
+        crNumber = 20;
+    }
+    char line[MAX_VAR];
+    gets(line);
+    if (strlen(line) != 0) {
+        sscanf (line, "%d %d %d %d",&tcNumber,&ccNumber,&ttNumber,&crNumber);
+        if(tcNumber>MAX_TC||tcNumber<=0){
+            printf ("ticket clerk number should be between 1 and 5\n");
+            return false; 
+        }   
+        //printf ("Enter your concession clerk number: ");
+        //scanf ("%d",&ccNumber);
+        if(ccNumber>MAX_CC||ccNumber<=0){
+            printf ("Concession clerk number should be between 1 and 5\n");
+            return false; 
+        }   
+       // printf ("Enter your ticket taker number: ");
+       // scanf ("%d",&ttNumber);
+        if(ttNumber>MAX_TT||ttNumber<=0){
+            printf ("Ticket taker number should be between 1 and 3\n");
+            return false; 
+        }  
+       // printf ("Enter your max customer number: ");
+       // scanf ("%d",&groupSum);
+        if(crNumber>MAX_CR_NUMBER){
+            printf ("Customer should be less than 100\n");
+            return false; 
+        } 
+    }
+    createClerk();
+    return true;
+}
     
+    
+void createClerk() {
     printf("Number of TicketClerks = [%d]\n",tcNumber);
     printf("Number of ConcessionClerks = [%d]\n",ccNumber); 
     printf("Number of TicketTakers = [%d]\n",ttNumber);
-
-
-
-
-     init();
    char *name;
     Thread * t; 
 
@@ -142,7 +195,7 @@ bool test_case(){
     //groupSum = rand()%10 + 10;//MIN_GROUP + MIN_GROUP;
     groupSum=0;
     nextCustomerNumber = 0; 
-   for (int i = 0;i < MAX_GP_NUMBER; ++i) {
+    for (int i = 0;i < MAX_GP_NUMBER; ++i) {
         int groupSize = rand()%MAX_GROUPSIZE+1;
         for (int j = 0;j < groupSize - 1; ++j) {
             name = new char[MAX_VAR];
@@ -167,7 +220,7 @@ bool test_case(){
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)cr_tb_new, int(customerData));
         groupSum++;
-        if (nextCustomerNumber >= crNumber && nextCustomerNumber >= MIN_CR) break;
+        if (nextCustomerNumber >= crNumber || nextCustomerNumber >= MIN_CR) break;
         
     }
     printf("Number of Groups = [%d]\n",groupSum);
@@ -207,7 +260,6 @@ bool test_case(){
         t = new Thread(name);
         t->Fork((VoidFunctionPtr)mt_new, i);
     }
-
 
 }
 
@@ -340,14 +392,7 @@ void cr_tb_new_t1(int arg) {
 
 
 
-//    * Customers always take the shortest line, but no 2 customers ever choose the same shortest line at the same time
-//    * Managers only read one from one Clerk's total money received, at a time.
-//    * Customers do not leave a Clerk, or TicketTaker, until they are told to do so. Clerks and TicketTakers do not start with another Customer until they know the current Customer has left. customer until they know that the last Customer has left their area
-//    * Managers get Clerks off their break when lines get too long
-//    * Total sales never suffers from a race condition
-//    * Customer groups always move together through the theater. This requires explicit synchronization that you implement.
-
-void TestCase_P2_1(){
+void TestCase_P2(int index){
 
    init();
    char *name;
@@ -360,7 +405,7 @@ void TestCase_P2_1(){
         name = new char[MAX_VAR];
         sprintf(name, "Thread_Manager_%d", i);
         t = new Thread(name);
-        t->Fork((VoidFunctionPtr)mr_new_testcase, i);
+        t->Fork((VoidFunctionPtr)testcase, index);
     }
  
 
@@ -412,102 +457,5 @@ void TestCase_P2_1(){
     printf("Number of Customers = [%d]\n",nextCustomerNumber);
     customerLeft = nextCustomerNumber;
     printf("Number of Groups = [%d]\n",groupSum); */
-   
-}
-
-void TestCase_P2_2(){
-
-   init();
-   char *name;
-    Thread * t; 
-    // create Manager 
-    
-    for (int i = 0;i < MAX_MR; ++i) {
-        name = new char[MAX_VAR];
-        sprintf(name, "Thread_Manager_%d", i);
-        t = new Thread(name);
-        t->Fork((VoidFunctionPtr)mr_new, i);
-    }
-
-   
-}
-
-
-void TestCase_P2_3(){
-
-   init();
-   char *name;
-    Thread * t; 
-    // create Manager 
-    
-    for (int i = 0;i < MAX_MR; ++i) {
-        name = new char[MAX_VAR];
-        sprintf(name, "Thread_Manager_%d", i);
-        t = new Thread(name);
-        t->Fork((VoidFunctionPtr)mr_new, i);
-    }
-
-   
-}
-
-void mr_t4() {
-    while (true) {
-        mr[0]->randToBreak(lBuyTickets, (Employee**)tc, MAX_TC, noTicketClerk, cNoTicketClerk, sNoTicketClerk);
-        for (int i = 0;i < 10; ++i) {
-            currentThread->Yield();
-        }
-    }
-}
-void TestCase_P2_4(){
-
-    init();
-    char *name;
-    Thread * t; 
-
-    // set ticketClerk on break
-    for (int i = 1; i < MAX_TC; ++i) {
-        tc[i]->setIsBreak(true);
-    }
-
-    // create Manager 
-    for (int i = 0;i < MAX_MR; ++i) {
-        name = new char[MAX_VAR];
-        sprintf(name, "Thread_Manager_%d", i);
-        t = new Thread(name);
-        t->Fork((VoidFunctionPtr)mr_t4, i);
-    }
-    test1();
-   
-}
-void TestCase_P2_5(){
-
-   init();
-   char *name;
-    Thread * t; 
-    // create Manager 
-    
-    for (int i = 0;i < MAX_MR; ++i) {
-        name = new char[MAX_VAR];
-        sprintf(name, "Thread_Manager_%d", i);
-        t = new Thread(name);
-        t->Fork((VoidFunctionPtr)mr_new, i);
-    }
-
-   
-}
-void TestCase_P2_6(){
-
-   init();
-   char *name;
-    Thread * t; 
-    // create Manager 
-    
-    for (int i = 0;i < MAX_MR; ++i) {
-        name = new char[MAX_VAR];
-        sprintf(name, "Thread_Manager_%d", i);
-        t = new Thread(name);
-        t->Fork((VoidFunctionPtr)mr_new, i);
-    }
-
    
 }
