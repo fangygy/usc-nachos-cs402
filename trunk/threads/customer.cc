@@ -175,13 +175,14 @@ void Customer::buyTickets() {
     
     DEBUGINFO('c', "Customer [%d] in group [%d] acquire lock [%s], owner %s", customerId, groupId, clerk->lock->getName(), clerk->lock->getOwnerThread()!=NULL?clerk->lock->getOwnerThread()->getName():"NULL");
     
-    // buy ticket :interact with TicketClerk
-    clerk->lock->Acquire();
 
+    DEBUGINFO('c', "Customer [%d] in Group [%d] sees TicketClerk [%d] break status [%d].\n",customerId,groupId,lineIndex, clerk->getIsBreak()?1:0);
     //waiting line number minus 1
     clerk->subWaitingSize();
 
     if (!clerk->getIsBreak()) {
+        // buy ticket :interact with TicketClerk
+        clerk->lock->Acquire();
         clerk->setIsBusy(true);
         lBuyTickets->Release(); 
          // tell clerk tickets sum
@@ -209,7 +210,6 @@ void Customer::buyTickets() {
         //if the clerk is on break,head customer need to start over and get another line
         printf("Customer [%d] in Group [%d] sees TicketClerk [%d] is on break.\n",customerId,groupId,lineIndex);
         lBuyTickets->Release();
-        clerk->lock->Release();
         buyTickets();
         return;
     }
@@ -240,14 +240,14 @@ void Customer::buyFood() {
     printf("Customer [%d] in Group [%d] is walking up to ConcessionClerk[%d] to buy [%d] popcorn and [%d] soda.\n",customerId,groupId,lineIndex,groupFoodSum[groupId][0],groupFoodSum[groupId][1]);
 
     DEBUGINFO('c', "Customer [%d] in group [%d] acquire lock [%s], owner %s", customerId, groupId, clerk->lock->getName(), clerk->lock->getOwnerThread()!=NULL?clerk->lock->getOwnerThread()->getName():"NULL");
-    //buyfood: interact with ConcessionClerk 
-    clerk->lock->Acquire();
     DEBUGINFO('c', "Customer [%d] in group [%d] acquired lock [%d], owner %s", customerId, groupId, clerk->lock->getName(), clerk->lock->getOwnerThread()!=NULL?clerk->lock->getOwnerThread()->getName():"NULL");
 
     //waiting line number minus 1    
     clerk->subWaitingSize();
 
     if (!clerk->getIsBreak()) {
+        //buyfood: interact with ConcessionClerk 
+        clerk->lock->Acquire();
         clerk->setIsBusy(true);
         lBuyFood->Release();
 
@@ -283,7 +283,6 @@ void Customer::buyFood() {
         //clerk->subWaitingSize();
         // for race condition of waiting size
         lBuyFood->Release();
-        clerk->lock->Release();
         buyFood();
         return;
     }
@@ -377,8 +376,8 @@ void Customer::checkTickets() {
     printf("Customer [%d] in Group [%d] is walking up to TicketTaker[%d] to give [%d] tickets.\n",customerId,groupId,lineIndex, ticketReceipt[groupId]);
 
     // ticker take: interact with TicketTaker 
-    clerk->lock->Acquire();
     if (!clerk->getIsBreak() ) {
+        clerk->lock->Acquire();
         DEBUGINFO('c', "Customer [%d] in group [%d] get lock with %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
         clerk->setIsBusy(true);
         DEBUGINFO('c', "Customer [%d] in group [%d] wait %s [%d]", customerId, groupId, clerk->getEmployeeType(), lineIndex);
@@ -425,7 +424,6 @@ DEBUGINFO('c', "Customer [%d] in group [%d] is leaving %s [%d] after get into ro
         lCheckTickets->Acquire();
         // for race condition of waiting size
         lCheckTickets->Release();
-        clerk->lock->Release();
         checkTickets();
         return;
     }
