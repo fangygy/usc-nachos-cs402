@@ -56,6 +56,7 @@ void ConcessionClerk::sellFood() {
             setIsBusy(false);
         }
         lock->Acquire();
+        DEBUGINFO('c', "%s [%d] signal customer ", getEmployeeType(), getId());
         // on service
         lBuyFood->Release();
         // wait customer or manager to signal
@@ -69,12 +70,14 @@ void ConcessionClerk::sellFood() {
             setIsBusy(false);
             lock->Release();
             lBuyFood->Release();
+            DEBUGINFO('c', "%s [%d] is break ", getEmployeeType(), getId());
             continue;
         } else {
             setIsBusy(true);
         }
         lBuyFood->Release();
  
+        DEBUGINFO('c', "%s [%d] wait customer to order ", getEmployeeType(), getId());
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
         DEBUGINFO('c', "%s [%d] get money from group [%d]", getEmployeeType(), getId(), getGroupId());

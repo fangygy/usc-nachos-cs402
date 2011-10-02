@@ -129,6 +129,7 @@ void Lock::Acquire() {
         isUsed = true;
         ownerThread = currentThread;
     } 
+    DEBUGINFO('c', "Lock [%s] acquired by [%s]", getName(), getOwnerThread()->getName());
     (void) interrupt->SetLevel(oldLevel);
     #endif
 }
@@ -142,8 +143,10 @@ void Lock::Release() {
         return;
     }
 
+    DEBUGINFO('c', "Lock [%s] released by [%s]", getName(), getOwnerThread()->getName());
     Thread *thread = (Thread *)waitingQueue->Remove();
     if (thread != NULL) {    // check if threads wait for acquiring lock
+        DEBUGINFO('c', "Lock [%s] give to [%s] by [%s]", getName(), thread->getName(), getOwnerThread()->getName());
         ownerThread = thread;
         scheduler->ReadyToRun(thread);   // append to ready queue
     } else {                 // release lock
@@ -193,15 +196,18 @@ void Condition::Wait(Lock* conditionLock) {
         (void) interrupt->SetLevel(oldLevel);
         return;
     }
-    // give up conditionLock
-    conditionLock->Release();
     // add myself to condition waiting queue
     waitingQueue->Append((void *) currentThread); 
+    // give up conditionLock
+    conditionLock->Release();
     // wait for schedule 
     currentThread->Sleep();
+    DEBUGINFO('c', "%s wake up", currentThread->getName());
     // require conditionLock
+    DEBUGINFO('c', "%s acquire lock %s, owner %s", currentThread->getName(), conditionLock->getName(), conditionLock->getOwnerThread()!=NULL?conditionLock->getOwnerThread()->getName():"NULL");
     conditionLock->Acquire();
 
+    DEBUGINFO('c', "%s acquired lock %s, owner %s", currentThread->getName(), conditionLock->getName(), conditionLock->getOwnerThread()!=NULL?conditionLock->getOwnerThread()->getName():"NULL");
     (void) interrupt->SetLevel(oldLevel);
     #endif
 }
@@ -231,11 +237,12 @@ void Condition::Signal(Lock* conditionLock) {
     // put the first waiting thread to ready queue 
     Thread *thread = (Thread *)waitingQueue->Remove();
     if (thread == NULL) {
+        DEBUGINFO('c', "%s with lock %s, No thread in waiting",currentThread->getName(), waitingLock->getName());
         waitingLock = NULL;
         (void) interrupt->SetLevel(oldLevel);
         return;
     }
-
+DEBUGINFO('c', "%s signal with lock %s, thread [%s]", currentThread->getName(), waitingLock->getName(), thread->getName());
     scheduler->ReadyToRun(thread);
     if (waitingQueue->IsEmpty()) {
         waitingLock = NULL; 

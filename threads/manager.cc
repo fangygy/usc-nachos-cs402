@@ -4,12 +4,15 @@
 void Manager::work() {
     while (true) {
         randToBreak(lBuyTickets, (Employee**)tc, tcNumber, noTicketClerk, cNoTicketClerk, sNoTicketClerk);
-//        randToBreak(lBuyFood, (Employee**)cc, ccNumber, noConcessionClerk, cNoConcessionClerk, sNoConcessionClerk);
+        currentThread->Yield();
+        randToBreak(lBuyFood, (Employee**)cc, ccNumber, noConcessionClerk, cNoConcessionClerk, sNoConcessionClerk);
+        currentThread->Yield();
         DEBUGINFO('c', "%s check noTicketTaker: %d", getEmployeeType(), noTicketTaker?1:0 );
-//        randToBreak(lCheckTickets, (Employee**)tt, ttNumber, noTicketTaker, cNoTicketTaker, sNoTicketTaker);
+        randToBreak(lCheckTickets, (Employee**)tt, ttNumber, noTicketTaker, cNoTicketTaker, sNoTicketTaker);
+        currentThread->Yield();
         startTicketTaken();
         startMovie();
-        for (int i = 0;i < 10; ++i) {
+        for (int i = 0;i < 1; ++i) {
             currentThread->Yield();
         }
         // if all customer leave, collect money
@@ -50,14 +53,14 @@ void Manager::collectMoney() {
 void Manager::startMovie() {
     lMovieState->Acquire();
     if (movieState == 1) {
-        DEBUGINFO('c', "%s acquire lTicketTaken, lTicketTaken's owner : %s", getEmployeeType(), lTicketTaken->getOwnerThread() == NULL? "NULL": lTicketTaken->getOwnerThread()->getName());
+        DEBUGINFO('c', "%s want to startMovie. acquire lTicketTaken, lTicketTaken's owner : %s", getEmployeeType(), lTicketTaken->getOwnerThread() == NULL? "NULL": lTicketTaken->getOwnerThread()->getName());
         lTicketTaken->Acquire();
         DEBUGINFO('c', "%s acquire lTicketSold, lTicketSold's owner : %s", getEmployeeType(), lTicketSold->getOwnerThread() == NULL? "NULL": lTicketSold->getOwnerThread()->getName());
         lTicketSold->Acquire();
         DEBUG('z',"\ttotalTicketTaken: %d, totalTicketSold: %d\n", totalTicketTaken, totalTicketSold);
-        DEBUGINFO('c', "%s totalTicketTaken: %d, totalTicketSold: %d, ticketTaken: %d", getEmployeeType(), totalTicketTaken, totalTicketSold, ticketTaken);
+        DEBUGINFO('c', "%s totalTicketTaken: %d, totalTicketSold: %d, ticketTaken: %d, stopTicketTaken: %d", getEmployeeType(), totalTicketTaken, totalTicketSold, ticketTaken, stopTicketTaken?1:0);
         if (stopTicketTaken || (totalTicketTaken == totalTicketSold && ticketTaken != 0)) {
-            DEBUGINFO('c', "%s totalTicketTaken: %d, totalTicketSold: %d, ticketTaken: %d", getEmployeeType(), totalTicketTaken, totalTicketSold, ticketTaken);
+            DEBUGINFO('c', "start Movie : %s totalTicketTaken: %d, totalTicketSold: %d, ticketTaken: %d", getEmployeeType(), totalTicketTaken, totalTicketSold, ticketTaken);
             stopTicketTaken = true;
             movieState = 2;
             sStartMovie->V();
@@ -97,54 +100,64 @@ void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count, bool
     // lock to get in line
     lockWaiting->Acquire();
     for (int i = 0;i < count; ++i) {
+        DEBUGINFO('c', "Manager start break  %s [%d]", clerk[i]->getEmployeeType(), i);
         if (clerk[i]->getIsBreak()) continue;
         if (!clerk[i]->getWaitingSize()) {
+        DEBUGINFO('c', "aaaaManager start break  %s [%d]", clerk[i]->getEmployeeType(), i);
             // rand to break
             if (rand()%5 == 0) {
-                clerk[i]->lock->Acquire();
+        DEBUGINFO('c', "Manager start break  %s [%d]", clerk[i]->getEmployeeType(), i);
                 clerk[i]->setIsBreak(true);
                 // signal the waiting customer
                 clerk[i]->condition[0]->Broadcast(lockWaiting);
                 if (!clerk[i]->getIsBusy()) {
+                    DEBUGINFO('c', "Manager wake up %s [%d] who is not busy and waiting for customer", clerk[i]->getEmployeeType(), i);
+                    clerk[i]->lock->Acquire();
                     clerk[i]->condition[1]->Signal(clerk[i]->lock);
+                    clerk[i]->lock->Release();
+                    DEBUGINFO('c', "Manager wake up %s [%d] who is not busy and waiting for customer", clerk[i]->getEmployeeType(), i);
                 }
                 printf("Manager has told %s [%d] to go on break.\n", clerk[i]->getEmployeeType(), i);
-                clerk[i]->lock->Release();
             }
         } else if (clerk[i]->getWaitingSize() < 3) {
+        DEBUGINFO('c', "cccccManager start break  %s [%d]", clerk[i]->getEmployeeType(), i);
             int j = 0;
-            for (j = 0;j < count; ++i) {
+            for (j = 0;j < count; ++j) {
                 if (i == j) continue;
                 if (!clerk[j]->getIsBreak()) {
                     break;
                 }
             }
+        DEBUGINFO('c', "dddddManager start break  %s [%d]", clerk[i]->getEmployeeType(), i);
             if (j != count && rand()%5 == 0) {
-                clerk[i]->lock->Acquire();
+        DEBUGINFO('c', "Manager start break  %s [%d]", clerk[i]->getEmployeeType(), i);
                 clerk[i]->setIsBreak(true);
                 // signal the waiting customer
                 clerk[i]->condition[0]->Broadcast(lockWaiting);
 
                 // if not busy, manager should signal clerk to get break
                 if (!clerk[i]->getIsBusy()) {
+                    DEBUGINFO('c', "Manager wake up %s [%d] who is not busy and waiting for customer", clerk[i]->getEmployeeType(), i);
+                    clerk[i]->lock->Acquire();
                     clerk[i]->condition[1]->Signal(clerk[i]->lock);
+                    clerk[i]->lock->Release();
+                    DEBUGINFO('c', "Manager wake up %s [%d] who is not busy and waiting for customer", clerk[i]->getEmployeeType(), i);
                 }
                 printf("Manager has told %s [%d] to go on break.\n", clerk[i]->getEmployeeType(), i);
-                clerk[i]->lock->Release();
             }
         } else if (clerk[i]->getWaitingSize() > 5) {
+        DEBUGINFO('c', "Manager start call back someone to help %s [%d]", clerk[i]->getEmployeeType(), i);
             /*int j = 0;
             for (j = 0;j < count; ++j) {
                 if (i == j) continue;
                 if (clerk[j]->getIsBreak()) {
-                    clerk[j]->lock->Acquire();
                     clerk[j]->setIsBreak(false);
-                    clerk[j]->lock->Release();
                     break;
                 }
             }*/
             sNoClerk->V();
         }
+        DEBUGINFO('c', "Manager end break  %s [%d]", clerk[i]->getEmployeeType(), i);
     }
     // if no clerk work and customers come, have to ask one to off break
     if (noClerk) {
@@ -158,7 +171,7 @@ void Manager::randToBreak(Lock * lockWaiting, Employee ** clerk, int count, bool
         cNoClerk->Broadcast(lockWaiting);
     }
     lockWaiting->Release();
-
+    DEBUGINFO('c', "Manager finish break");
 }
 Manager::Manager(int mrId) : Employee(mrId, "Manager"){
 }
