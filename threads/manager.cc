@@ -4,15 +4,12 @@
 void Manager::work() {
     while (true) {
         randToBreak(lBuyTickets, (Employee**)tc, tcNumber, noTicketClerk, cNoTicketClerk, sNoTicketClerk);
-        currentThread->Yield();
         randToBreak(lBuyFood, (Employee**)cc, ccNumber, noConcessionClerk, cNoConcessionClerk, sNoConcessionClerk);
-        currentThread->Yield();
         DEBUGINFO('c', "%s check noTicketTaker: %d", getEmployeeType(), noTicketTaker?1:0 );
-        randToBreak(lCheckTickets, (Employee**)tt, ttNumber, noTicketTaker, cNoTicketTaker, sNoTicketTaker);
-        currentThread->Yield();
+//        randToBreak(lCheckTickets, (Employee**)tt, ttNumber, noTicketTaker, cNoTicketTaker, sNoTicketTaker);
         startTicketTaken();
         startMovie();
-        for (int i = 0;i < 1; ++i) {
+        for (int i = 0;i < 0; ++i) {
             currentThread->Yield();
         }
         // if all customer leave, collect money
