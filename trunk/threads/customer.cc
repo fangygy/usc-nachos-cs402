@@ -137,6 +137,7 @@ int Customer::getInLine(Lock *lock, Condition *cNoClerk, int count, bool &noCler
         printf("Customer [%d] in Group [%d] is in the lobby.\n", customerId, groupId);
         cNoClerk->Wait(lock);
         printf("Customer [%d] in Group [%d] is leaving the lobby.\n",  customerId, groupId);
+        return lineIndex;
 
     } else {
         //if head customer find the shortest line, waiting in line customer number add 1        
@@ -170,8 +171,9 @@ void Customer::buyTickets() {
     if (clerk->getIsBusy()) {
         clerk->condition[0]->Wait(lBuyTickets);
     }
-    printf("Customer [%d] in Group [%d] is walking up to TicketClerk[%d] to buy [%d] tickets\n",customerId,groupId,lineIndex,groupSize);
+    printf("Customer [%d] in Group [%d] is walking up to TicketClerk [%d] to buy [%d] tickets\n",customerId,groupId,lineIndex,groupSize);
     
+    DEBUGINFO('c', "Customer [%d] in group [%d] acquire lock [%s], owner %s", customerId, groupId, clerk->lock->getName(), clerk->lock->getOwnerThread()!=NULL?clerk->lock->getOwnerThread()->getName():"NULL");
     
     // buy ticket :interact with TicketClerk
     clerk->lock->Acquire();
@@ -186,6 +188,7 @@ void Customer::buyTickets() {
         clerk->setGroupId(groupId);
         clerk->setTicketSum(groupSize);
         clerk->condition[1]->Signal(clerk->lock);
+        DEBUGINFO('c', "1 Customer [%d] in Group [%d] is walking up to TicketClerk [%d] to buy [%d] tickets\n",customerId,groupId,lineIndex,groupSize);
         // wait for clerk to tell how much money
         clerk->condition[1]->Wait(clerk->lock);
         // ask ticket clerk for total price
@@ -193,12 +196,14 @@ void Customer::buyTickets() {
         // pay money 
         clerk->setPayment(amount);
         printf("Customer [%d] in Group [%d] in TicketClerk line [%d] is paying [%.2f] for tickets\n",customerId,groupId,lineIndex,amount);
+        DEBUGINFO('c', "2 Customer [%d] in Group [%d] in TicketClerk line [%d] is paying [%.2f] for tickets\n",customerId,groupId,lineIndex,amount);
         //to give the clerk money
         clerk->condition[1]->Signal(clerk->lock);
         // wait to get tickets back
         clerk->condition[1]->Wait(clerk->lock);
         // finish and leave
         clerk->condition[1]->Signal(clerk->lock);
+        DEBUGINFO('c', "3 Customer [%d] in Group [%d] is leaving TicketClerk[%d]\n",customerId,groupId,lineIndex);
         printf("Customer [%d] in Group [%d] is leaving TicketClerk[%d]\n",customerId,groupId,lineIndex);
     } else {
         //if the clerk is on break,head customer need to start over and get another line
@@ -229,12 +234,15 @@ void Customer::buyFood() {
    // if the clerk is busy serving other customer,wait for the clerk to wake them up 
     if (clerk->getIsBusy()) {
         clerk->condition[0]->Wait(lBuyFood);
+    DEBUGINFO('c', "Customer [%d] in group [%d] is wake up to goto ConcessionClerk [%d]", customerId, groupId, lineIndex);
     }
     DEBUGINFO('c', "Customer [%d] in group [%d] is walking up to ConcessionClerk [%d]", customerId, groupId, lineIndex);
     printf("Customer [%d] in Group [%d] is walking up to ConcessionClerk[%d] to buy [%d] popcorn and [%d] soda.\n",customerId,groupId,lineIndex,groupFoodSum[groupId][0],groupFoodSum[groupId][1]);
 
+    DEBUGINFO('c', "Customer [%d] in group [%d] acquire lock [%s], owner %s", customerId, groupId, clerk->lock->getName(), clerk->lock->getOwnerThread()!=NULL?clerk->lock->getOwnerThread()->getName():"NULL");
     //buyfood: interact with ConcessionClerk 
     clerk->lock->Acquire();
+    DEBUGINFO('c', "Customer [%d] in group [%d] acquired lock [%d], owner %s", customerId, groupId, clerk->lock->getName(), clerk->lock->getOwnerThread()!=NULL?clerk->lock->getOwnerThread()->getName():"NULL");
 
     //waiting line number minus 1    
     clerk->subWaitingSize();

@@ -55,8 +55,10 @@ void TicketClerk::sellTickets() {
         // wait customer to signal
         condition[1]->Wait(lock);
         // if break 
-        
+        DEBUGINFO('c', "1 TicketClerk [%d] has a line size [%d] and is signaled by a customer\n",getId(),getWaitingSize());
+        DEBUGINFO('c', "TicketClerk [%d] has a line size [%d] and wait for lBuyTickets Lock owner is %s\n",getId(),getWaitingSize(), lBuyTickets->getOwnerThread()!=NULL?lBuyTickets->getOwnerThread()->getName():"NULL");
         lBuyTickets->Acquire();
+        DEBUGINFO('c', "TicketClerk [%d] has a line size [%d] and is signaling a customer\n",getId(),getWaitingSize());
         if (getIsBreak() && !getIsBusy()) {
             setIsBusy(false);
             lock->Release();
@@ -75,19 +77,20 @@ void TicketClerk::sellTickets() {
       
         condition[1]->Signal(lock);
         condition[1]->Wait(lock);
+        DEBUGINFO('c', "2 TicketClerk [%d] has an order for [%d] and the cost is [%.2f].\n",getId(),ticketSum,getAmount()); 
         // cal amount
-        //lAmount->Acquire();
+        lAmount->Acquire();
         ticketClerkAmount[getId()] += getAmount();
-        //lAmount->Release();
+        lAmount->Release();
         // get money, handout the tickets 
         ticketReceipt[getGroupId()] = ticketSum;
-        //lTicketSold->Acquire();
+        lTicketSold->Acquire();
         totalTicketSold += ticketSum;
-        //lTicketSold->Release();
+        lTicketSold->Release();
         condition[1]->Signal(lock);
         // customer leave, get next customer 
         condition[1]->Wait(lock);
-        DEBUG('z',"\tTicketClerk [%d] got the lock back\n", getId());
+        DEBUGINFO('c',"3 TicketClerk [%d] got the lock back after customer leave\n", getId());
         lock->Release();
 
     }
